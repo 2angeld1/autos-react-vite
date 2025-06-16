@@ -1,0 +1,712 @@
+/* ===================================
+   MODERN CAR CARD STYLES - PIXEL FUSION
+   ================================== */
+
+.modern-car-card {
+    background: linear-gradient(145deg, #1a1a1a, #2d2d2d);
+    border-radius: 16px;
+    overflow: hidden;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 
+        0 10px 30px rgba(0, 0, 0, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.05);
+    height: 420px;
+    display: flex;
+    flex-direction: column;
+}
+
+.modern-car-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 0 1px rgba(255, 56, 96, 0.4),
+        0 0 30px rgba(255, 56, 96, 0.2);
+}
+
+/* ===================================
+   PIXEL FUSION CONTAINER
+   ================================== */
+
+.card-image-container {
+    position: relative;
+    height: 240px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #1e1e1e, #3a3a3a);
+}
+
+.car-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.8s ease;
+    filter: brightness(1.1) contrast(1.05) saturate(1.2);
+    position: relative;
+    z-index: 2;
+}
+
+.modern-car-card:hover .car-image {
+    transform: scale(1.1);
+    filter: brightness(1.3) contrast(1.2) saturate(1.4);
+}
+
+/* ===================================
+   PIXEL DECOMPOSITION EFFECT
+   ================================== */
+
+.card-image-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(2px 2px at 6px 6px, rgba(255, 56, 96, 0.8) 0%, transparent 50%),
+        radial-gradient(2px 2px at 14px 14px, rgba(255, 56, 96, 0.6) 0%, transparent 50%),
+        radial-gradient(1px 1px at 22px 22px, rgba(255, 56, 96, 0.4) 0%, transparent 50%),
+        radial-gradient(1px 1px at 30px 30px, rgba(255, 56, 96, 0.3) 0%, transparent 50%);
+    background-size: 12px 12px, 16px 16px, 8px 8px, 20px 20px;
+    background-position: 0 0, 8px 8px, 16px 16px, 24px 24px;
+    opacity: 0;
+    z-index: 3;
+    transition: all 0.8s ease;
+    animation: pixelFloat 4s infinite ease-in-out;
+}
+
+.modern-car-card:hover .card-image-container::before {
+    opacity: 1;
+    animation: pixelExplode 0.8s ease-out;
+}
+
+/* ===================================
+   PIXEL RECONSTRUCTION OVERLAY
+   ================================== */
+
+.card-image-container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        linear-gradient(45deg, 
+            transparent 40%, 
+            rgba(255, 56, 96, 0.1) 41%, 
+            rgba(255, 56, 96, 0.1) 43%, 
+            transparent 44%
+        ),
+        linear-gradient(-45deg, 
+            transparent 40%, 
+            rgba(255, 56, 96, 0.08) 41%, 
+            rgba(255, 56, 96, 0.08) 43%, 
+            transparent 44%
+        );
+    background-size: 8px 8px, 12px 12px;
+    opacity: 0;
+    z-index: 4;
+    transition: all 0.6s ease;
+    mix-blend-mode: screen;
+}
+
+.modern-car-card:hover .card-image-container::after {
+    opacity: 1;
+    animation: pixelReconstruct 1s ease-out 0.2s;
+}
+
+/* ===================================
+   FUSION GRADIENT OVERLAY
+   ================================== */
+
+.image-fusion-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(
+        to top,
+        rgba(26, 26, 26, 0.95) 0%,
+        rgba(255, 56, 96, 0.1) 30%,
+        rgba(255, 56, 96, 0.05) 60%,
+        transparent 100%
+    );
+    z-index: 5;
+    transition: all 0.6s ease;
+    mask: 
+        radial-gradient(4px at 4px 4px, transparent 2px, black 3px) 0 0/8px 8px,
+        radial-gradient(4px at 4px 4px, transparent 2px, black 3px) 4px 4px/8px 8px;
+    -webkit-mask: 
+        radial-gradient(4px at 4px 4px, transparent 2px, black 3px) 0 0/8px 8px,
+        radial-gradient(4px at 4px 4px, transparent 2px, black 3px) 4px 4px/8px 8px;
+}
+
+.modern-car-card:hover .image-fusion-overlay {
+    height: 120px;
+    background: linear-gradient(
+        to top,
+        rgba(26, 26, 26, 0.98) 0%,
+        rgba(255, 56, 96, 0.2) 40%,
+        rgba(255, 56, 96, 0.1) 70%,
+        transparent 100%
+    );
+}
+
+/* ===================================
+   PIXEL ANIMATIONS
+   ================================== */
+
+@keyframes pixelFloat {
+    0%, 100% {
+        transform: translateY(0) scale(1);
+        opacity: 0;
+    }
+    50% {
+        transform: translateY(-2px) scale(1.05);
+        opacity: 0.3;
+    }
+}
+
+@keyframes pixelExplode {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+        filter: blur(0px);
+    }
+    30% {
+        opacity: 0.8;
+        transform: scale(1.2);
+        filter: blur(1px);
+    }
+    60% {
+        opacity: 1;
+        transform: scale(0.8);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+        filter: blur(0px);
+    }
+}
+
+@keyframes pixelReconstruct {
+    0% {
+        opacity: 0;
+        transform: scale(0.5) rotate(180deg);
+        filter: hue-rotate(180deg);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1) rotate(90deg);
+        filter: hue-rotate(90deg);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) rotate(0deg);
+        filter: hue-rotate(0deg);
+    }
+}
+
+/* ===================================
+   BADGES WITH PIXEL EFFECT
+   ================================== */
+
+.car-badge-modern {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: rgba(255, 56, 96, 0.95);
+    color: #ffffff;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 12px rgba(255, 56, 96, 0.4);
+    z-index: 6;
+    transition: all 0.4s ease;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+.modern-car-card:hover .car-badge-modern {
+    background: rgba(255, 56, 96, 1);
+    transform: scale(1.05) rotate(-2deg);
+    box-shadow: 0 6px 20px rgba(255, 56, 96, 0.6);
+    animation: pixelGlitch 0.3s ease-out;
+}
+
+.car-price-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(0, 0, 0, 0.9);
+    color: #ff3860;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 56, 96, 0.3);
+    z-index: 6;
+    transition: all 0.4s ease;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.modern-car-card:hover .car-price-badge {
+    border-color: rgba(255, 56, 96, 0.8);
+    transform: scale(1.05) rotate(2deg);
+    box-shadow: 0 0 20px rgba(255, 56, 96, 0.4);
+}
+
+/* ===================================
+   PIXEL GLITCH ANIMATION
+   ================================== */
+
+@keyframes pixelGlitch {
+    0%, 100% {
+        clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    }
+    25% {
+        clip-path: polygon(0 0, calc(100% - 4px) 0, 100% 4px, 100% 100%, 4px 100%, 0 calc(100% - 4px));
+        transform: scale(1.05) rotate(-2deg) translateX(2px);
+    }
+    75% {
+        clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+        transform: scale(1.05) rotate(-2deg) translateX(-2px);
+    }
+}
+
+/* ===================================
+   CARD CONTENT WITH PIXEL TRANSITION
+   ================================== */
+
+.card-content-modern {
+    padding: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: linear-gradient(180deg, #1a1a1a 0%, #222222 100%);
+    position: relative;
+    z-index: 5;
+}
+
+.card-content-modern::before {
+    content: '';
+    position: absolute;
+    top: -20px;
+    left: 0;
+    right: 0;
+    height: 20px;
+    background: 
+        radial-gradient(2px at 2px 2px, rgba(255, 56, 96, 0.3) 0%, transparent 50%),
+        radial-gradient(2px at 6px 6px, rgba(255, 56, 96, 0.2) 0%, transparent 50%);
+    background-size: 4px 4px, 8px 8px;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+}
+
+.modern-car-card:hover .card-content-modern::before {
+    opacity: 1;
+    animation: pixelSpread 0.8s ease-out;
+}
+
+@keyframes pixelSpread {
+    0% {
+        transform: scaleY(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scaleY(1.2);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scaleY(1);
+        opacity: 1;
+    }
+}
+
+/* ===================================
+   CAR INFO WITH PIXEL EFFECTS
+   ================================== */
+
+.car-info {
+    margin-bottom: 16px;
+}
+
+.car-title {
+    color: #ffffff;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    line-height: 1.3;
+    letter-spacing: -0.02em;
+    transition: all 0.4s ease;
+}
+
+.modern-car-card:hover .car-title {
+    color: #ff3860;
+    text-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
+    animation: textPixelGlow 0.6s ease-out;
+}
+
+@keyframes textPixelGlow {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 56, 96, 0.3);
+    }
+    50% {
+        text-shadow: 
+            0 0 20px rgba(255, 56, 96, 0.6),
+            2px 2px 0px rgba(255, 56, 96, 0.2),
+            -2px -2px 0px rgba(255, 56, 96, 0.2);
+    }
+}
+
+.car-specs {
+    color: #a0a0a0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    margin: 0;
+    transition: color 0.4s ease;
+}
+
+.modern-car-card:hover .car-specs {
+    color: rgba(255, 56, 96, 0.8);
+}
+
+/* ===================================
+   PIXEL FEATURE CHIPS
+   ================================== */
+
+.car-features-grid {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+}
+
+.feature-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    color: #e0e0e0;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.feature-chip::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 56, 96, 0.2), 
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.feature-chip:hover {
+    background: rgba(255, 56, 96, 0.15);
+    border-color: rgba(255, 56, 96, 0.4);
+    color: #ff3860;
+    transform: translateY(-2px);
+}
+
+.feature-chip:hover::before {
+    left: 100%;
+}
+
+.feature-chip .icon {
+    font-size: 0.75rem;
+    color: #ff3860;
+    transition: all 0.3s ease;
+}
+
+.feature-chip:hover .icon {
+    animation: iconPixelPulse 0.4s ease-out;
+}
+
+@keyframes iconPixelPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+        filter: drop-shadow(0 0 4px rgba(255, 56, 96, 0.6));
+    }
+}
+
+/* ===================================
+   PIXEL FUSION BUTTON
+   ================================== */
+
+.view-details-btn-modern {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #ff3860, #ff1744);
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 4px 15px rgba(255, 56, 96, 0.3);
+    position: relative;
+    overflow: hidden;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+
+.view-details-btn-modern::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+        radial-gradient(1px at 1px 1px, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
+        radial-gradient(1px at 3px 3px, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+    background-size: 2px 2px, 4px 4px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.view-details-btn-modern::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.3), 
+        transparent
+    );
+    transition: left 0.6s ease;
+}
+
+.view-details-btn-modern:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 56, 96, 0.5);
+    color: #ffffff;
+    text-decoration: none;
+    background: linear-gradient(135deg, #ff1744, #d50000);
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+
+.view-details-btn-modern:hover::before {
+    opacity: 1;
+    animation: buttonPixelPulse 0.8s ease-out;
+}
+
+.view-details-btn-modern:hover::after {
+    left: 100%;
+}
+
+@keyframes buttonPixelPulse {
+    0%, 100% {
+        background-size: 2px 2px, 4px 4px;
+    }
+    50% {
+        background-size: 4px 4px, 8px 8px;
+    }
+}
+
+.view-details-btn-modern .icon {
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.view-details-btn-modern:hover .icon {
+    transform: translateX(4px);
+    animation: iconPixelShift 0.4s ease-out;
+}
+
+@keyframes iconPixelShift {
+    0%, 100% {
+        transform: translateX(4px);
+    }
+    25% {
+        transform: translateX(6px) scale(1.1);
+    }
+    75% {
+        transform: translateX(2px) scale(0.9);
+    }
+}
+
+/* ===================================
+   FALLBACK IMAGE WITH PIXEL EFFECT
+   ================================== */
+
+.image-fallback-indicator-modern {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    background: rgba(255, 56, 96, 0.9);
+    color: white;
+    padding: 6px 8px;
+    border-radius: 4px;
+    font-size: 0.8rem;
+    backdrop-filter: blur(10px);
+    z-index: 6;
+    animation: pixelPulse 2s infinite;
+}
+
+@keyframes pixelPulse {
+    0%, 100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 4px rgba(255, 56, 96, 0.6));
+    }
+    50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 8px rgba(255, 56, 96, 0.8));
+    }
+}
+
+/* ===================================
+   RESPONSIVE DESIGN
+   ================================== */
+
+@media (max-width: 768px) {
+    .modern-car-card {
+        height: 380px;
+        margin-bottom: 20px;
+    }
+    
+    .card-image-container {
+        height: 200px;
+    }
+    
+    .card-content-modern {
+        padding: 16px;
+    }
+    
+    .car-title {
+        font-size: 1.1rem;
+    }
+    
+    .car-features-grid {
+        gap: 6px;
+    }
+    
+    .feature-chip {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .modern-car-card {
+        height: 350px;
+    }
+    
+    .card-image-container {
+        height: 180px;
+    }
+    
+    .car-badge-modern,
+    .car-price-badge {
+        font-size: 0.8rem;
+        padding: 6px 10px;
+    }
+    
+    .view-details-btn-modern {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+}
+
+/* ===================================
+   LOADING STATE WITH PIXELS
+   ================================== */
+
+.modern-car-card.is-loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.modern-car-card.is-loading .car-image {
+    filter: blur(2px) grayscale(0.5);
+    animation: pixelLoading 2s infinite;
+}
+
+@keyframes pixelLoading {
+    0%, 100% {
+        opacity: 0.7;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.02);
+    }
+}
+
+/* ===================================
+   ACCESSIBILITY
+   ================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    .modern-car-card,
+    .car-image,
+    .view-details-btn-modern,
+    .feature-chip,
+    .card-image-container::before,
+    .card-image-container::after {
+        transition: none;
+        animation: none;
+    }
+    
+    .modern-car-card:hover {
+        transform: translateY(-4px);
+    }
+    
+    .modern-car-card:hover .car-image {
+        transform: scale(1.05);
+    }
+}
+
+/* ===================================
+   HIGH CONTRAST MODE
+   ================================== */
+
+@media (prefers-contrast: high) {
+    .modern-car-card {
+        border: 2px solid #ffffff;
+    }
+    
+    .car-title {
+        color: #ffffff;
+    }
+    
+    .car-specs {
+        color: #cccccc;
+    }
+    
+    .feature-chip {
+        border-color: #ffffff;
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    .view-details-btn-modern {
+        background: #ff3860;
+        border: 2px solid #ffffff;
+    }
+}

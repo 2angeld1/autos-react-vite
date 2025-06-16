@@ -1,0 +1,22 @@
+:root {
+    /* Colores */
+    --accent-color: rgb(187, 134, 252);
+    --secondary-accent: rgb(144, 202, 249);
+    --text-primary: #e0e0e0;
+    --text-secondary: #a0a0a0;
+    --background: #111111;
+    --surface: #1e1e1e;
+    --error: #CF6679;
+    --dark-surface: #1e1e1e;
+    --danger-color: #cf6679;
+    --dark-bg: #121212;
+    
+    /* Fuentes */
+    --font-primary: 'Montserrat', 'Roboto', sans-serif;
+    
+    /* Tamaños */
+    --border-radius: 8px;
+    
+    /* Transiciones */
+    --transition-speed: 0.3s;
+  }

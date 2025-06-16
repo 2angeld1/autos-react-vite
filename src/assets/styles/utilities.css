@@ -1,0 +1,135 @@
+/* Utilidades de espacio */
+.newsletter-section {
+  background: linear-gradient(135deg, var(--dark-surface), #0f0f0f);
+}
+
+/* Estilos del contenedor de partículas */
+.particles-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particles-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Asegurar que el contenido esté por encima de las partículas */
+.hero.is-gradient .hero-body {
+  z-index: 1;
+  position: relative;
+}
+
+/* Animación para botón de chat */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(187, 134, 252, 0.7);
+  }
+  70% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(187, 134, 252, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(187, 134, 252, 0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Utilidades de visibilidad */
+@media screen and (max-width: 768px) {
+  .is-hidden-mobile {
+    display: none !important;
+  }
+}
+
+@media screen and (min-width: 769px) {
+  .is-hidden-desktop {
+    display: none !important;
+  }
+}
+
+/* Utilidades de texto */
+.text-gradient {
+  background: linear-gradient(90deg, var(--accent-color), var(--secondary-accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Utilidades de bordes */
+.border-gradient {
+  border: 1px solid;
+  border-image: linear-gradient(45deg, var(--accent-color), var(--secondary-accent)) 1;
+}
+
+/* Utilidades de fondos */
+.bg-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-dark-glass {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Clases de estado para el carousel */
+.carousel-loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.carousel-loaded {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Efectos de transición suave para cambios de estado */
+.auto-carousel-track {
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Pausar animaciones cuando el usuario prefiere reducir movimiento */
+@media (prefers-reduced-motion: reduce) {
+  .auto-carousel-track,
+  .modern-car-card,
+  .car-image {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Estados de focus para accesibilidad */
+.control-btn:focus,
+.indicator:focus,
+.view-details-btn-modern:focus {
+  outline: 2px solid var(--accent-color);
+  outline-offset: 2px;
+}
+
+/* Mejoras de rendimiento */
+.auto-carousel-track,
+.modern-car-card,
+.car-image {
+  backface-visibility: hidden;
+  transform-style: preserve-3d;
+}

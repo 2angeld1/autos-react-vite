@@ -1,0 +1,1651 @@
+/* Auto-carousel moderno con loop */
+.auto-carousel-container {
+  position: relative;
+  padding: 2rem 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(10, 10, 20, 0.8), rgba(30, 30, 30, 0.9));
+  border-radius: 16px;
+  margin-bottom: 3rem;
+  border: 1px solid rgba(187, 134, 252, 0.1);
+}
+
+.auto-carousel-wrapper {
+  overflow: hidden;
+  position: relative;
+  margin: 0 2rem;
+}
+
+.auto-carousel-track {
+  display: flex;
+  transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
+}
+
+.auto-carousel-item {
+  flex: 0 0 25%;
+  padding: 0 0.75rem;
+  box-sizing: border-box;
+}
+
+/* Controles del carousel */
+.carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  margin-bottom: 2rem;
+  padding: 0 2rem;
+}
+
+.control-btn {
+  background: rgba(187, 134, 252, 0.2);
+  border: 1px solid rgba(187, 134, 252, 0.3);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.control-btn:hover {
+  background: rgba(187, 134, 252, 0.3);
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(187, 134, 252, 0.4);
+}
+
+.control-btn.is-playing {
+  background: rgba(187, 134, 252, 0.8);
+  color: #000;
+}
+
+/* Indicadores del carousel */
+.carousel-indicators {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.indicator.is-active {
+  background: var(--accent-color);
+  transform: scale(1.2);
+  box-shadow: 0 0 10px rgba(187, 134, 252, 0.6);
+}
+
+.indicator:hover {
+  background: rgba(187, 134, 252, 0.6);
+  transform: scale(1.1);
+}
+
+/* Tarjetas modernas del carousel */
+.modern-car-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 16px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  height: 100%;
+  position: relative;
+}
+
+.modern-car-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: rgba(187, 134, 252, 0.4);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.3),
+    0 0 30px rgba(187, 134, 252, 0.2);
+}
+
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #000; /* Fallback por si la imagen no carga */
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+  display: block;
+  background: transparent;
+}
+
+/* Asegurar que la imagen cubra completamente el contenedor */
+.featured-car-card .car-image {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.featured-car-card:hover .car-image {
+  transform: scale(1.05);
+}
+
+/* Overlay de gradiente más sutil para no interferir con la imagen */
+.image-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Asegurar que los badges estén por encima del overlay */
+.car-year-badge,
+.car-price-badge,
+.electric-badge,
+.chinese-brand-badge {
+  z-index: 15;
+}
+
+/* Badge de año rediseñado - más compacto */
+.car-year-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+  
+  /* Hacer el badge más compacto */
+  display: inline-block;
+  width: auto;
+  min-width: auto;
+  max-width: 60px;
+  text-align: center;
+  line-height: 1.2;
+  
+  /* Asegurar que esté en la esquina */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car-year-badge span {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Badge de precio estilo carousel */
+.car-price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Badge eléctrico rediseñado */
+.electric-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Badge marca china rediseñado */
+.chinese-brand-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.4);
+}
+
+/* Mejora adicional para imágenes problemáticas */
+.car-image {
+  /* Forzar que la imagen llene todo el espacio */
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center center !important;
+  
+  /* Eliminar cualquier espacio o margen */
+  margin: 0;
+  padding: 0;
+  border: none;
+  outline: none;
+  
+  /* Asegurar que no haya espacios en blanco */
+  background-color: transparent;
+  vertical-align: top;
+}
+
+/* Contenedor sin espacios */
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #1a1a1a; /* Color de fondo que coincida con el diseño */
+  
+  /* Eliminar cualquier espacio interno */
+  padding: 0;
+  margin: 0;
+  border: none;
+  
+  /* Asegurar que el contenedor tenga el tamaño correcto */
+  width: 100%;
+  display: block;
+}
+
+/* Responsive ajustado */
+@media screen and (max-width: 1024px) {
+  .card-image-container {
+    height: 180px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .card-image-container {
+    height: 160px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .card-image-container {
+    height: 180px;
+  }
+}
+
+/* Animaciones del auto-loop */
+@keyframes carousel-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+.auto-carousel-track.is-playing {
+  animation: carousel-slide 20s linear infinite;
+}
+
+.auto-carousel-track.is-paused {
+  animation-play-state: paused;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1200px) {
+  .auto-carousel-item {
+    flex: 0 0 33.333%;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .auto-carousel-item {
+    flex: 0 0 50%;
+  }
+  
+  .carousel-controls {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .control-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .auto-carousel-wrapper {
+    margin: 0 1rem;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .auto-carousel-item {
+    flex: 0 0 100%;
+  }
+  
+  .carousel-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .carousel-indicators {
+    order: -1;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+/* Efectos de entrada suaves */
+.auto-carousel-container {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pausa en hover para mejor UX */
+.auto-carousel-container:hover .auto-carousel-track.is-playing {
+  animation-play-state: paused;
+}
+
+/* Efecto de brillo en los bordes */
+.auto-carousel-container::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, transparent, rgba(187, 134, 252, 0.1), transparent, rgba(187, 134, 252, 0.1), transparent);
+  border-radius: 16px;
+  z-index: -1;
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Slider para autos destacados (legacy) */
+.featured-cars-slider {
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.featured-cars-slider::-webkit-scrollbar-track {
+  background: var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 10px;
+}
+
+/* GRID DE VEHÍCULOS DESTACADOS REDISEÑADO - 4 POR FILA */
+.featured-cars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 1rem;
+}
+
+/* TARJETA DE AUTO DESTACADO ESTILO CAROUSEL */
+.featured-car-card {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 46, 0.95) 0%,
+    rgba(45, 45, 75, 0.9) 50%,
+    rgba(30, 30, 46, 0.95) 100%
+  );
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+  position: relative;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(187, 134, 252, 0.05);
+}
+
+.featured-car-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(187, 134, 252, 0.3);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 5px 20px rgba(187, 134, 252, 0.15);
+}
+
+/* Contenedor de imagen ajustado */
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #000; /* Fallback por si la imagen no carga */
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+  display: block;
+  background: transparent;
+}
+
+/* Asegurar que la imagen cubra completamente el contenedor */
+.featured-car-card .car-image {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.featured-car-card:hover .car-image {
+  transform: scale(1.05);
+}
+
+/* Overlay de gradiente más sutil para no interferir con la imagen */
+.image-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Asegurar que los badges estén por encima del overlay */
+.car-year-badge,
+.car-price-badge,
+.electric-badge,
+.chinese-brand-badge {
+  z-index: 15;
+}
+
+/* Badge de año rediseñado - más compacto */
+.car-year-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+  
+  /* Hacer el badge más compacto */
+  display: inline-block;
+  width: auto;
+  min-width: auto;
+  max-width: 60px;
+  text-align: center;
+  line-height: 1.2;
+  
+  /* Asegurar que esté en la esquina */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car-year-badge span {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Badge de precio estilo carousel */
+.car-price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Badge eléctrico rediseñado */
+.electric-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Badge marca china rediseñado */
+.chinese-brand-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.4);
+}
+
+/* Contenido de la tarjeta */
+.card-content-modern {
+  padding: 1.5rem;
+}
+
+.car-info {
+  margin-bottom: 1rem;
+}
+
+.car-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.car-specs {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+/* Grid de características */
+.car-features-grid {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-chip:hover {
+  background: rgba(187, 134, 252, 0.2);
+  border-color: rgba(187, 134, 252, 0.4);
+}
+
+.feature-chip .icon {
+  font-size: 0.75rem;
+  color: var(--accent-color);
+}
+
+/* Botón de ver detalles moderno */
+.view-details-btn-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, transparent, rgba(187, 134, 252, 0.1));
+  border: 1px solid rgba(187, 134, 252, 0.3);
+  border-radius: 12px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.view-details-btn-modern:hover {
+  background: linear-gradient(135deg, var(--accent-color), rgba(187, 134, 252, 0.8));
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(187, 134, 252, 0.3);
+}
+
+.view-details-btn-modern .icon {
+  transition: transform 0.3s ease;
+}
+
+.view-details-btn-modern:hover .icon {
+  transform: translateX(4px);
+}
+
+/* Animaciones del auto-loop */
+@keyframes carousel-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+.auto-carousel-track.is-playing {
+  animation: carousel-slide 20s linear infinite;
+}
+
+.auto-carousel-track.is-paused {
+  animation-play-state: paused;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1200px) {
+  .auto-carousel-item {
+    flex: 0 0 33.333%;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .auto-carousel-item {
+    flex: 0 0 50%;
+  }
+  
+  .carousel-controls {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .control-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .auto-carousel-wrapper {
+    margin: 0 1rem;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .auto-carousel-item {
+    flex: 0 0 100%;
+  }
+  
+  .carousel-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .carousel-indicators {
+    order: -1;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+/* Efectos de entrada suaves */
+.auto-carousel-container {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pausa en hover para mejor UX */
+.auto-carousel-container:hover .auto-carousel-track.is-playing {
+  animation-play-state: paused;
+}
+
+/* Efecto de brillo en los bordes */
+.auto-carousel-container::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, transparent, rgba(187, 134, 252, 0.1), transparent, rgba(187, 134, 252, 0.1), transparent);
+  border-radius: 16px;
+  z-index: -1;
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Slider para autos destacados (legacy) */
+.featured-cars-slider {
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.featured-cars-slider::-webkit-scrollbar-track {
+  background: var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 10px;
+}
+
+/* GRID DE VEHÍCULOS DESTACADOS REDISEÑADO - 4 POR FILA */
+.featured-cars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 1rem;
+}
+
+/* TARJETA DE AUTO DESTACADO ESTILO CAROUSEL */
+.featured-car-card {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 46, 0.95) 0%,
+    rgba(45, 45, 75, 0.9) 50%,
+    rgba(30, 30, 46, 0.95) 100%
+  );
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+  position: relative;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(187, 134, 252, 0.05);
+}
+
+.featured-car-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(187, 134, 252, 0.3);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 5px 20px rgba(187, 134, 252, 0.15);
+}
+
+/* Contenedor de imagen ajustado */
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #000; /* Fallback por si la imagen no carga */
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+  display: block;
+  background: transparent;
+}
+
+/* Asegurar que la imagen cubra completamente el contenedor */
+.featured-car-card .car-image {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.featured-car-card:hover .car-image {
+  transform: scale(1.05);
+}
+
+/* Overlay de gradiente más sutil para no interferir con la imagen */
+.image-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Asegurar que los badges estén por encima del overlay */
+.car-year-badge,
+.car-price-badge,
+.electric-badge,
+.chinese-brand-badge {
+  z-index: 15;
+}
+
+/* Badge de año rediseñado - más compacto */
+.car-year-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+  
+  /* Hacer el badge más compacto */
+  display: inline-block;
+  width: auto;
+  min-width: auto;
+  max-width: 60px;
+  text-align: center;
+  line-height: 1.2;
+  
+  /* Asegurar que esté en la esquina */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car-year-badge span {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Badge de precio estilo carousel */
+.car-price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Badge eléctrico rediseñado */
+.electric-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Badge marca china rediseñado */
+.chinese-brand-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.4);
+}
+
+/* Contenido de la tarjeta */
+.card-content-modern {
+  padding: 1.5rem;
+}
+
+.car-info {
+  margin-bottom: 1rem;
+}
+
+.car-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.car-specs {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  text-transform: capitalize;
+}
+
+/* Grid de características */
+.car-features-grid {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+}
+
+.feature-chip:hover {
+  background: rgba(187, 134, 252, 0.2);
+  border-color: rgba(187, 134, 252, 0.4);
+}
+
+.feature-chip .icon {
+  font-size: 0.75rem;
+  color: var(--accent-color);
+}
+
+/* Botón de ver detalles moderno */
+.view-details-btn-modern {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, transparent, rgba(187, 134, 252, 0.1));
+  border: 1px solid rgba(187, 134, 252, 0.3);
+  border-radius: 12px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+}
+
+.view-details-btn-modern:hover {
+  background: linear-gradient(135deg, var(--accent-color), rgba(187, 134, 252, 0.8));
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(187, 134, 252, 0.3);
+}
+
+.view-details-btn-modern .icon {
+  transition: transform 0.3s ease;
+}
+
+.view-details-btn-modern:hover .icon {
+  transform: translateX(4px);
+}
+
+/* Animaciones del auto-loop */
+@keyframes carousel-slide {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-25%);
+  }
+}
+
+.auto-carousel-track.is-playing {
+  animation: carousel-slide 20s linear infinite;
+}
+
+.auto-carousel-track.is-paused {
+  animation-play-state: paused;
+}
+
+/* Responsive design */
+@media screen and (max-width: 1200px) {
+  .auto-carousel-item {
+    flex: 0 0 33.333%;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-33.333%);
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .auto-carousel-item {
+    flex: 0 0 50%;
+  }
+  
+  .carousel-controls {
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .control-btn {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .auto-carousel-wrapper {
+    margin: 0 1rem;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .auto-carousel-item {
+    flex: 0 0 100%;
+  }
+  
+  .carousel-controls {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .carousel-indicators {
+    order: -1;
+  }
+  
+  @keyframes carousel-slide {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+/* Efectos de entrada suaves */
+.auto-carousel-container {
+  opacity: 0;
+  animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Pausa en hover para mejor UX */
+.auto-carousel-container:hover .auto-carousel-track.is-playing {
+  animation-play-state: paused;
+}
+
+/* Efecto de brillo en los bordes */
+.auto-carousel-container::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: -1px;
+  right: -1px;
+  bottom: -1px;
+  background: linear-gradient(45deg, transparent, rgba(187, 134, 252, 0.1), transparent, rgba(187, 134, 252, 0.1), transparent);
+  border-radius: 16px;
+  z-index: -1;
+  animation: border-glow 3s ease-in-out infinite;
+}
+
+@keyframes border-glow {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Slider para autos destacados (legacy) */
+.featured-cars-slider {
+  overflow-x: auto;
+  padding: 20px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar {
+  height: 8px;
+}
+
+.featured-cars-slider::-webkit-scrollbar-track {
+  background: var(--dark-surface);
+}
+
+.featured-cars-slider::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 10px;
+}
+
+/* GRID DE VEHÍCULOS DESTACADOS REDISEÑADO - 4 POR FILA */
+.featured-cars-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+  padding: 1rem;
+}
+
+/* TARJETA DE AUTO DESTACADO ESTILO CAROUSEL */
+.featured-car-card {
+  background: linear-gradient(
+    135deg,
+    rgba(30, 30, 46, 0.95) 0%,
+    rgba(45, 45, 75, 0.9) 50%,
+    rgba(30, 30, 46, 0.95) 100%
+  );
+  border-radius: 20px;
+  overflow: hidden;
+  transition: all 0.4s ease;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  height: 100%;
+  position: relative;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 2px 8px rgba(187, 134, 252, 0.05);
+}
+
+.featured-car-card:hover {
+  transform: translateY(-8px);
+  border-color: rgba(187, 134, 252, 0.3);
+  box-shadow: 
+    0 15px 40px rgba(0, 0, 0, 0.4),
+    0 5px 20px rgba(187, 134, 252, 0.15);
+}
+
+/* Contenedor de imagen ajustado */
+.card-image-container {
+  position: relative;
+  height: 200px;
+  overflow: hidden;
+  border-radius: 20px 20px 0 0;
+  background: #000; /* Fallback por si la imagen no carga */
+}
+
+.car-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 0.5s ease;
+  display: block;
+  background: transparent;
+}
+
+/* Asegurar que la imagen cubra completamente el contenedor */
+.featured-car-card .car-image {
+  min-width: 100%;
+  min-height: 100%;
+}
+
+.featured-car-card:hover .car-image {
+  transform: scale(1.05);
+}
+
+/* Overlay de gradiente más sutil para no interferir con la imagen */
+.image-gradient-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40%;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0.2) 50%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Asegurar que los badges estén por encima del overlay */
+.car-year-badge,
+.car-price-badge,
+.electric-badge,
+.chinese-brand-badge {
+  z-index: 15;
+}
+
+/* Badge de año rediseñado - más compacto */
+.car-year-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 15;
+  
+  /* Hacer el badge más compacto */
+  display: inline-block;
+  width: auto;
+  min-width: auto;
+  max-width: 60px;
+  text-align: center;
+  line-height: 1.2;
+  
+  /* Asegurar que esté en la esquina */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.car-year-badge span {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+/* Badge de precio estilo carousel */
+.car-price-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 15px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+}
+
+/* Badge eléctrico rediseñado */
+.electric-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(16, 185, 129, 0.4);
+}
+
+/* Badge marca china rediseñado */
+.chinese-brand-badge {
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 3px 10px rgba(249, 115, 22, 0.4);
+}
+
+/* Contenido de la tarjeta estilo carousel */
+.card-content {
+  padding: 1.5rem 1.25rem;
+  background: transparent;
+  color: #fff;
+}
+
+/* Información del auto */
+.car-info {
+  margin-bottom: 1rem;
+}
+
+.car-title {
+  color: #fff;
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
+}
+
+.car-specs {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  margin-bottom: 0;
+}
+
+/* Características del auto estilo carousel */
+.car-features {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.feature-chip {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.4rem 0.75rem;
+  border-radius: 15px;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.3s ease;
+}
+
+.feature-chip:hover {
+  background: rgba(187, 134, 252, 0.2);
+  border-color: rgba(187, 134, 252, 0.4);
+}
+
+.feature-chip .icon {
+  font-size: 0.75rem;
+  color: var(--accent-color);
+}
+
+/* Botón de ver detalles estilo carousel */
+.view-details-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: transparent;
+  border: 2px solid rgba(187, 134, 252, 0.5);
+  border-radius: 12px;
+  color: var(--accent-color);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.view-details-btn:hover {
+  background: var(--accent-color);
+  color: #000;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(187, 134, 252, 0.3);
+}
+
+.view-details-btn .icon {
+  transition: transform 0.3s ease;
+}
+
+.view-details-btn:hover .icon {
+  transform: translateX(3px);
+}
+
+/* Efectos de entrada más suaves */
+.animate-fadeIn {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: carouselCardFadeIn 0.6s ease forwards;
+}
+
+@keyframes carouselCardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Delay escalonado más rápido */
+.featured-car-card:nth-child(1) { animation-delay: 0.05s; }
+.featured-car-card:nth-child(2) { animation-delay: 0.1s; }
+.featured-car-card:nth-child(3) { animation-delay: 0.15s; }
+.featured-car-card:nth-child(4) { animation-delay: 0.2s; }
+.featured-car-card:nth-child(5) { animation-delay: 0.25s; }
+.featured-car-card:nth-child(6) { animation-delay: 0.3s; }
+.featured-car-card:nth-child(7) { animation-delay: 0.35s; }
+.featured-car-card:nth-child(8) { animation-delay: 0.4s; }
+.featured-car-card:nth-child(9) { animation-delay: 0.45s; }
+.featured-car-card:nth-child(10) { animation-delay: 0.5s; }
+.featured-car-card:nth-child(11) { animation-delay: 0.55s; }
+.featured-car-card:nth-child(12) { animation-delay: 0.6s; }
+.featured-car-card:nth-child(13) { animation-delay: 0.65s; }
+.featured-car-card:nth-child(14) { animation-delay: 0.7s; }
+.featured-car-card:nth-child(15) { animation-delay: 0.75s; }
+
+/* RESPONSIVE DESIGN PARA 4 COLUMNAS */
+@media screen and (max-width: 1400px) {
+  .featured-cars-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+  }
+}
+
+@media screen and (max-width: 1024px) {
+  .featured-cars-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .card-image-container {
+    height: 180px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .featured-cars-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+    padding: 0.5rem;
+  }
+  
+  .card-image-container {
+    height: 160px;
+  }
+  
+  .card-content {
+    padding: 1rem;
+  }
+  
+  .car-title {
+    font-size: 1.1rem;
+  }
+  
+  .view-details-btn {
+    padding: 0.625rem 0.875rem;
+    font-size: 0.85rem;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .featured-cars-grid {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .card-image-container {
+    height: 180px;
+  }
+  
+  .car-features {
+    gap: 0.375rem;
+  }
+  
+  .feature-chip {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}

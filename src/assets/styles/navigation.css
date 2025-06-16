@@ -1,0 +1,87 @@
+/* Navegación */
+.navbar.is-dark {
+  background-color: var(--dark-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.navbar.is-dark .navbar-brand .navbar-item,
+.navbar.is-dark .navbar-item {
+  color: var(--text-primary);
+}
+
+.navbar.is-dark .navbar-burger span {
+  background-color: var(--text-primary);
+}
+
+/* Estilos para el navbar con efecto de transparencia y cambio al scroll */
+.navbar {
+  transition: all 0.3s ease;
+}
+
+.navbar.is-transparent {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.navbar.is-scrolled {
+  background-color: #0a0a14;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Asegurar que el texto sea legible en ambos estados */
+.navbar-item, .navbar-link {
+  color: white;
+  transition: color 0.3s ease;
+}
+
+.navbar-item:hover, .navbar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--accent-color) !important;
+}
+
+/* Ajustes para el logo */
+.brand-logo {
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.brand-name {
+  font-size: 1.2rem;
+  background: linear-gradient(90deg, #ffffff, var(--accent-color));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Ajustes para el menú móvil */
+@media screen and (max-width: 1023px) {
+  .navbar-menu.is-active {
+    background-color: rgba(10, 10, 20, 0.95);
+    backdrop-filter: blur(10px);
+  }
+  
+  .navbar.is-transparent .navbar-burger span {
+    background-color: white;
+  }
+}
+
+/* Botón de hamburguesa */
+.navbar-burger span {
+  background-color: white;
+  height: 2px;
+}
+
+/* Ajustes para el botón */
+.navbar .button.is-accent {
+  transition: all 0.3s ease;
+}
+
+.navbar.is-transparent .button.is-accent {
+  background-color: rgba(187, 134, 252, 0.9);
+}
+
+.navbar.is-scrolled .button.is-accent {
+  background-color: var(--accent-color);
+}

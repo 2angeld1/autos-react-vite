@@ -1,0 +1,339 @@
+@import 'bulma/css/bulma.min.css';
+@import '@fortawesome/fontawesome-free/css/all.min.css';
+@import './variables.css';
+@import './base.css';
+@import './layout.css';
+@import './navigation.css';
+@import './hero.css';
+@import './components.css';
+@import './car-cards.css';
+@import './featured-cars.css';
+@import './utilities.css';
+@import './CarCard.css';
+@import './CarDetails.css';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+
+/* Variables de color personalizadas */
+:root {
+  --primary-color: #3273dc;
+  --secondary-color: #ffdd57;
+  --accent-color: #ff3860;
+  --dark-color: #363636;
+  --light-color: #f5f5f5;
+  --success-color: #48c774;
+  --info-color: #209cee;
+  --warning-color: #ffdd57;
+  --danger-color: #ff3860;
+}
+
+/* Estilos globales adicionales pueden ser añadidos aquí */
+
+/* Estilos generales */
+body {
+  font-family: 'Nunito', sans-serif;
+  color: #333;
+  background-color: #f7f7f7;
+}
+
+/* Estilos personalizados adicionales */
+.car-image {
+  height: 200px;
+  object-fit: cover;
+  width: 100%;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.card-content {
+  flex-grow: 1;
+}
+
+.brand-tag {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: bold;
+}
+
+.detail-image {
+  max-height: 400px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.favorites-button {
+  transition: all 0.3s ease;
+}
+
+.favorites-button.is-favorite {
+  background-color: #ff3860;
+  color: white;
+}
+
+/* Estilos de tarjetas de autos */
+.car-card {
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.car-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.car-brand-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  padding: 0.5rem;
+  border-radius: 4px;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Sección de destacados */
+.featured-section {
+  background: linear-gradient(135deg, var(--info-color) 0%, var(--primary-color) 100%);
+  color: white;
+  padding: 3rem 1.5rem;
+}
+
+.featured-car-image {
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Sección de categorías */
+.category-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  height: 200px;
+}
+
+.category-card:hover {
+  transform: scale(1.03);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+.category-card img {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+
+.category-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(0deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 100%);
+  padding: 1.5rem 1rem;
+  color: white;
+}
+
+/* Sección de estadísticas */
+.stats-section {
+  background-color: var(--light-color);
+  padding: 3rem 1.5rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary-color);
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.stat-label {
+  font-size: 1.2rem;
+  color: #666;
+}
+
+/* Sección de testimonios */
+.testimonial-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  margin: 1rem;
+  position: relative;
+  height: 100%;
+}
+
+.testimonial-card::before {
+  content: '"';
+  font-size: 5rem;
+  position: absolute;
+  top: -15px;
+  left: 10px;
+  font-family: Georgia, serif;
+  color: rgba(0, 0, 0, 0.1);
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Sección de contacto/newsletter */
+.newsletter-section {
+  background: linear-gradient(135deg, var(--dark-color) 0%, #222 100%);
+  color: white;
+  padding: 3rem 1.5rem;
+}
+
+/* Animaciones */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animated {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+/* Hero section con paralaje */
+.hero-parallax {
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  position: relative;
+}
+
+.hero-parallax::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.spec-label {
+  font-weight: bold;
+  color: #666;
+}
+
+.spec-value {
+  font-size: 1.1rem;
+}
+
+/* Breadcrumbs personalizados */
+.custom-breadcrumb {
+  margin-bottom: 2rem;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem 1.5rem;
+}
+
+/* Footer personalizado */
+.custom-footer {
+  background-color: var(--dark-color);
+  color: white;
+  padding: 3rem 1.5rem;
+}
+
+.footer-link {
+  color: #bbb;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: white;
+}
+
+.social-icon {
+  font-size: 1.5rem;
+  margin: 0 0.5rem;
+  color: #bbb;
+  transition: color 0.3s ease;
+}
+
+.social-icon:hover {
+  color: white;
+}
+
+/* Estilos responsivos */
+@media screen and (max-width: 768px) {
+  .featured-car-image {
+    height: 200px;
+  }
+  
+  .stat-value {
+    font-size: 2rem;
+  }
+  
+  .category-card {
+    height: 150px;
+  }
+}
+
+/* Botón flotante de ayuda */
+.help-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: var(--primary-color);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  z-index: 99;
+}
+
+.help-button:hover {
+  transform: scale(1.1);
+  background-color: var(--info-color);
+}
+.subtitle {
+  margin-top:40px;
+}

@@ -1,0 +1,249 @@
+/* Tarjetas */
+.card {
+  background-color: var(--dark-surface);
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  height: 100%;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+}
+
+.card-image {
+  position: relative;
+}
+
+.card-image::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 30%;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+}
+
+.card-content {
+  padding: 1.5rem;
+}
+
+.card .title, 
+.card .subtitle {
+  color: var(--text-primary);
+}
+
+.card-footer {
+  border-top: 1px solid #333;
+}
+
+.card-footer-item {
+  color: var(--accent-color);
+}
+
+/* Tags */
+.tag.is-year {
+  background-color: var(--accent-color);
+  color: #000;
+  font-weight: bold;
+}
+
+.tag.is-feature {
+  background-color: #333;
+  color: var(--text-secondary);
+}
+
+.price-tag {
+  color: var(--secondary-accent);
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+/* Botones */
+.button.is-accent {
+  background-color: var(--accent-color);
+  color: #000;
+}
+
+.button.is-accent:hover {
+  background-color: #9969da;
+}
+
+.button.is-secondary-accent {
+  background-color: var(--secondary-accent);
+  color: #000;
+}
+
+.button.is-secondary-accent:hover {
+  background-color: #00b8a9;
+}
+
+.button.is-danger {
+  background-color: var(--danger-color);
+}
+
+/* Botones de lujo */
+.luxury-button {
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: none;
+  box-shadow: 0 4px 10px rgba(187, 134, 252, 0.3);
+}
+
+.luxury-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 15px rgba(187, 134, 252, 0.4);
+}
+
+.luxury-button-outline {
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.luxury-button-outline:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+/* Notificaciones */
+.notification {
+  background-color: var(--dark-surface);
+  color: var(--text-primary);
+}
+
+.notification.is-danger {
+  background-color: var(--danger-color);
+  color: #fff;
+}
+
+/* Favoritos */
+.heart-icon {
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.heart-icon.is-favorite {
+  color: var(--danger-color);
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease forwards;
+}
+
+/* Estadísticas */
+.stat-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  background: linear-gradient(135deg, var(--accent-color), var(--secondary-accent));
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #121212;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #121212;
+}
+
+/* Testimonios */
+.testimonial {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 1.5rem;
+  position: relative;
+}
+
+.testimonial::before {
+  content: '"';
+  font-size: 4rem;
+  color: var(--accent-color);
+  opacity: 0.2;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.testimonial-author {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+
+.testimonial-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  margin-right: 1rem;
+}
+
+/* Llamado a la acción */
+.cta-box {
+  background: linear-gradient(135deg, #6b46c1, #2c5282);
+  border-radius: 10px;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+/* Estilos para la sección de Servicios Premium */
+.service-box {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  transition: all 0.3s ease;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.service-box:hover {
+  transform: translateY(-10px);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.service-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  color: var(--dark-color);
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.service-box h3 {
+  color: white;
+}
