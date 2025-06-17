@@ -38,10 +38,17 @@ const CarDetails: React.FC = () => {
                 setLoading(true);
                 setBgLoading(true);
                 
-                const data: Car = await fetchCarById(id);
-                setCar(data);
+                const data = await fetchCarById(id); // No forzar el tipo aquí
+                
+                if (!data) {
+                    setError('Auto no encontrado');
+                    setBgLoading(false);
+                    return;
+                }
+                
+                setCar(data); // Ahora TypeScript sabe que data no es null
                 setError(null);
-
+    
                 // Find similar cars
                 if (cars.length > 0) {
                     const similar = cars
@@ -60,7 +67,7 @@ const CarDetails: React.FC = () => {
                 setLoading(false);
             }
         };
-
+    
         getCar();
         window.scrollTo(0, 0);
     }, [id, cars]);
