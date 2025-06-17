@@ -1,0 +1,390 @@
+/* ===================================
+   ANIMACIONES PREMIUM PIXEL FUSION
+   ================================== */
+
+/* Animaciones de entrada cinematográficas */
+@keyframes cinematic-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(60px) scale(0.9);
+        filter: blur(10px);
+    }
+    30% {
+        opacity: 0.4;
+        transform: translateY(20px) scale(0.95);
+        filter: blur(5px);
+    }
+    60% {
+        opacity: 0.8;
+        transform: translateY(-10px) scale(1.02);
+        filter: blur(2px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+        filter: blur(0);
+    }
+}
+
+@keyframes cinematic-slide-up {
+    0% {
+        opacity: 0;
+        transform: translateY(100px) rotateX(20deg);
+    }
+    50% {
+        opacity: 0.6;
+        transform: translateY(20px) rotateX(5deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) rotateX(0deg);
+    }
+}
+
+/* Animaciones de texto con efectos tipográficos */
+@keyframes text-glow-pulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 5px rgba(99, 102, 241, 0.3),
+            0 0 10px rgba(99, 102, 241, 0.2),
+            0 0 15px rgba(99, 102, 241, 0.1);
+    }
+    50% {
+        text-shadow: 
+            0 0 10px rgba(99, 102, 241, 0.6),
+            0 0 20px rgba(99, 102, 241, 0.4),
+            0 0 30px rgba(99, 102, 241, 0.2);
+    }
+}
+
+@keyframes gradient-shift-advanced {
+    0%, 100% {
+        background-position: 0% 50%;
+        filter: hue-rotate(0deg);
+    }
+    25% {
+        background-position: 100% 50%;
+        filter: hue-rotate(90deg);
+    }
+    50% {
+        background-position: 100% 100%;
+        filter: hue-rotate(180deg);
+    }
+    75% {
+        background-position: 0% 100%;
+        filter: hue-rotate(270deg);
+    }
+}
+
+/* Animaciones de partículas flotantes */
+@keyframes float-particles-advanced {
+    0%, 100% {
+        transform: translateY(0) translateX(0) rotate(0deg) scale(1);
+        opacity: 0.3;
+    }
+    25% {
+        transform: translateY(-20px) translateX(15px) rotate(90deg) scale(1.2);
+        opacity: 0.8;
+    }
+    50% {
+        transform: translateY(-40px) translateX(-10px) rotate(180deg) scale(0.8);
+        opacity: 0.5;
+    }
+    75% {
+        transform: translateY(-30px) translateX(20px) rotate(270deg) scale(1.1);
+        opacity: 0.9;
+    }
+}
+
+@keyframes pixel-rain {
+    0% {
+        transform: translateY(-100vh) translateX(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) translateX(50px);
+        opacity: 0;
+    }
+}
+
+/* Animaciones de hover ultra elegantes */
+@keyframes luxury-hover-glow {
+    0% {
+        box-shadow: 
+            0 8px 25px rgba(99, 102, 241, 0.2),
+            0 0 0 1px rgba(99, 102, 241, 0.1);
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        box-shadow: 
+            0 25px 50px rgba(99, 102, 241, 0.4),
+            0 0 0 1px rgba(99, 102, 241, 0.3),
+            0 0 30px rgba(99, 102, 241, 0.2);
+        transform: translateY(-10px) scale(1.02);
+    }
+}
+
+@keyframes premium-button-shine {
+    0% {
+        transform: translateX(-100%) skewX(-15deg);
+    }
+    100% {
+        transform: translateX(200%) skewX(-15deg);
+    }
+}
+
+/* Animaciones de carga sofisticadas */
+@keyframes loading-dots-premium {
+    0%, 20% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.5) translateY(-10px);
+        opacity: 0.7;
+    }
+    100% {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes loading-spinner-gradient {
+    0% {
+        transform: rotate(0deg);
+        border-color: var(--accent-color) transparent transparent transparent;
+    }
+    25% {
+        border-color: transparent var(--secondary-accent) transparent transparent;
+    }
+    50% {
+        transform: rotate(180deg);
+        border-color: transparent transparent var(--tertiary-accent) transparent;
+    }
+    75% {
+        border-color: transparent transparent transparent var(--gold-accent);
+    }
+    100% {
+        transform: rotate(360deg);
+        border-color: var(--accent-color) transparent transparent transparent;
+    }
+}
+
+/* Animaciones de transición de página */
+@keyframes page-slide-enter {
+    0% {
+        opacity: 0;
+        transform: translateX(100px) rotateY(10deg);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+    }
+}
+
+@keyframes page-slide-leave {
+    0% {
+        opacity: 1;
+        transform: translateX(0) rotateY(0deg);
+    }
+    100% {
+        opacity: 0;
+        transform: translateX(-100px) rotateY(-10deg);
+    }
+}
+
+/* Animaciones de microinteracciones */
+@keyframes micro-bounce {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes micro-shake {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-3px);
+    }
+    75% {
+        transform: translateX(3px);
+    }
+}
+
+@keyframes micro-pulse-scale {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+/* Clases de animación para aplicar */
+.animate-cinematic-fade-in {
+    animation: cinematic-fade-in 1.2s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+.animate-cinematic-slide-up {
+    animation: cinematic-slide-up 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-text-glow {
+    animation: text-glow-pulse 3s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+    animation: gradient-shift-advanced 8s ease-in-out infinite;
+}
+
+.animate-float-particles {
+    animation: float-particles-advanced 6s ease-in-out infinite;
+}
+
+.animate-luxury-hover {
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-luxury-hover:hover {
+    animation: luxury-hover-glow 0.4s ease forwards;
+}
+
+.animate-micro-bounce {
+    animation: micro-bounce 0.6s ease-in-out;
+}
+
+.animate-micro-shake {
+    animation: micro-shake 0.5s ease-in-out;
+}
+
+.animate-micro-pulse {
+    animation: micro-pulse-scale 0.3s ease-in-out;
+}
+
+/* Animaciones con delays escalonados */
+.stagger-animation > *:nth-child(1) { animation-delay: 0.1s; }
+.stagger-animation > *:nth-child(2) { animation-delay: 0.2s; }
+.stagger-animation > *:nth-child(3) { animation-delay: 0.3s; }
+.stagger-animation > *:nth-child(4) { animation-delay: 0.4s; }
+.stagger-animation > *:nth-child(5) { animation-delay: 0.5s; }
+.stagger-animation > *:nth-child(6) { animation-delay: 0.6s; }
+
+/* Animaciones de entrada para diferentes elementos */
+.animate-slide-in-left {
+    animation: slide-in-left 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-slide-in-right {
+    animation: slide-in-right 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes slide-in-left {
+    0% {
+        opacity: 0;
+        transform: translateX(-100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes slide-in-right {
+    0% {
+        opacity: 0;
+        transform: translateX(100px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Animaciones de scroll reveal */
+.scroll-reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.scroll-reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Animaciones para estados de carga */
+.loading-state {
+    position: relative;
+    overflow: hidden;
+}
+
+.loading-state::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(99, 102, 241, 0.2),
+        transparent
+    );
+    animation: loading-shimmer 2s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Optimizaciones de rendimiento */
+.gpu-accelerated {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+}
+
+/* Media queries para animaciones */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .animate-float-particles,
+    .animate-gradient-shift,
+    .animate-text-glow {
+        animation: none !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .animate-cinematic-fade-in,
+    .animate-cinematic-slide-up {
+        animation-duration: 0.6s;
+    }
+    
+    .animate-luxury-hover:hover {
+        animation: none;
+        transform: translateY(-5px) scale(1.01);
+    }
+}
