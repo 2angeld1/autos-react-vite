@@ -11,7 +11,6 @@ const DiagnosticsButton: React.FC = () => {
     setResults('');
     
     try {
-      console.log('🔍 Ejecutando diagnósticos...');
       const result = await runApiDiagnostics();
       
       setResults(JSON.stringify(result, null, 2));

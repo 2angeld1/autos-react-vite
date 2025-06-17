@@ -2,7 +2,7 @@ export interface Car {
   id: string;
   make: string;
   model: string;
-  year: number; // ✅ Asegurar que sea number
+  year: number;
   price: number;
   image: string;
   description?: string;
@@ -11,19 +11,16 @@ export interface Car {
   cylinders?: number;
   class?: string;
   trim?: string;
-  displacement?: number; 
-  // ✅ Añadir las propiedades que faltan
+  displacement?: number;
   city_mpg?: number;
   highway_mpg?: number;
   combination_mpg?: number;
 }
 
+// ✅ SIMPLIFICADO: Solo marca/modelo y año
 export interface SearchFilters {
-  searchTerm?: string;
-  year?: string;
-  fuelType?: string;
-  transmission?: string;
-  price?: string;
+  searchTerm?: string; // Para marca y modelo
+  year?: string;       // Para año
 }
 
 export interface CarContextType {

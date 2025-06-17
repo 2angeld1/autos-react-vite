@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import SearchFilter from '../components/SearchFilter';
 import { useCarContext } from '../context/CarContext';
 import Testimonials from '../components/Testimonials';
 import DotPattern from '../components/DotPattern';
 import FeaturedCars from '../components/FeaturedCars'; // Este componente se usa más abajo
-import { searchCars, getDefaultCarImage } from '../services/api';
+import { searchCars } from '../services/api';
 import type { Car, SearchFilters } from '@/types';
 import { useCarImage } from '../hooks/useCarImage';
+import FeaturedCarsSection from '../components/FeaturedCarsSection';
 
 const Home: React.FC = () => {
     const { cars: contextCars, loading: contextLoading } = useCarContext();
@@ -26,7 +26,15 @@ const Home: React.FC = () => {
             try {
                 setLoading(true);
                 if (contextCars && contextCars.length > 0 && !contextLoading) {
-                    setDisplayedCars(contextCars);
+                    // ✅ Asegurar que tengamos al menos 8 autos para el carrusel
+                    if (contextCars.length >= 8) {
+                        setDisplayedCars(contextCars);
+                    } else {
+                        // Si no hay suficientes en context, cargar más
+                        const { fetchCars } = await import('../services/api/carService');
+                        const moreCars = await fetchCars(16); // Cargar más autos
+                        setDisplayedCars(moreCars);
+                    }
                 }
             } catch (error) {
                 console.error("Error loading cars:", error);
@@ -217,122 +225,19 @@ const Home: React.FC = () => {
             </section>
             
             {/* Sección de búsqueda y vehículos destacados */}
-            <section className="section" id="featured-cars">
-                <div className="container">
-                    <h2 className="title is-2 has-text-centered animate-fadeIn section-title">
-                        Explora Nuestra Colección
-                    </h2>
-                    <p className="subtitle has-text-centered has-text-grey-light mb-6">
-                        Encuentra el auto perfecto según tus preferencias
-                    </p>
-                    
-                    {/* Filtros de búsqueda integrados */}
-                    <div className="box has-background-dark has-shadow animate-fadeIn mb-6" id="search">
-                        <SearchFilter onSearch={handleSearch} />
-                    </div>
-                    
-                    {/* Mostrar estado de carga */}
-                    {loading && (
-                        <div className="has-text-centered p-6">
-                            <div className="button is-loading is-large is-white"></div>
-                            <p className="mt-4 is-size-5 has-text-grey-light">Cargando vehículos...</p>
-                        </div>
-                    )}
-                    
-                    {/* Mostrar error si ocurre */}
-                    {searchError && (
-                        <div className="notification is-danger mt-5">
-                            <button className="delete" onClick={() => setSearchError(null)}></button>
-                            {searchError}
-                        </div>
-                    )}
-                    
-                    {/* Resultados/Vehículos destacados */}
-                    {!loading && displayedCars.length > 0 && (
-                        <div className="auto-carousel-container">
-                            {/* Controles del carousel */}
-                            <div className="carousel-controls">
-                                <button 
-                                    className={`control-btn play-pause ${isPlaying ? 'is-playing' : 'is-paused'}`}
-                                    onClick={() => setIsPlaying(!isPlaying)}
-                                    title={isPlaying ? 'Pausar' : 'Reproducir'}
-                                >
-                                    <i className={`fas ${isPlaying ? 'fa-pause' : 'fa-play'}`}></i>
-                                </button>
-                                
-                                {/* Indicadores de posición */}
-                                <div className="carousel-indicators">
-                                    {Array.from({ length: Math.max(1, displayedCars.length - slidesToShow + 1) }).map((_, index) => (
-                                        <button
-                                            key={index}
-                                            className={`indicator ${index === currentSlide ? 'is-active' : ''}`}
-                                            onClick={() => setCurrentSlide(index)}
-                                        />
-                                    ))}
-                                </div>
-                                
-                                <button 
-                                    className="control-btn next-btn"
-                                    onClick={() => setCurrentSlide(current => 
-                                        current >= displayedCars.length - slidesToShow ? 0 : current + 1
-                                    )}
-                                    title="Siguiente"
-                                >
-                                    <i className="fas fa-chevron-right"></i>
-                                </button>
-                            </div>
-                            
-                            {/* ✅ NUEVO CONTENEDOR DEL CAROUSEL */}
-                            <div className="auto-carousel-wrapper">
-                                <div 
-                                    className="auto-carousel-track"
-                                    style={{
-                                        transform: `translateX(-${currentSlide * 25}%)`, // 25% = 100% / 4 cards
-                                        '--total-slides': Math.ceil(displayedCars.length / slidesToShow)
-                                    } as React.CSSProperties}
-                                >
-                                    {displayedCars.map((car: Car) => (
-                                        <div key={car.id} className="auto-carousel-item">
-                                            <CarCard car={car} />
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            
-                            <div className="has-text-centered mt-6">
-                                <Link to="/catalog" className="button is-accent is-medium mr-2">
-                                    <span className="icon">
-                                        <i className="fas fa-th-large"></i>
-                                    </span>
-                                    <span>Ver catálogo completo</span>
-                                </Link>
-                                <button 
-                                    className="button is-warning is-medium"
-                                    onClick={handleClearCache}
-                                    disabled={loading}
-                                >
-                                    <span className="icon">
-                                        <i className="fas fa-sync-alt"></i>
-                                    </span>
-                                    <span>Actualizar datos</span>
-                                </button>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {!loading && displayedCars.length === 0 && (
-                        <div className="notification is-warning has-text-centered">
-                            <p className="is-size-5">No se encontraron vehículos con esos criterios de búsqueda.</p>
-                            <button 
-                                className="button is-warning is-light mt-3"
-                                onClick={() => window.location.reload()}
-                            >
-                                Reiniciar búsqueda
-                            </button>
-                        </div>
-                    )}
-                </div>
-            </section>
+            <FeaturedCarsSection
+                loading={loading}
+                searchError={searchError}
+                setSearchError={setSearchError}
+                displayedCars={displayedCars}
+                isPlaying={isPlaying}
+                setIsPlaying={setIsPlaying}
+                currentSlide={currentSlide}
+                setCurrentSlide={setCurrentSlide}
+                slidesToShow={slidesToShow}
+                onSearch={handleSearch}
+                onClearCache={handleClearCache}
+            />
             
             {/* Añadir el componente FeaturedCars aquí */}
             <FeaturedCars />
@@ -496,91 +401,6 @@ const Home: React.FC = () => {
                     </div>
                 </div>
             </section>
-        </div>
-    );
-};
-
-// Mejorar el componente CarCard
-const CarCard: React.FC<{ car: Car }> = ({ car }) => {
-    const carImageHook = useCarImage({ 
-        car,
-        fallbackImage: getDefaultCarImage(car.make)
-    });
-    
-    return (
-        <div className="modern-car-card">
-            <div className="card-image-container">
-                {/* ✅ Placeholder de carga */}
-                {carImageHook.imageLoading && (
-                    <div className="image-loading-placeholder">
-                        <span className="icon">
-                            <i className="fas fa-image"></i>
-                        </span>
-                    </div>
-                )}
-                
-                {/* ✅ Imagen con modo inteligente pero flexible */}
-                <img 
-                    src={carImageHook.imageSrc}
-                    alt={`${car.make} ${car.model}`}
-                    className={`car-image ${
-                        carImageHook.imageMode === 'contain' ? 'contain-mode' : 
-                        carImageHook.imageSrc.includes('googleusercontent.com') ? 'google-image' : ''
-                    }`}
-                    onError={carImageHook.handleImageError}
-                    onLoad={carImageHook.handleImageLoad}
-                    loading="lazy"
-                    style={{
-                        display: carImageHook.imageLoading ? 'none' : 'block',
-                        objectFit: carImageHook.imageMode
-                    }}
-                />
-                
-                {/* Resto del código permanece igual... */}
-                <div className="image-gradient-overlay"></div>
-                
-                <div className="car-badge-modern">
-                    <span>{car.year}</span>
-                </div>
-                
-                <div className="car-price-badge">
-                    <span>${car.price?.toLocaleString() || 'Consultar'}</span>
-                </div>
-            </div>
-            
-            {/* Resto del contenido... */}
-            <div className="card-content-modern">
-                <div className="car-info">
-                    <h3 className="car-title">{car.make} {car.model}</h3>
-                    <p className="car-specs">
-                        {car.transmission === 'a' ? 'Automático' : 'Manual'} · {car.fuel_type}
-                    </p>
-                </div>
-                
-                <div className="car-features-grid">
-                    <div className="feature-chip">
-                        <span className="icon">
-                            <i className="fas fa-gas-pump"></i>
-                        </span>
-                        <span>{car.fuel_type}</span>
-                    </div>
-                    <div className="feature-chip">
-                        <span className="icon">
-                            <i className="fas fa-cog"></i>
-                        </span>
-                        <span>{car.transmission === 'a' ? 'Auto' : 'Manual'}</span>
-                    </div>
-                </div>
-                
-                <div className="card-actions">
-                    <Link to={`/car/${car.id}`} className="view-details-btn-modern">
-                        <span>Ver detalles</span>
-                        <span className="icon">
-                            <i className="fas fa-arrow-right"></i>
-                        </span>
-                    </Link>
-                </div>
-            </div>
         </div>
     );
 };

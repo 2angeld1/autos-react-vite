@@ -103,7 +103,7 @@ export const getFallbackCarData = () => {
       year: 2024,
       class: 'compact car',
       cylinders: 0,
-      displacement: 0,
+      displacement: '',
       drive: 'rwd',
       fuel_type: 'electricity',
       highway_mpg: 134,

@@ -37,7 +37,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     };
 
     return (
-        <div className="column is-4-desktop is-6-tablet">
+        <div className="is-6-tablet">
             <div className="card car-card">
                 <div className="card-image">
                     {imgError ? (
@@ -68,7 +68,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                 <div className="card-content">
                     <div className="media">
                         <div className="media-content">
-                            <p className="title is-4">{car.make} {car.model}</p>
+                            <p className="title is-4">{car.make} <br /> {car.model}</p>
                             <p className="subtitle is-6">{car.year}</p>
                         </div>
                         <div className="media-right">

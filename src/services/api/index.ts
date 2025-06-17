@@ -1,16 +1,17 @@
-import { enhanceCarWithImage } from './carService'; 
-import { fetchCars, fetchCarById, searchCars } from './carService'; // Assuming they are in this file
+import { enhanceCarWithImage, filterModernCars } from './carService'; 
+import { fetchCars, fetchCarById, searchCars } from './carService';
 import { getHighResCarImage } from './imageService';
-import { getDefaultCarImage } from './carBrands'; // Renaming if the file is called carBrands instead of carImages
+import { getDefaultCarImage } from './carBrands';
 
-// Exporting everything to maintain the same public API
+// ✅ Exportar todas las funciones necesarias
 export {
   // Car services
   enhanceCarWithImage,
+  filterModernCars, // ✅ AGREGADO
   
   // Fetching functions
   fetchCars,
-  fetchCarById,
+  fetchCarById, // ✅ AGREGADO
   searchCars,
   
   // Image functions

@@ -1,15 +1,22 @@
-import { carApiClient, CAR_API_URL } from './config';
 import { 
   setCarsInCache, 
   getCarsFromCache,
-  isReliableImageUrl // ✅ AGREGAR IMPORT
+  isReliableImageUrl,
+  saveImageCache,
+  imageCache,
+  hasImageRequestFailed,
+  markImageRequestAsFailed,
+  clearAllImageCaches
 } from './cache';
+import { getCarImageFromGoogle } from './imageService';
+import { getDefaultCarImage } from './carBrands';
 import { generateStableId } from './utils';
+import { carApiClient } from './config'; // ✅ Quitar CAR_API_URL no usado
 import type { Car, SearchFilters } from '@/types';
-import { getDefaultCarImage } from './carBrands'; // ✅ Agregar esta importación
 
-// ✅ DEFINIR INTERFACES QUE FALTAN
+// ✅ CORREGIDO: Agregar id opcional a ApiCarData
 interface ApiCarData {
+  id?: string; // ✅ AGREGADO
   make?: string;
   model?: string;
   year?: number;
@@ -23,13 +30,13 @@ interface ApiCarData {
   combination_mpg?: number;
   price?: number;
   image?: string;
+  description?: string;
 }
 
-
-// ✅ ACTUALIZADO: Datos de respaldo con Mitsubishi y Chevrolet en lugar de Ford
-const getFallbackCarData = () => {
+// ✅ ACTUALIZADO: Datos de respaldo con IDs incluidos
+const getFallbackCarData = (): ApiCarData[] => {
   return [
-    // Toyota (sin cambios)
+    // Toyota
     {
       id: 'fallback-toyota-1',
       make: 'Toyota',
@@ -82,7 +89,7 @@ const getFallbackCarData = () => {
       description: 'Toyota Corolla 2024 sedan compacto y eficiente.'
     },
 
-    // Kia (sin cambios)
+    // Kia
     {
       id: 'fallback-kia-1',
       make: 'Kia',
@@ -135,7 +142,7 @@ const getFallbackCarData = () => {
       description: 'Kia Telluride 2024 SUV familiar de lujo.'
     },
 
-    // Hyundai (sin cambios)
+    // Hyundai
     {
       id: 'fallback-hyundai-1',
       make: 'Hyundai',
@@ -188,7 +195,7 @@ const getFallbackCarData = () => {
       description: 'Hyundai Santa Fe 2024 SUV familiar espacioso.'
     },
 
-    // Tesla (sin cambios)
+    // Tesla
     {
       id: 'fallback-tesla-1',
       make: 'Tesla',
@@ -241,7 +248,7 @@ const getFallbackCarData = () => {
       description: 'Tesla Model S 2024 sedán eléctrico de lujo premium.'
     },
 
-    // Nissan (sin cambios)
+    // Nissan
     {
       id: 'fallback-nissan-1',
       make: 'Nissan',
@@ -294,7 +301,7 @@ const getFallbackCarData = () => {
       description: 'Nissan Altima 2024 sedán mediano con tecnología avanzada.'
     },
 
-    // ✅ NUEVO: Chevrolet (reemplaza Ford)
+    // Chevrolet
     {
       id: 'fallback-chevrolet-1',
       make: 'Chevrolet',
@@ -347,7 +354,7 @@ const getFallbackCarData = () => {
       description: 'Chevrolet Tahoe 2024 SUV grande familiar con gran capacidad.'
     },
 
-    // ✅ NUEVO: Mitsubishi
+    // Mitsubishi
     {
       id: 'fallback-mitsubishi-1',
       make: 'Mitsubishi',
@@ -400,7 +407,7 @@ const getFallbackCarData = () => {
       description: 'Mitsubishi Mirage 2024 sedán subcompacto económico y eficiente.'
     },
 
-    // Geely (sin cambios)
+    // Geely
     {
       id: 'fallback-geely-1',
       make: 'Geely',
@@ -458,46 +465,20 @@ const getFallbackCarData = () => {
 // ✅ ACTUALIZADO: Configuración con 2 autos por marca
 const API_CONFIG = {
   FEATURED_MAKES: [
-    'toyota', 'kia', 'hyundai', 'nissan'  // Marcas principales de la API
+    'toyota', 'kia', 'hyundai', 'nissan'
   ] as const,
   AMERICAN_MAKES: [
-    'chevrolet'  // Solo Chevrolet ahora
+    'chevrolet'
   ] as const,
   JAPANESE_MAKES: [
-    'nissan', 'mitsubishi'  // Nissan y Mitsubishi
+    'nissan', 'mitsubishi'
   ] as const,
   OTHER_MAKES: [
-    'tesla', 'geely'  // Tesla y marcas chinas
+    'tesla', 'geely'
   ] as const,
-  CARS_PER_MAKE: 2, // ✅ CAMBIADO: Solo 2 autos por marca
+  CARS_PER_MAKE: 2,
   MAX_REQUESTS_PER_BATCH: 3,
   DELAY_BETWEEN_REQUESTS: 1500
-};
-
-// ✅ CORREGIDA: Función para probar la API
-const testApiAvailability = async (make: string): Promise<boolean> => {
-  try {
-    const apiKey = import.meta.env.VITE_NINJA_API_KEY;
-    if (!apiKey || !CAR_API_URL) {
-      return false;
-    }
-    
-    const response = await carApiClient.get(CAR_API_URL, {
-      params: { make, limit: 1 },
-      timeout: 5000,
-      headers: { 'X-Api-Key': apiKey }
-    });
-    
-    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      return true;
-    } else {
-      return false;
-    }
-    
-  } catch (error) {
-    console.error(`❌ Error testing API availability for ${make}:`, error);
-    return false;
-  }
 };
 
 // ✅ FUNCIÓN PARA OBTENER AUTOS DE LA API
@@ -507,25 +488,45 @@ const fetchCarsFromApi = async (make: string, limit: number = 10): Promise<ApiCa
     const apiUrl = import.meta.env.VITE_NINJA_API_URL;
     
     if (!apiKey || !apiUrl) {
-      console.warn('⚠️ API keys not configured, using fallback data');
+      console.warn(`⚠️ API no configurada para ${make}`);
       return getFallbackDataForMake(make, limit);
     }
+
+    // ✅ CORREGIDO: Solo make, sin limit
+    const params: Record<string, string> = { 
+      make: make.toLowerCase()
+    };
         
     const response = await carApiClient.get(apiUrl, {
-      params: { make, limit },
+      params,
       timeout: 8000,
       headers: { 'X-Api-Key': apiKey }
     });
     
     if (response.data && Array.isArray(response.data)) {
-      return response.data;
+      console.log(`✅ API devolvió ${response.data.length} resultados para ${make} (versión gratuita)`);
+      // Limitar en el cliente
+      return response.data.slice(0, limit);
     } else {
-      console.warn(`⚠️ API returned no data for ${make}, using fallback`);
+      console.warn(`⚠️ API no devolvió datos válidos para ${make}`);
       return getFallbackDataForMake(make, limit);
     }
     
-  } catch (error) {
-    console.error(`❌ API request failed for ${make}:`, error);
+  } catch (error: unknown) {
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { status?: number } };
+      
+      if (axiosError.response?.status === 400) {
+        console.warn(`⚠️ Error 400 para ${make}: Parámetros no válidos en versión gratuita`);
+      } else if (axiosError.response?.status === 403) {
+        console.warn(`⚠️ Error 403 para ${make}: Límite de API alcanzado`);
+      } else {
+        console.error(`❌ API request failed for ${make}:`, error);
+      }
+    } else {
+      console.error(`❌ API request failed for ${make}:`, error);
+    }
+    
     return getFallbackDataForMake(make, limit);
   }
 };
@@ -534,153 +535,345 @@ const fetchCarsFromApi = async (make: string, limit: number = 10): Promise<ApiCa
 const getFallbackDataForMake = (make: string, limit: number): ApiCarData[] => {
   const allFallbackData = getFallbackCarData();
   const makeData = allFallbackData.filter(car => 
-    car.make.toLowerCase() === make.toLowerCase()
+    car.make?.toLowerCase() === make.toLowerCase()
   );
   
   return makeData.slice(0, limit);
 };
 
-// ✅ MODIFICADA: Función principal para asegurar Toyota, Kia, Hyundai en featured
+// ✅ FUNCIÓN FILTERMODERNCAR AGREGADA
+export const filterModernCars = (cars: Car[]): Car[] => {
+  return cars.filter(car => {
+    // ✅ CAMBIAR: Permitir autos desde 2015 en lugar de 2020
+    if (car.year < 2015) return false;
+    if (!car.make || !car.model) return false;
+    if (!car.price || car.price < 10000 || car.price > 200000) return false;
+    
+    const problematicModels = ['insight', 'fit', 'spark'];
+    if (problematicModels.includes(car.model.toLowerCase())) return false;
+    
+    return true;
+  });
+};
+const modernizeOldCar = (car: Car): Car => {
+  let modernYear = car.year;
+  
+  // Si el auto es muy antiguo, actualizarlo a una versión moderna
+  if (car.year < 2015) {
+    // Asignar años modernos basados en la marca
+    const modernYears = [2020, 2021, 2022, 2023, 2024];
+    const yearIndex = Math.abs(car.make.charCodeAt(0) + car.model.charCodeAt(0)) % modernYears.length;
+    modernYear = modernYears[yearIndex];
+    
+    console.log(`🔄 Modernizando ${car.make} ${car.model} de ${car.year} a ${modernYear}`);
+  }
+  
+  return {
+    ...car,
+    year: modernYear,
+    price: car.price && car.price > 15000 ? car.price : generateRealisticPrice(car as ApiCarData)
+  };
+};
+// ✅ FUNCIÓN FETCHCARBYID AGREGADA
+export const fetchCarById = async (id: string): Promise<Car | null> => {
+  try {
+    console.log(`🔍 Buscando auto con ID: ${id}`);
+    
+    // 1. Buscar en cache principal
+    const cachedCars = getCarsFromCache();
+    const cachedCar = cachedCars.find(car => car.id === id);
+    
+    if (cachedCar) {
+      console.log(`✅ Auto encontrado en cache principal: ${cachedCar.make} ${cachedCar.model}`);
+      return cachedCar;
+    }
+    
+    // 2. ✅ NUEVO: Buscar en cache de resultados de búsqueda
+    const searchResults = getSearchResultsFromCache();
+    const searchCar = searchResults.find(car => car.id === id);
+    
+    if (searchCar) {
+      console.log(`✅ Auto encontrado en resultados de búsqueda: ${searchCar.make} ${searchCar.model}`);
+      return searchCar;
+    }
+    
+    // 3. Buscar en datos de fallback
+    const fallbackData = getFallbackCarData();
+    const fallbackCar = fallbackData.find(car => car.id === id);
+    
+    if (fallbackCar) {
+      console.log(`✅ Auto encontrado en fallback: ${fallbackCar.make} ${fallbackCar.model}`);
+      const processedCar = processCarData(fallbackCar as ApiCarData, 0);
+      if (processedCar) {
+        const enhancedCar = await enhanceCarWithImage(processedCar, 0);
+        return enhancedCar;
+      }
+    }
+    
+    console.warn(`⚠️ Auto con ID ${id} no encontrado en ninguna fuente`);
+    return null;
+    
+  } catch (error: unknown) {
+    console.error(`❌ Error buscando auto con ID ${id}:`, error);
+    return null;
+  }
+};
+
+// ✅ CORREGIR: Función processCarData con tipado correcto
+const processCarData = (carData: ApiCarData, index: number): Car | null => {
+  try {
+    if (!carData.make || !carData.model) {
+      console.warn(`❌ Datos de auto inválidos en índice ${index}:`, carData);
+      return null;
+    }
+    
+    const processedCar: Car = {
+      id: generateStableId(carData, index),
+      make: String(carData.make),
+      model: String(carData.model),
+      year: Number(carData.year) || new Date().getFullYear(),
+      price: Number(carData.price) || generateRealisticPrice(carData),
+      image: String(carData.image || ''),
+      description: String(carData.description || ''),
+      fuel_type: String(carData.fuel_type || 'gas'),
+      transmission: String(carData.transmission || 'a'),
+      cylinders: Number(carData.cylinders) || 4,
+      class: String(carData.class || 'sedan'),
+      displacement: Number(carData.displacement) || 2.0,
+      city_mpg: Number(carData.city_mpg) || 25,
+      highway_mpg: Number(carData.highway_mpg) || 32,
+      combination_mpg: Number(carData.combination_mpg) || 28
+    };
+    
+    return processedCar;
+    
+  } catch (error) {
+    console.error(`❌ Error procesando auto en índice ${index}:`, error);
+    return null;
+  }
+};
+
+// ✅ MEJORAR generateRealisticPrice - FUNCIÓN ÚNICA
+const generateRealisticPrice = (carData: ApiCarData): number => {
+  try {
+    const make = carData.make?.toLowerCase() || '';
+    const carClass = carData.class?.toLowerCase() || '';
+    const fuelType = carData.fuel_type?.toLowerCase() || 'gas';
+    const cylinders = carData.cylinders || 4;
+    
+    let basePrice = 25000;
+    
+    if (carClass.includes('subcompact')) {
+      basePrice = 18000;
+    } else if (carClass.includes('compact')) {
+      basePrice = 22000;
+    } else if (carClass.includes('midsize')) {
+      basePrice = 28000;
+    } else if (carClass.includes('large') || carClass.includes('full-size')) {
+      basePrice = 35000;
+    } else if (carClass.includes('luxury')) {
+      basePrice = 45000;
+    } else if (carClass.includes('suv')) {
+      basePrice = 32000;
+    } else if (carClass.includes('pickup')) {
+      basePrice = 40000;
+    }
+    
+    let brandMultiplier = 1.0;
+    const luxuryBrands = ['mercedes', 'bmw', 'audi', 'lexus', 'acura', 'infiniti', 'tesla'];
+    const premiumBrands = ['toyota', 'honda', 'nissan', 'mazda'];
+    const valueBrands = ['kia', 'hyundai', 'mitsubishi'];
+    const electricBrands = ['tesla', 'byd', 'nio'];
+    
+    if (luxuryBrands.includes(make)) {
+      brandMultiplier = 1.6;
+    } else if (electricBrands.includes(make) && fuelType === 'electricity') {
+      brandMultiplier = 1.4;
+    } else if (premiumBrands.includes(make)) {
+      brandMultiplier = 1.2;
+    } else if (valueBrands.includes(make)) {
+      brandMultiplier = 0.85;
+    } else if (['chevrolet', 'ford', 'dodge'].includes(make)) {
+      brandMultiplier = 1.1;
+    }
+    
+    if (fuelType === 'electricity') {
+      basePrice *= 1.3;
+    } else if (fuelType.includes('hybrid')) {
+      basePrice *= 1.15;
+    }
+    
+    if (cylinders >= 8) {
+      basePrice *= 1.25;
+    } else if (cylinders === 6) {
+      basePrice *= 1.1;
+    }
+    
+    basePrice *= brandMultiplier;
+    
+    const variation = 0.95 + (Math.random() * 0.1);
+    basePrice *= variation;
+    
+    const finalPrice = Math.round(basePrice / 100) * 100;
+    
+    return Math.max(15000, Math.min(200000, finalPrice));
+    
+  } catch (error) {
+    console.warn('⚠️ Error generando precio realista:', error);
+    return 25000;
+  }
+};
+
+// ✅ MODIFICADA: Función principal
 export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
   
-  // ✅ LIMPIAR cache de Unsplash para forzar búsquedas reales
   const { clearUnsplashCache } = await import('./cache');
   clearUnsplashCache();
   
   try {
-    // Verificar cache
-    if (carCache.length > 0 && carCache.length >= Math.min(limit, 15)) {
-      // ✅ USAR filterModernCars en el cache
-      const modernCars = filterModernCars(carCache);
-      return modernCars.slice(0, limit);
+    const currentCache = getCarsFromCache();
+    if (currentCache.length > 0 && currentCache.length >= Math.min(limit, 15)) {
+      return currentCache.slice(0, limit);
     }
 
-    // Intentar cargar desde localStorage
     try {
       const savedCache = localStorage.getItem('carCatalogCache');
       if (savedCache) {
-        const cachedCars = JSON.parse(savedCache) as Car[];
-        if (Array.isArray(cachedCars) && cachedCars.length >= Math.min(limit, 10)) {
-          // ✅ USAR filterModernCars en localStorage
-          const modernCachedCars = filterModernCars(cachedCars);
-          carCache = modernCachedCars;
-          setCarsInCache(modernCachedCars);
-          return modernCachedCars.slice(0, limit);
+        const parsedCache = JSON.parse(savedCache);
+        if (Array.isArray(parsedCache) && parsedCache.length >= Math.min(limit, 15)) {
+          setCarsInCache(parsedCache);
+          return parsedCache.slice(0, limit);
         }
       }
     } catch (cacheError) {
-      console.warn('⚠️ Error leyendo cache:', cacheError);
+      console.warn('⚠️ Error loading from localStorage:', cacheError);
     }
         
     const allCars: Car[] = [];
 
-    // ✅ 1. FORZAR Toyota, Kia, Hyundai desde API primero
     const primaryMakes = ['toyota', 'kia', 'hyundai'];
     for (const make of primaryMakes) {
       try {
         const apiCars = await fetchCarsFromApi(make, API_CONFIG.CARS_PER_MAKE);
         
-        for (const apiCar of apiCars.slice(0, API_CONFIG.CARS_PER_MAKE)) {
-          const enhancedCar = await enhanceCarWithImage(apiCar as Car, allCars.length);
-          if (enhancedCar) {
-            allCars.push(enhancedCar);
-          }
+        if (apiCars.length > 0) {
+          
+          const processedCars = apiCars
+            .map((carData, index) => processCarData(carData, index))
+            .filter((car): car is Car => car !== null);
+          
+          const enhancedCars = await Promise.all(
+            processedCars.map(async (car, index) => {
+              try {
+                return await enhanceCarWithImage(car, index);
+              } catch (error) {
+                console.warn(`⚠️ Error enhancing ${car.make} ${car.model}:`, error);
+                return car;
+              }
+            })
+          );
+          
+          const validCars = enhancedCars.filter((car): car is Car => car !== null);
+          allCars.push(...validCars);
         }
         
-        // Pequeña pausa entre marcas
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise(resolve => setTimeout(resolve, API_CONFIG.DELAY_BETWEEN_REQUESTS));
       } catch (error) {
-        console.warn(`⚠️ Error processing ${make}:`, error);
+        console.error(`❌ Failed to fetch ${make} from API:`, error);
       }
     }
 
-    // ✅ 2. Luego Tesla y marcas adicionales
     const additionalMakes = ['tesla', 'nissan', 'chevrolet', 'mitsubishi'];
     for (const make of additionalMakes) {
-      const isAvailable = await testApiAvailability(make);
-      
-      if (isAvailable) {
-        try {
-          const apiCars = await fetchCarsFromApi(make, API_CONFIG.CARS_PER_MAKE);
+      try {
+        const apiCars = await fetchCarsFromApi(make, API_CONFIG.CARS_PER_MAKE);
+        
+        if (apiCars.length > 0) {
+          const processedCars = apiCars
+            .map((carData, index) => processCarData(carData, index))
+            .filter((car): car is Car => car !== null);
           
-          for (const apiCar of apiCars.slice(0, API_CONFIG.CARS_PER_MAKE)) {
-            const enhancedCar = await enhanceCarWithImage(apiCar as Car, allCars.length);
-            if (enhancedCar) {
-              allCars.push(enhancedCar);
-            }
-          }
+          const enhancedCars = await Promise.all(
+            processedCars.map(async (car, index) => {
+              try {
+                return await enhanceCarWithImage(car, index);
+              } catch (error) {
+                console.warn(`⚠️ Error enhancing ${car.make} ${car.model}:`, error);
+                return car;
+              }
+            })
+          );
           
-          await new Promise(resolve => setTimeout(resolve, 500));
-          
-        } catch (error) {
-          console.warn(`⚠️ Error processing ${make}:`, error);
+          const validCars = enhancedCars.filter((car): car is Car => car !== null);
+          allCars.push(...validCars);
         }
+        
+        await new Promise(resolve => setTimeout(resolve, API_CONFIG.DELAY_BETWEEN_REQUESTS));
+      } catch (error) {
+        console.error(`❌ Failed to fetch ${make} from API:`, error);
       }
     }
 
-    // ✅ 3. Agregar datos de fallback para marcas que faltan
     const fallbackData = getFallbackCarData();
     
-    // ✅ ASEGURAR que tenemos todas las marcas featured
     const allFeaturedMakes = ['toyota', 'kia', 'hyundai', 'tesla', 'geely', 'nissan', 'chevrolet', 'mitsubishi'];
     
     for (const targetMake of allFeaturedMakes) {
-      // Solo agregar del fallback si no tenemos suficientes de esa marca
-      const existingCount = allCars.filter(car => car.make.toLowerCase() === targetMake).length;
+      const currentCount = allCars.filter(car => 
+        car.make.toLowerCase() === targetMake.toLowerCase()
+      ).length;
       
-      if (existingCount < API_CONFIG.CARS_PER_MAKE) {
-        const neededCount = API_CONFIG.CARS_PER_MAKE - existingCount;
+      if (currentCount < API_CONFIG.CARS_PER_MAKE) {
+        const needed = API_CONFIG.CARS_PER_MAKE - currentCount;
         const fallbackCars = fallbackData
-          .filter(car => car.make.toLowerCase() === targetMake)
-          .slice(0, neededCount);
+          .filter(car => car.make?.toLowerCase() === targetMake.toLowerCase())
+          .slice(0, needed);
+                
+        const processedFallback = fallbackCars
+          .map((carData, index) => processCarData(carData as ApiCarData, index))
+          .filter((car): car is Car => car !== null);
         
-        for (const fallbackCar of fallbackCars) {
-          const enhancedCar = await enhanceCarWithImage(fallbackCar as Car, allCars.length);
-          if (enhancedCar) {
-            allCars.push(enhancedCar);
-          }
-        }
+        allCars.push(...processedFallback);
       }
     }
 
-    // ✅ USAR filterModernCars antes de finalizar
     const modernCars = filterModernCars(allCars);
     
     const finalCars = modernCars.slice(0, limit);
     
-    // ✅ VERIFICAR que tenemos las marcas principales
     const makesCounts: Record<string, number> = {};
     finalCars.forEach(car => {
-      makesCounts[car.make.toLowerCase()] = (makesCounts[car.make.toLowerCase()] || 0) + 1;
+      makesCounts[car.make] = (makesCounts[car.make] || 0) + 1;
     });
-    
-    // Guardar en cache
-    carCache = finalCars;
-    localStorage.setItem('carCatalogCache', JSON.stringify(finalCars));
+        
     setCarsInCache(finalCars);
+    localStorage.setItem('carCatalogCache', JSON.stringify(finalCars));
     
     return finalCars;
 
   } catch (error) {
     console.error('❌ Error crítico en fetchCars:', error);
     
-    // Fallback completo
     const fallbackData = getFallbackCarData();
     const enhancedFallback = await Promise.all(
-      fallbackData.slice(0, limit).map(async (car, index) => {
-        const enhancedCar = await enhanceCarWithImage(car as Car, index);
-        return enhancedCar || car as Car;
+      fallbackData.slice(0, limit).map(async (carData, index) => {
+        try {
+          const processedCar = processCarData(carData as ApiCarData, index);
+          if (!processedCar) return null;
+          
+          return await enhanceCarWithImage(processedCar, index);
+        } catch (error) {
+          console.warn(`⚠️ Error processing fallback car ${index}:`, error);
+          return null;
+        }
       })
     );
     
     const validFallback = enhancedFallback.filter((car): car is Car => car !== null);
-    // ✅ USAR filterModernCars en el fallback también
     const modernFallback = filterModernCars(validFallback);
     
-    carCache = modernFallback;
-    localStorage.setItem('carCatalogCache', JSON.stringify(modernFallback));
     setCarsInCache(modernFallback);
+    localStorage.setItem('carCatalogCache', JSON.stringify(modernFallback));
     
     return modernFallback;
   }
@@ -699,8 +892,6 @@ export const getCacheStats = () => {
   };
 };
 
-let carCache: Car[] = [];
-
 export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car | null> => {
   if (!car || !car.make || !car.model) {
     console.warn('❌ Invalid car data:', car);
@@ -708,76 +899,72 @@ export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car 
   }
 
   try {
-    const mpgData = simulatePremiumFields(car as ApiCarData);
-    const stableId = generateStableId(car, index);
+    // ✅ MODERNIZAR auto si es muy antiguo
+    const modernizedCar = modernizeOldCar(car);
     
-    // ✅ MODIFICADO: Forzar búsqueda de Google Images para todas las marcas
-    let imageUrl = car.image;
+    const mpgData = simulatePremiumFields(modernizedCar as ApiCarData);
+    const stableId = generateStableId(modernizedCar, index);
+    
+    let imageUrl = modernizedCar.image;
     const needsNewImage = !imageUrl || 
                          !isReliableImageUrl(imageUrl) ||
                          imageUrl.includes('unsplash.com') ||
                          imageUrl.includes('placeholder');
     
     if (needsNewImage) {
+      const cacheKey = `${modernizedCar.make.toLowerCase()}-${modernizedCar.model.toLowerCase()}-${modernizedCar.year || 'unknown'}-v4`;
       
-      try {
-        // ✅ CORREGIDO: Importar correctamente la función
-        const { getCarImageFromGoogle } = await import('./imageService');
-        
-        // ✅ Intentar múltiples búsquedas para asegurar resultado
-        let googleImage = await getCarImageFromGoogle(car.make, car.model, car.year);
-        
-        // Si no funciona con año, intentar sin año
-        if (!googleImage || googleImage.includes('placeholder') || googleImage === getDefaultCarImage(car.make)) {
-          googleImage = await getCarImageFromGoogle(car.make, car.model);
+      if (imageCache[cacheKey] && isReliableImageUrl(imageCache[cacheKey])) {
+        imageUrl = imageCache[cacheKey];
+      } else if (!hasImageRequestFailed(cacheKey)) {
+        try {
+          const googleImage = await getCarImageFromGoogle(modernizedCar.make, modernizedCar.model, modernizedCar.year);
+          
+          if (googleImage && isReliableImageUrl(googleImage)) {
+            imageUrl = googleImage;
+            saveImageCache(cacheKey, googleImage, getDefaultCarImage);
+          } else {
+            imageUrl = getDefaultCarImage(modernizedCar.make);
+            markImageRequestAsFailed(cacheKey);
+          }
+        } catch (imageError: unknown) {
+          console.warn(`⚠️ Error fetching image for ${modernizedCar.make} ${modernizedCar.model}:`, imageError);
+          imageUrl = getDefaultCarImage(modernizedCar.make);
+          markImageRequestAsFailed(cacheKey);
         }
-        
-        // Si aún no funciona, intentar solo con la marca
-        if (!googleImage || googleImage.includes('placeholder') || googleImage === getDefaultCarImage(car.make)) {
-          googleImage = await getCarImageFromGoogle(`${car.make} car exterior`);
-        }
-        
-        // Verificar si la imagen de Google es válida
-        if (googleImage && isReliableImageUrl(googleImage) && !googleImage.includes('placeholder')) {
-          imageUrl = googleImage;
-        } else {
-          const { getDefaultCarImage } = await import('./carBrands');
-          imageUrl = getDefaultCarImage(car.make);
-        }
-      } catch (imageError) {
-        console.warn(`❌ Error en búsqueda de imagen para ${car.make} ${car.model}:`, imageError);
-        const { getDefaultCarImage } = await import('./carBrands');
-        imageUrl = getDefaultCarImage(car.make);
+      } else {
+        imageUrl = getDefaultCarImage(modernizedCar.make);
       }
     }
 
     const enhancedCar: Car = {
-      ...car,
+      ...modernizedCar,
       id: stableId,
       image: imageUrl,
-      city_mpg: car.city_mpg || mpgData.city_mpg,
-      highway_mpg: car.highway_mpg || mpgData.highway_mpg,
-      combination_mpg: car.combination_mpg || mpgData.combination_mpg,
-      price: car.price && car.price > 10000 ? car.price : generateRealisticPrice(car as ApiCarData),
-      description: car.description || generateCarDescription(car)
+      city_mpg: modernizedCar.city_mpg || mpgData.city_mpg,
+      highway_mpg: modernizedCar.highway_mpg || mpgData.highway_mpg,
+      combination_mpg: modernizedCar.combination_mpg || mpgData.combination_mpg,
+      price: modernizedCar.price && modernizedCar.price > 10000 ? modernizedCar.price : generateRealisticPrice(modernizedCar as ApiCarData),
+      description: modernizedCar.description || generateCarDescription(modernizedCar)
     };
 
-    if (enhancedCar.year < 2020) {
+    // ✅ CAMBIAR: Ahora solo filtrar autos extremadamente antiguos
+    if (enhancedCar.year < 2015) {
+      console.warn(`⚠️ Auto demasiado antiguo después de modernización: ${enhancedCar.make} ${enhancedCar.model} ${enhancedCar.year}`);
       return null;
     }
 
     return enhancedCar;
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`❌ Error enhancing car ${car.make} ${car.model}:`, error);
     return null;
   }
 };
 
-// ✅ MEJORAR la función simulatePremiumFields para ser más realista
+// ✅ MEJORAR la función simulatePremiumFields - ELIMINAR displacement no usado
 const simulatePremiumFields = (carData: ApiCarData): { city_mpg: number; highway_mpg: number; combination_mpg: number } => {
   try {
-    // Si ya tiene datos completos de MPG, usarlos
     if (carData.city_mpg && carData.highway_mpg && carData.combination_mpg) {
       return {
         city_mpg: carData.city_mpg,
@@ -786,10 +973,9 @@ const simulatePremiumFields = (carData: ApiCarData): { city_mpg: number; highway
       };
     }
 
-    // ✅ Valores base por tipo de combustible y cilindros
     const fuelType = carData.fuel_type?.toLowerCase() || 'gas';
     const cylinders = carData.cylinders || 4;
-    const displacement = carData.displacement || 2.0;
+    // ✅ ELIMINAR displacement no usado
     const isHybrid = carData.model?.toLowerCase().includes('hybrid') || carData.fuel_type?.toLowerCase().includes('hybrid');
     const isElectric = fuelType === 'electricity';
     
@@ -797,47 +983,36 @@ const simulatePremiumFields = (carData: ApiCarData): { city_mpg: number; highway
     let baseHighwayMpg: number;
 
     if (isElectric) {
-      // Vehículos eléctricos (MPGe)
-      baseCityMpg = 120 + Math.random() * 30; // 120-150 MPGe
-      baseHighwayMpg = 100 + Math.random() * 25; // 100-125 MPGe
+      baseCityMpg = 110 + Math.random() * 40;
+      baseHighwayMpg = 100 + Math.random() * 30;
     } else if (isHybrid) {
-      // Vehículos híbridos
-      baseCityMpg = 45 + Math.random() * 15; // 45-60 MPG
-      baseHighwayMpg = 40 + Math.random() * 12; // 40-52 MPG
+      baseCityMpg = 45 + Math.random() * 15;
+      baseHighwayMpg = 40 + Math.random() * 15;
     } else {
-      // Vehículos de gasolina
       if (cylinders <= 3) {
-        baseCityMpg = 30 + Math.random() * 8; // 30-38 MPG
-        baseHighwayMpg = 35 + Math.random() * 10; // 35-45 MPG
+        baseCityMpg = 30 + Math.random() * 10;
+        baseHighwayMpg = 35 + Math.random() * 10;
       } else if (cylinders === 4) {
-        baseCityMpg = 25 + Math.random() * 8; // 25-33 MPG
-        baseHighwayMpg = 30 + Math.random() * 8; // 30-38 MPG
+        baseCityMpg = 25 + Math.random() * 8;
+        baseHighwayMpg = 32 + Math.random() * 8;
       } else if (cylinders === 6) {
-        baseCityMpg = 20 + Math.random() * 6; // 20-26 MPG
-        baseHighwayMpg = 25 + Math.random() * 7; // 25-32 MPG
+        baseCityMpg = 20 + Math.random() * 6;
+        baseHighwayMpg = 28 + Math.random() * 6;
       } else {
-        // 8+ cilindros
-        baseCityMpg = 15 + Math.random() * 5; // 15-20 MPG
-        baseHighwayMpg = 20 + Math.random() * 6; // 20-26 MPG
-      }
-      
-      // Ajustar por desplazamiento
-      if (displacement > 3.0) {
-        baseCityMpg *= 0.9;
-        baseHighwayMpg *= 0.9;
+        baseCityMpg = 15 + Math.random() * 5;
+        baseHighwayMpg = 22 + Math.random() * 6;
       }
     }
 
-    // ✅ Ajustar por marca (algunas marcas son más eficientes)
     const make = carData.make?.toLowerCase() || '';
     let brandMultiplier = 1.0;
     
     if (['toyota', 'honda', 'nissan', 'hyundai', 'kia'].includes(make)) {
-      brandMultiplier = 1.05; // +5% eficiencia
+      brandMultiplier = 1.05;
     } else if (['tesla', 'byd', 'nio'].includes(make)) {
-      brandMultiplier = 1.1; // +10% para eléctricos
+      brandMultiplier = 1.1;
     } else if (['chevrolet', 'ford', 'ram', 'gmc'].includes(make)) {
-      brandMultiplier = 0.95; // -5% para americanos
+      brandMultiplier = 0.95;
     }
 
     const finalCityMpg = Math.max(15, Math.round(baseCityMpg * brandMultiplier));
@@ -852,7 +1027,6 @@ const simulatePremiumFields = (carData: ApiCarData): { city_mpg: number; highway
 
   } catch (error) {
     console.warn('⚠️ Error simulating premium fields:', error);
-    // Valores de respaldo seguros
     return {
       city_mpg: 25,
       highway_mpg: 32,
@@ -870,14 +1044,12 @@ const generateCarDescription = (car: Car): string => {
   const transmission = car.transmission === 'a' ? 'automática' : 'manual';
   const carClass = car.class || 'sedan';
   
-  // Determinar características especiales
   const isElectric = fuelType === 'electricity';
   const isHybrid = model.toLowerCase().includes('hybrid') || fuelType.toLowerCase().includes('hybrid');
   const isLuxury = carClass.includes('luxury') || ['mercedes', 'bmw', 'audi', 'tesla', 'lexus'].includes(make.toLowerCase());
   
   let description = `${make} ${model} ${year}`;
   
-  // Añadir tipo de vehículo
   if (carClass.includes('suv')) {
     description += ' SUV';
   } else if (carClass.includes('pickup')) {
@@ -888,7 +1060,6 @@ const generateCarDescription = (car: Car): string => {
     description += ` ${carClass}`;
   }
   
-  // Añadir características de propulsión
   if (isElectric) {
     description += ' eléctrico';
   } else if (isHybrid) {
@@ -897,10 +1068,8 @@ const generateCarDescription = (car: Car): string => {
     description += ` con motor de ${fuelType === 'gas' ? 'gasolina' : fuelType}`;
   }
   
-  // Añadir transmisión
   description += ` y transmisión ${transmission}`;
   
-  // Añadir características especiales
   if (isLuxury) {
     description += ', con acabados de lujo y tecnología avanzada';
   } else if (isElectric) {
@@ -916,230 +1085,329 @@ const generateCarDescription = (car: Car): string => {
   return description;
 };
 
-// ✅ MEJORAR generateRealisticPrice para ser más preciso
-const generateRealisticPrice = (carData: ApiCarData): number => {
-  try {
-    const make = carData.make?.toLowerCase() || '';
-    const model = carData.model?.toLowerCase() || '';
-    const year = carData.year || 2024;
-    const carClass = carData.class?.toLowerCase() || '';
-    const fuelType = carData.fuel_type?.toLowerCase() || 'gas';
-    const cylinders = carData.cylinders || 4;
-    
-    // ✅ Precio base por categoría de vehículo
-    let basePrice = 25000; // Precio base por defecto
-    
-    if (carClass.includes('subcompact')) {
-      basePrice = 18000;
-    } else if (carClass.includes('compact')) {
-      basePrice = 22000;
-    } else if (carClass.includes('midsize')) {
-      basePrice = 28000;
-    } else if (carClass.includes('large') || carClass.includes('full-size')) {
-      basePrice = 35000;
-    } else if (carClass.includes('luxury')) {
-      basePrice = 45000;
-    } else if (carClass.includes('suv')) {
-      if (carClass.includes('compact')) {
-        basePrice = 26000;
-      } else if (carClass.includes('midsize')) {
-        basePrice = 32000;
-      } else {
-        basePrice = 40000;
-      }
-    } else if (carClass.includes('pickup')) {
-      basePrice = 30000;
-    }
-    
-    // ✅ Multiplicador por marca
-    let brandMultiplier = 1.0;
-    const luxuryBrands = ['mercedes', 'bmw', 'audi', 'lexus', 'acura', 'infiniti', 'tesla'];
-    const premiumBrands = ['toyota', 'honda', 'nissan', 'mazda'];
-    const valueBrands = ['kia', 'hyundai', 'mitsubishi'];
-    const electricBrands = ['tesla', 'byd', 'nio'];
-    
-    if (luxuryBrands.includes(make)) {
-      brandMultiplier = 1.6;
-    } else if (electricBrands.includes(make) && fuelType === 'electricity') {
-      brandMultiplier = 1.4;
-    } else if (premiumBrands.includes(make)) {
-      brandMultiplier = 1.1;
-    } else if (valueBrands.includes(make)) {
-      brandMultiplier = 0.9;
-    } else if (['chevrolet', 'ford', 'dodge'].includes(make)) {
-      brandMultiplier = 1.0;
-    }
-    
-    // ✅ Ajustar por tipo de combustible
-    if (fuelType === 'electricity') {
-      brandMultiplier *= 1.2;
-    } else if (model.includes('hybrid')) {
-      brandMultiplier *= 1.1;
-    }
-    
-    // ✅ Ajustar por cilindros (más cilindros = más caro)
-    if (cylinders >= 8) {
-      brandMultiplier *= 1.3;
-    } else if (cylinders === 6) {
-      brandMultiplier *= 1.1;
-    }
-    
-    // ✅ Ajustar por año (autos más nuevos son más caros)
-    const currentYear = new Date().getFullYear();
-    const ageMultiplier = Math.max(0.8, 1 - ((currentYear - year) * 0.05));
-    
-    // ✅ Modelos específicos conocidos
-    const modelPriceAdjustments: Record<string, number> = {
-      'model s': 1.8,
-      'model x': 2.0,
-      'model 3': 1.3,
-      'prius': 1.1,
-      'camry': 1.0,
-      'corolla': 0.9,
-      'rav4': 1.1,
-      'highlander': 1.3,
-      'accord': 1.1,
-      'civic': 0.9,
-      'silverado': 1.2,
-      'f-150': 1.2,
-      'tahoe': 1.5,
-      'suburban': 1.6,
-      'corvette': 2.2,
-      'mustang': 1.4
-    };
-    
-    const modelMultiplier = modelPriceAdjustments[model] || 1.0;
-    
-    // ✅ Calcular precio final
-    const finalPrice = Math.round(basePrice * brandMultiplier * ageMultiplier * modelMultiplier);
-    
-    // ✅ Asegurar rangos realistas
-    const minPrice = 15000;
-    const maxPrice = fuelType === 'electricity' ? 120000 : 80000;
-    
-    const clampedPrice = Math.max(minPrice, Math.min(maxPrice, finalPrice));
-        
-    return clampedPrice;
+// ✅ NUEVO: Cache temporal para resultados de búsqueda
+let searchResultsCache: Car[] = [];
 
+// ✅ NUEVO: Función para guardar resultados de búsqueda
+const saveSearchResultsToCache = (cars: Car[]): void => {
+  searchResultsCache = cars;
+  
+  // También guardar en localStorage temporal
+  try {
+    localStorage.setItem('searchResultsCache', JSON.stringify(cars));
   } catch (error) {
-    console.warn('⚠️ Error generating realistic price:', error);
-    return 25000; // Precio de respaldo
+    console.warn('⚠️ Error guardando resultados de búsqueda:', error);
   }
 };
 
-// ✅ USAR filterModernCars en searchCars también
+// ✅ NUEVO: Función para obtener resultados de búsqueda
+const getSearchResultsFromCache = (): Car[] => {
+  if (searchResultsCache.length > 0) {
+    return searchResultsCache;
+  }
+  
+  // Intentar cargar desde localStorage
+  try {
+    const saved = localStorage.getItem('searchResultsCache');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) {
+        searchResultsCache = parsed;
+        return parsed;
+      }
+    }
+  } catch (error) {
+    console.warn('⚠️ Error cargando resultados de búsqueda:', error);
+  }
+  
+  return [];
+};
+
+// ✅ ACTUALIZAR searchCars para guardar resultados
 export const searchCars = async (filters: SearchFilters): Promise<Car[]> => {
   try {
-    const cachedCars = getCarsFromCache();
-    if (cachedCars.length === 0) {
-      const freshCars = await fetchCars(30);
-      const filteredResults = freshCars.filter(car => {
-        if (filters.searchTerm && !car.make.toLowerCase().includes(filters.searchTerm.toLowerCase()) && 
-            !car.model.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
-          return false;
-        }
-        if (filters.year && car.year.toString() !== filters.year) return false;
-        if (filters.fuelType && car.fuel_type !== filters.fuelType) return false;
-        if (filters.transmission && car.transmission !== filters.transmission) return false;
-        return true;
-      });
-      
-      // ✅ USAR filterModernCars en los resultados de búsqueda
-      const modernResults = filterModernCars(filteredResults);
-      return modernResults.slice(0, 20);
-    }
+    console.log('🔍 Buscando con filtros:', filters);
     
-    const filteredResults = cachedCars.filter(car => {
-      if (filters.searchTerm && !car.make.toLowerCase().includes(filters.searchTerm.toLowerCase()) && 
-          !car.model.toLowerCase().includes(filters.searchTerm.toLowerCase())) {
-        return false;
+    // Si no hay filtros, devolver cache
+    if (!filters.searchTerm && !filters.year) {
+      console.log('📦 Sin filtros, devolviendo cache');
+      const results = getCarsFromCache().slice(0, 16);
+      saveSearchResultsToCache(results); // ✅ Guardar en cache de búsqueda
+      return results;
+    }
+
+    const apiKey = import.meta.env.VITE_NINJA_API_KEY;
+    const apiUrl = import.meta.env.VITE_NINJA_API_URL;
+    
+    let searchResults: Car[] = [];
+
+    // ✅ SIEMPRE buscar en API si hay término de búsqueda
+    if (filters.searchTerm && filters.searchTerm.trim()) {
+      const searchTerm = filters.searchTerm.trim().toLowerCase();
+      
+      if (apiKey && apiUrl) {
+        console.log(`🌐 Buscando en API para: ${searchTerm}`);
+        
+        // ✅ Detectar si es una marca conocida o cualquier término
+        const knownMakes = ['toyota', 'kia', 'hyundai', 'tesla', 'nissan', 'chevrolet', 'mitsubishi', 'geely'];
+        const foundMake = knownMakes.find(make => searchTerm.includes(make));
+        
+        if (foundMake) {
+          // Buscar por marca conocida
+          console.log(`🔍 Marca conocida detectada: ${foundMake}`);
+          try {
+            const apiResults = await searchInApi({ make: foundMake });
+            searchResults.push(...apiResults);
+            
+            // Filtrar por modelo si se especificó
+            const words = searchTerm.split(' ');
+            if (words.length > 1 && apiResults.length > 0) {
+              const modelWords = words.filter(word => word !== foundMake);
+              if (modelWords.length > 0) {
+                const modelTerm = modelWords.join(' ').toLowerCase();
+                searchResults = searchResults.filter(car => 
+                  car.model.toLowerCase().includes(modelTerm)
+                );
+              }
+            }
+          } catch (apiError) {
+            console.warn(`⚠️ Error en API para marca conocida ${foundMake}:`, apiError);
+          }
+        } else {
+          // ✅ Buscar cualquier término como marca en API
+          console.log(`🔍 Término desconocido, buscando como marca: ${searchTerm}`);
+          try {
+            // Intentar el término completo como marca
+            const firstWord = searchTerm.split(' ')[0];
+            const apiResults = await searchInApi({ make: firstWord });
+            
+            if (apiResults.length > 0) {
+              console.log(`✅ Encontrados ${apiResults.length} resultados para marca: ${firstWord}`);
+              searchResults.push(...apiResults);
+              
+              // Si hay más palabras, filtrar por modelo
+              const words = searchTerm.split(' ');
+              if (words.length > 1) {
+                const modelWords = words.slice(1);
+                const modelTerm = modelWords.join(' ').toLowerCase();
+                searchResults = searchResults.filter(car => 
+                  car.model.toLowerCase().includes(modelTerm)
+                );
+              }
+            } else {
+              console.log(`📭 No se encontraron resultados para marca: ${firstWord}`);
+            }
+          } catch (apiError) {
+            console.warn(`⚠️ Error en API para término ${searchTerm}:`, apiError);
+          }
+        }
+      } else {
+        console.warn('⚠️ API no configurada, no se puede buscar término desconocido');
       }
-      if (filters.year && car.year.toString() !== filters.year) return false;
-      if (filters.fuelType && car.fuel_type !== filters.fuelType) return false;
-      if (filters.transmission && car.transmission !== filters.transmission) return false;
-      return true;
+    }
+
+    // ✅ Buscar en caché como complemento (no reemplazo)
+    console.log(`🔍 Buscando en caché como complemento...`);
+    const localResults = searchInLocalCache(filters, false); // false = no usar fallback si está vacío
+    
+    // ✅ Combinar resultados de API y cache, evitando duplicados
+    const combinedResults = [...searchResults];
+    
+    localResults.forEach(localCar => {
+      const isDuplicate = combinedResults.some(car => 
+        car.make.toLowerCase() === localCar.make.toLowerCase() &&
+        car.model.toLowerCase() === localCar.model.toLowerCase() &&
+        car.year === localCar.year
+      );
+      
+      if (!isDuplicate) {
+        combinedResults.push(localCar);
+      }
     });
 
-    // ✅ USAR filterModernCars en los resultados del cache
-    const modernResults = filterModernCars(filteredResults);
-    return modernResults.slice(0, 20);
+    // Aplicar filtro de año si existe
+    let finalResults = combinedResults;
+    if (filters.year && filters.year.trim()) {
+      const targetYear = parseInt(filters.year);
+      if (!isNaN(targetYear)) {
+        finalResults = finalResults.filter(car => car.year === targetYear);
+      }
+    }
 
-  } catch (error) {
-    console.error('Error in searchCars:', error);
-    return [];
+    console.log(`✅ Búsqueda completada: ${finalResults.length} resultados (${searchResults.length} de API + ${combinedResults.length - searchResults.length} de caché)`);
+    
+    // ✅ Si no hay resultados y no se encontró nada en API, mostrar mensaje específico
+    if (finalResults.length === 0 && filters.searchTerm) {
+      console.log(`ℹ️ No se encontraron resultados para "${filters.searchTerm}". Marca puede no estar disponible en la API.`);
+    }
+    
+    const limitedResults = finalResults.slice(0, 16);
+    
+    // ✅ NUEVO: Guardar resultados en cache de búsqueda
+    saveSearchResultsToCache(limitedResults);
+    
+    return limitedResults;
+
+  } catch (error: unknown) {
+    console.error('❌ Error en búsqueda:', error);
+    
+    // Fallback: usar solo cache local
+    console.log('📦 Fallback: usando solo cache local');
+    const fallbackResults = searchInLocalCache(filters, true); // true = usar fallback si está vacío
+    saveSearchResultsToCache(fallbackResults); // ✅ Guardar fallback también
+    return fallbackResults;
   }
 };
 
-// ✅ USAR filterModernCars en fetchFeaturedCars también
+const searchInLocalCache = (filters: SearchFilters, useFallbackIfEmpty: boolean = true): Car[] => {
+  console.log('🔍 Buscando en cache local con filtros:', filters);
+  
+  const cachedCars = getCarsFromCache();
+  let filteredCars = cachedCars;
+
+  // ✅ Solo usar datos de fallback si se especifica Y el cache está vacío
+  if (filteredCars.length === 0 && useFallbackIfEmpty) {
+    console.log('📦 Cache vacío, usando datos de fallback');
+    const fallbackData = getFallbackCarData();
+    filteredCars = fallbackData
+      .map((carData, index) => processCarData(carData as ApiCarData, index))
+      .filter((car): car is Car => car !== null);
+  }
+
+  // Filtrar por término de búsqueda
+  if (filters.searchTerm && filters.searchTerm.trim()) {
+    const term = filters.searchTerm.toLowerCase();
+    filteredCars = filteredCars.filter(car => 
+      car.make.toLowerCase().includes(term) || 
+      car.model.toLowerCase().includes(term) ||
+      `${car.make} ${car.model}`.toLowerCase().includes(term)
+    );
+  }
+
+  // Filtrar por año
+  if (filters.year && filters.year.trim()) {
+    const year = parseInt(filters.year);
+    if (!isNaN(year)) {
+      filteredCars = filteredCars.filter(car => car.year === year);
+    }
+  }
+
+  console.log(`📦 Cache local: ${filteredCars.length} resultados encontrados`);
+  return filteredCars;
+};
+// ✅ NUEVA: Función helper para buscar en la API
+const searchInApi = async (params: Record<string, string>): Promise<Car[]> => {
+  try {
+    const apiKey = import.meta.env.VITE_NINJA_API_KEY;
+    const apiUrl = import.meta.env.VITE_NINJA_API_URL;
+    
+    if (!apiKey || !apiUrl) {
+      console.warn('⚠️ API no configurada');
+      return [];
+    }
+
+    const cleanParams: Record<string, string> = {};
+    
+    // Solo incluir parámetros básicos permitidos
+    const allowedParams = ['make', 'model', 'year'];
+    allowedParams.forEach(key => {
+      if (params[key]) {
+        cleanParams[key] = params[key];
+      }
+    });
+    
+    console.log(`🌐 Consultando API con parámetros:`, cleanParams);
+    
+    const response = await carApiClient.get(apiUrl, {
+      params: cleanParams,
+      timeout: 10000,
+      headers: { 'X-Api-Key': apiKey }
+    });
+
+    if (response.data && Array.isArray(response.data) && response.data.length > 0) {
+      console.log(`📊 API devolvió ${response.data.length} resultados para marca: ${cleanParams.make}`);
+      
+      // Procesar resultados - limitar en el cliente
+      const enhancedResults = await Promise.all(
+        response.data.slice(0, 8).map(async (carData: ApiCarData, index: number) => {
+          try {
+            const processedCar = processCarData(carData, index);
+            if (!processedCar) return null;
+            
+            const enhancedCar = await enhanceCarWithImage(processedCar, index);
+            return enhancedCar;
+          } catch (processingError) {
+            console.warn(`⚠️ Error procesando auto ${index}:`, processingError);
+            return null;
+          }
+        })
+      );
+
+      const validResults = enhancedResults.filter((car): car is Car => car !== null);
+      
+      console.log(`✅ ${validResults.length} autos procesados exitosamente desde API`);
+      return validResults;
+    } else {
+      console.log(`📭 API no devolvió resultados para marca: ${cleanParams.make}`);
+      return [];
+    }
+
+  } catch (error: unknown) {
+    console.error('❌ Error en consulta API:', error);
+    
+    if (error && typeof error === 'object' && 'response' in error) {
+      const axiosError = error as { response?: { status?: number } };
+      
+      if (axiosError.response?.status === 400) {
+        console.warn(`⚠️ Error 400: Marca "${params.make}" no válida o no encontrada en API`);
+      } else if (axiosError.response?.status === 403) {
+        console.warn('⚠️ Error 403: Límite de API alcanzado');
+      } else if (axiosError.response?.status === 429) {
+        console.warn('⚠️ Error 429: Demasiadas requests');
+      }
+    }
+    
+    return [];
+  }
+};
+// ✅ USAR fetchFeaturedCars también con filterModernCars
 export const fetchFeaturedCars = async (): Promise<Car[]> => {
   try {
-    if (carCache.length >= 12) {
-      const modernCars = filterModernCars(carCache);
-      return modernCars.slice(0, 12);
-    }
-
-    const cars = await fetchCars(24);
-    const modernCars = filterModernCars(cars);
-    return modernCars.slice(0, 12);
-
+    const allCars = await fetchCars(24);
+    const modernCars = filterModernCars(allCars);
+    return modernCars.slice(0, 16);
   } catch (error) {
-    console.error('Error fetching featured cars:', error);
-    return [];
+    console.error('❌ Error fetching featured cars:', error);
+    const fallbackData = getFallbackCarData();
+    const processedFallback = fallbackData
+      .map((carData, index) => processCarData(carData as ApiCarData, index))
+      .filter((car): car is Car => car !== null);
+    
+    return filterModernCars(processedFallback).slice(0, 16);
   }
 };
 
-// ✅ MEJORADA: Función filterModernCars más específica
-const filterModernCars = (cars: Car[]): Car[] => {
-  return cars.filter(car => {
-    // Filtrar autos muy antiguos
-    if (car.year < 2018) {
-      return false;
-    }
+// ✅ ACTUALIZAR clearAllCaches para incluir cache de búsqueda
+export const clearAllCaches = (): void => {
+  try {
+    // ✅ Limpiar cache de autos principal
+    setCarsInCache([]);
     
-    // Filtrar datos incompletos o poco realistas
-    if (!car.make || !car.model) {
-      return false;
-    }
+    // ✅ Limpiar cache de búsqueda
+    searchResultsCache = [];
     
-    // Filtrar precios poco realistas (muy bajos o muy altos)
-    if (car.price && (car.price < 10000 || car.price > 200000)) {
-      return false;
-    }
+    // ✅ Limpiar todos los caches de imágenes
+    clearAllImageCaches();
     
-    return true;
-  });
-};
-
-export const fetchCarById = async (id: string): Promise<Car> => {
-  try {    
-    // Primero buscar en el cache
-    const cachedCars = getCarsFromCache();
-    const cachedCar = cachedCars.find(car => car.id === id);
+    // ✅ Limpiar localStorage
+    localStorage.removeItem('carCatalogCache');
+    localStorage.removeItem('searchResultsCache');
+    localStorage.removeItem('carImageCache');
+    localStorage.removeItem('imageRequestFailed');
     
-    if (cachedCar) {
-      return cachedCar;
-    }
-
-    // Si no está en cache, intentar recargar todos los autos
-    const allCars = await fetchCars(30);
-    const foundCar = allCars.find(car => car.id === id);
+    console.log('✅ Todos los caches limpiados exitosamente');
     
-    if (foundCar) {
-      return foundCar;
-    }
-
-    // Si aún no se encuentra, buscar en datos de fallback
-    const fallbackData = getFallbackCarData();
-    const fallbackCar = fallbackData.find(car => car.id === id);
-    
-    if (fallbackCar) {
-      return fallbackCar as Car;
-    }
-
-    throw new Error(`No se encontró el vehículo con ID: ${id}`);
-
   } catch (error) {
-    console.error(`❌ Error buscando auto con ID ${id}:`, error);
-    throw new Error('No se pudo cargar el vehículo solicitado');
+    console.warn('⚠️ Error limpiando caches:', error);
   }
 };

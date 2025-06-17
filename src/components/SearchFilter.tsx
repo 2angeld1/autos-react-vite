@@ -8,11 +8,10 @@ interface SearchFilterProps {
 const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
     const [filters, setFilters] = useState<SearchFilters>({
         searchTerm: '',
-        year: '',
-        price: '',
-        fuelType: 'any',
-        transmission: 'any'
+        year: ''
     });
+
+    const [isSearching, setIsSearching] = useState(false);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
@@ -22,140 +21,109 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
         }));
     };
 
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSearch(filters);
+        setIsSearching(true);
+        
+        try {
+            await onSearch(filters);
+        } finally {
+            setIsSearching(false);
+        }
     };
 
-    const handleClear = () => {
-        setFilters({
+    const handleClear = async () => {
+        const emptyFilters = {
             searchTerm: '',
-            year: '',
-            price: '',
-            fuelType: 'any',
-            transmission: 'any'
-        });
-        // Opcional: también ejecutar búsqueda vacía
-        onSearch({
-            searchTerm: '',
-            year: '',
-            price: '',
-            fuelType: 'any',
-            transmission: 'any'
-        });
+            year: ''
+        };
+        
+        setFilters(emptyFilters);
+        setIsSearching(true);
+        
+        try {
+            await onSearch(emptyFilters);
+        } finally {
+            setIsSearching(false);
+        }
     };
+
+    const availableMakes = ['Toyota', 'Kia', 'Tesla', 'Ford', 'Chevrolet']; // Ejemplo de marcas disponibles
 
     return (
         <form onSubmit={handleSubmit} className="search-filter-form">
             <div className="columns is-multiline">
-                <div className="column is-6-tablet is-3-desktop">
+                <div className="column is-6-tablet is-4-desktop">
                     <div className="field">
-                        <label className="label has-text-white">Marca y Modelo</label>
+                        <label className="label has-text-white">
+                            <span className="icon-text">
+                                <span className="icon">
+                                    <i className="fas fa-car"></i>
+                                </span>
+                                <span>Marca y Modelo</span>
+                            </span>
+                        </label>
                         <div className="control has-icons-left">
                             <input 
                                 className="input" 
                                 type="text" 
                                 name="searchTerm" 
-                                placeholder="Ej. Toyota Corolla" 
+                                placeholder="Ej. Toyota Corolla, Kia Sportage" 
                                 value={filters.searchTerm}
                                 onChange={handleFilterChange}
+                                disabled={isSearching}
                             />
                             <span className="icon is-small is-left">
                                 <i className="fas fa-car"></i>
                             </span>
                         </div>
+                        <p className="help has-text-grey-light">
+                            Busca por marca (Toyota, Kia, Tesla) o marca + modelo
+                        </p>
                     </div>
                 </div>
 
-                <div className="column is-6-tablet is-3-desktop">
+                <div className="column is-6-tablet is-4-desktop">
                     <div className="field">
-                        <label className="label has-text-white">Año</label>
+                        <label className="label has-text-white">
+                            <span className="icon-text">
+                                <span className="icon">
+                                    <i className="fas fa-calendar-alt"></i>
+                                </span>
+                                <span>Año</span>
+                            </span>
+                        </label>
                         <div className="control">
                             <input 
                                 className="input" 
                                 type="number" 
                                 name="year" 
-                                placeholder="Ej. 2022" 
+                                placeholder="Ej. 2022, 2023, 2024" 
                                 value={filters.year}
                                 onChange={handleFilterChange}
                                 min="1990"
                                 max={new Date().getFullYear().toString()}
+                                disabled={isSearching}
                             />
                         </div>
+                        <p className="help has-text-grey-light">
+                            Año del modelo (1990-{new Date().getFullYear()})
+                        </p>
                     </div>
                 </div>
 
-                <div className="column is-6-tablet is-3-desktop">
-                    <div className="field">
-                        <label className="label has-text-white">Precio</label>
-                        <div className="control has-icons-left">
-                            <input 
-                                className="input" 
-                                type="number" 
-                                name="price" 
-                                placeholder="Presupuesto máximo" 
-                                value={filters.price}
-                                onChange={handleFilterChange}
-                                min="0"
-                            />
-                            <span className="icon is-small is-left">
-                                <i className="fas fa-dollar-sign"></i>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="column is-6-tablet is-3-desktop">
-                    <div className="field">
-                        <label className="label has-text-white">Combustible</label>
-                        <div className="control">
-                            <div className="select is-fullwidth">
-                                <select 
-                                    name="fuelType" 
-                                    value={filters.fuelType} 
-                                    onChange={handleFilterChange}
-                                >
-                                    <option value="any">Todos</option>
-                                    <option value="gas">Gasolina</option>
-                                    <option value="diesel">Diesel</option>
-                                    <option value="electricity">Eléctrico</option>
-                                    <option value="hybrid">Híbrido</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="column is-6-tablet is-3-desktop">
-                    <div className="field">
-                        <label className="label has-text-white">Transmisión</label>
-                        <div className="control">
-                            <div className="select is-fullwidth">
-                                <select 
-                                    name="transmission" 
-                                    value={filters.transmission} 
-                                    onChange={handleFilterChange}
-                                >
-                                    <option value="any">Todas</option>
-                                    <option value="a">Automática</option>
-                                    <option value="m">Manual</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="column is-12 has-text-centered">
+                <div className="column is-12-tablet is-4-desktop has-text-centered">
                     <div className="field is-grouped is-grouped-centered mt-4">
                         <div className="control">
                             <button 
                                 type="submit" 
-                                className="button is-accent is-medium"
+                                className={`button is-accent is-medium ${isSearching ? 'is-loading' : ''}`}
+                                disabled={isSearching}
                             >
                                 <span className="icon">
                                     <i className="fas fa-search"></i>
                                 </span>
-                                <span>Buscar</span>
+                                <span>{isSearching ? 'Buscando...' : 'Buscar'}</span>
                             </button>
                         </div>
                         <div className="control">
@@ -163,6 +131,7 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
                                 type="button" 
                                 className="button is-light is-medium"
                                 onClick={handleClear}
+                                disabled={isSearching}
                             >
                                 <span className="icon">
                                     <i className="fas fa-times"></i>
@@ -172,6 +141,19 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
                         </div>
                     </div>
                 </div>
+            </div>
+            {/* ✅ ACTUALIZAR mensaje informativo */}
+            <div className="notification is-info is-light mt-3" style={{ fontSize: '0.85rem' }}>
+                <p>
+                    <strong>💡 Consejo:</strong> Puedes buscar cualquier marca de auto. 
+                    Si no está en nuestro catálogo local, buscaremos en la API externa.
+                </p>
+                <p className="mt-2">
+                    <strong>Marcas en catálogo local:</strong> {availableMakes.join(', ')}
+                </p>
+                <p className="mt-2">
+                    <strong>Otras marcas:</strong> Ford, BMW, Mercedes, Audi, Honda, Mazda, Subaru, etc.
+                </p>
             </div>
         </form>
     );

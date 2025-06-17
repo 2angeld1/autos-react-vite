@@ -46,7 +46,6 @@ export const useCarImage = ({
         };
         
         const brandImage = backupImages[make.toLowerCase()] || fallbackImage;
-        console.log(`🎯 Getting backup image for ${make}: ${brandImage}`);
         return brandImage;
     }, [fallbackImage]);
 
@@ -55,19 +54,14 @@ export const useCarImage = ({
         
         // ✅ SUPER PERMISIVO: Solo usar contain si la imagen es EXTREMADAMENTE pequeña
         if (img.naturalWidth < 100 || img.naturalHeight < 100) {
-            console.log(`📐 Image ${img.naturalWidth}x${img.naturalHeight} - Using contain mode (very small)`);
             return 'contain';
         }
         
         // ✅ Para todo lo demás, usar cover (dejamos que CSS lo maneje)
-        console.log(`📐 Image ${img.naturalWidth}x${img.naturalHeight} - Using cover mode (good size)`);
         return 'cover';
     }, []);
 
-    useEffect(() => {
-        console.log(`🖼️ useCarImage hook - Processing: ${car.make} ${car.model}`);
-        console.log(`🖼️ Car image URL: ${car.image}`);
-        
+    useEffect(() => {        
         setImageLoading(true);
         
         // ✅ SUPER PERMISIVO: Usar CUALQUIER imagen que no sea placeholder
@@ -76,14 +70,12 @@ export const useCarImage = ({
             !car.image.includes('placehold.it') &&
             !car.image.includes('via.placeholder.com')) {
             
-            console.log(`✅ Using car's original image (ALL SIZES ACCEPTED): ${car.image}`);
             setImageSrc(car.image);
             setImageError(false);
         } 
         // ✅ Solo si no hay imagen válida, usar imagen específica por marca
         else {
             const backupImage = getBackupImageByMake(car.make);
-            console.log(`🔄 Using backup image for ${car.make}: ${backupImage}`);
             setImageSrc(backupImage);
             setImageError(false);
         }
@@ -91,15 +83,12 @@ export const useCarImage = ({
 
     const handleImageLoad = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
         const img = e.target as HTMLImageElement;
-        console.log(`✅ Image loaded successfully: ${img.src}`);
-        console.log(`📐 Image dimensions: ${img.naturalWidth}x${img.naturalHeight}`);
-        
+
         // Detectar el mejor modo para esta imagen
         const bestMode = detectImageMode(img);
         setImageMode(bestMode);
         setImageLoading(false);
         
-        console.log(`🎨 Using image mode: ${bestMode}`);
     }, [detectImageMode]);
 
     const handleImageError = useCallback((e: React.SyntheticEvent<HTMLImageElement>) => {
@@ -111,7 +100,6 @@ export const useCarImage = ({
         // ✅ Usar imagen específica por marca como backup
         if (!imageError) {
             const backupImage = getBackupImageByMake(car.make);
-            console.log(`🔄 Fallback to brand image: ${backupImage}`);
             target.src = backupImage;
             setImageSrc(backupImage);
             setImageError(true);

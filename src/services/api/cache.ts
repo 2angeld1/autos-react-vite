@@ -166,6 +166,22 @@ export const validateImageCache = (): boolean => {
   }
 })();
 
+// ✅ CARGAR también el caché de resultados de búsqueda
+(function loadSearchResultsCache() {
+  try {
+    const savedSearchCache = localStorage.getItem('searchResultsCache');
+    if (savedSearchCache) {
+      const parsedCache = JSON.parse(savedSearchCache);
+      if (Array.isArray(parsedCache)) {
+        // No necesitamos una variable global aquí, se maneja en carService.ts
+        console.log(`📦 Cache de búsqueda cargado: ${parsedCache.length} resultados`);
+      }
+    }
+  } catch (e) {
+    console.warn('Error loading search results cache from localStorage:', e);
+  }
+})();
+
 // ✅ Cargar también el caché de autos
 (function loadCarCache() {
   try {
@@ -315,26 +331,50 @@ export const clearProblematicCache = (): void => {
   }
 };
 
-// ✅ AÑADIR función para limpiar cache de Unsplash
-export const clearUnsplashCache = (): void => {
+// ✅ AÑADIR funciones para limpiar caches específicos
+export const clearImageCache = (): void => {
   try {
-    const keysToDelete = Object.keys(imageCache).filter(key => {
-      const url = imageCache[key];
-      return url.includes('unsplash.com') || url.includes('placeholder');
-    });
-        
-    keysToDelete.forEach(key => {
+    // Limpiar el objeto imageCache
+    Object.keys(imageCache).forEach(key => {
       delete imageCache[key];
+    });
+    console.log('🧹 Cache de imágenes limpiado');
+  } catch (error) {
+    console.warn('⚠️ Error limpiando cache de imágenes:', error);
+  }
+};
+
+export const clearImageFailedCache = (): void => {
+  try {
+    // Limpiar el objeto de requests fallidos
+    Object.keys(imageRequestFailed).forEach(key => {
       delete imageRequestFailed[key];
     });
-    
-    // Actualizar localStorage
-    localStorage.setItem('carImageCache', JSON.stringify(imageCache));
-    localStorage.setItem('imageRequestFailed', JSON.stringify(imageRequestFailed));
-    
+    console.log('🧹 Cache de requests fallidos limpiado');
+  } catch (error) {
+    console.warn('⚠️ Error limpiando cache de requests fallidos:', error);
+  }
+};
+
+export const clearUnsplashCache = (): void => {
+  try {
+    // Limpiar cache específico de Unsplash
+    Object.keys(imageCache).forEach(key => {
+      if (imageCache[key].includes('unsplash.com')) {
+        delete imageCache[key];
+      }
+    });
+    console.log('🧹 Cache de Unsplash limpiado');
   } catch (error) {
     console.warn('⚠️ Error limpiando cache de Unsplash:', error);
   }
+};
+
+// ✅ FUNCIÓN MAESTRA para limpiar todos los caches
+export const clearAllImageCaches = (): void => {
+  clearImageCache();
+  clearImageFailedCache();
+  clearUnsplashCache();
 };
 
 // ✅ NUEVA función para limpiar cache específico de marcas problemáticas

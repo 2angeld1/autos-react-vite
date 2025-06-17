@@ -12,9 +12,7 @@ const FeaturedCars: React.FC = () => {
     
     useEffect(() => {
         const validateAndFilterCars = async () => {
-            if (cars.length > 0 && !loading) {
-                console.log('🎯 Filtering featured cars for specified brands...');
-                
+            if (cars.length > 0 && !loading) {                
                 // ✅ ACTUALIZADO: Orden prioritario de marcas con 2 por marca
                 const featuredBrands = [
                     'toyota', 'kia', 'hyundai', // ✅ PRIORIDAD MÁXIMA
@@ -26,9 +24,7 @@ const FeaturedCars: React.FC = () => {
                     const make = car.make.toLowerCase();
                     return featuredBrands.includes(make);
                 });
-                
-                console.log(`📊 Found ${brandFilteredCars.length} cars from featured brands`);
-                
+                                
                 // ✅ MODIFICADO: 2 autos por marca máximo
                 const validatedCars: Car[] = [];
                 const brandCounts: Record<string, number> = {};
@@ -46,15 +42,11 @@ const FeaturedCars: React.FC = () => {
                         carsToAdd.forEach(car => {
                             brandCounts[brand] = (brandCounts[brand] || 0) + 1;
                             validatedCars.push(car);
-                            console.log(`✅ ${brand}: ${car.make} ${car.model} added (${brandCounts[brand]}/${maxPerBrand})`);
                         });
                     } else {
                         console.warn(`⚠️ No se encontraron autos para ${brand}`);
                     }
                 }
-                
-                console.log(`🎯 Featured cars set: ${validatedCars.length} vehicles from featured brands`);
-                console.log('📊 Final distribution:', brandCounts);
                 setFeaturedCars(validatedCars);
                 setIsValidating(false);
             }
