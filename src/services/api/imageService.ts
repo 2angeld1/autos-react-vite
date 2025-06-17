@@ -43,7 +43,6 @@ export const getCarImageFromGoogle = async (
       isReliableImageUrl(imageCache[cacheKey]) && 
       !imageCache[cacheKey].includes('unsplash.com') &&
       !imageCache[cacheKey].includes('placeholder')) {
-    console.log(`🎯 Cache hit para: ${searchQuery} - ${imageCache[cacheKey]}`);
     return imageCache[cacheKey];
   }
   
@@ -52,9 +51,7 @@ export const getCarImageFromGoogle = async (
       console.warn('⚠️ Google Search API no configurada');
       return getDefaultCarImage(makeOrQuery);
     }
-    
-    console.log(`🔍 Buscando en Google Images: "${searchQuery}"`);
-    
+        
     // ✅ MEJORADO: Parámetros de búsqueda más específicos
     const params = new URLSearchParams({
       key: GOOGLE_API_KEY,
@@ -76,9 +73,7 @@ export const getCarImageFromGoogle = async (
     
     const data = response.data as { items?: Array<{ link: string; title?: string; snippet?: string }> };
     
-    if (data.items && Array.isArray(data.items)) {
-      console.log(`📸 Encontradas ${data.items.length} imágenes para ${searchQuery}`);
-      
+    if (data.items && Array.isArray(data.items)) {      
       // ✅ MEJORADO: Sistema de puntuación más inteligente
       const scoredImages: Array<{url: string, score: number, title: string}> = [];
       
@@ -102,7 +97,6 @@ export const getCarImageFromGoogle = async (
           ];
           
           if (badDomains.some(bad => domain.includes(bad))) {
-            console.log(`⚠️ Dominio rechazado: ${domain}`);
             continue;
           }
           
@@ -142,7 +136,6 @@ export const getCarImageFromGoogle = async (
           ];
           if (trustedDomains.some(trusted => domain.includes(trusted))) {
             score += 10;
-            console.log(`🏆 Sitio de confianza: ${domain} (+10 puntos)`);
           }
           
           // Penalizar términos no deseados
@@ -167,10 +160,8 @@ export const getCarImageFromGoogle = async (
       scoredImages.sort((a, b) => b.score - a.score);
       
       for (const scoredImage of scoredImages) {
-        console.log(`🔢 Imagen candidata: ${scoredImage.url.substring(0, 50)}... Score: ${scoredImage.score}`);
         
         if (scoredImage.score >= 3) { // Umbral mínimo
-          console.log(`✅ IMAGEN SELECCIONADA! (puntaje: ${scoredImage.score})`);
           
           // Guardar en cache
           imageCache[cacheKey] = scoredImage.url;
@@ -183,7 +174,6 @@ export const getCarImageFromGoogle = async (
         }
       }
       
-      console.log(`⚠️ No se encontraron imágenes de calidad para "${searchQuery}"`);
     } else {
       console.warn(`⚠️ No se encontraron resultados para: ${searchQuery}`);
     }
@@ -207,17 +197,14 @@ export const getHighResCarImage = async (
     ? `${make} ${model} ${year} car high resolution` 
     : `${make} car high resolution`;
   
-  console.log(`🔍 Searching high-res image for: ${searchQuery}`);
   
   try {
     const imageUrl = await getCarImageFromGoogle(searchQuery, model, year);
     
     if (imageUrl && !imageUrl.includes('placeholder')) {
-      console.log(`✅ High-res image found: ${imageUrl}`);
       return imageUrl;
     }
     
-    console.log(`⚠️ No high-res image found, using standard search`);
     return await getCarImageFromGoogle(make, model, year);
     
   } catch (error) {
@@ -242,9 +229,7 @@ export const getMultipleCarImages = async (
       console.warn('⚠️ Google Search API not configured');
       return Array(count).fill(getDefaultCarImage(make));
     }
-    
-    console.log(`🔍 Searching multiple images for: ${searchQuery}`);
-    
+        
     // ✅ CORREGIDO: Verificar que todas las variables son válidas antes de usar URLSearchParams
     const params = new URLSearchParams({
       key: GOOGLE_API_KEY, // Ya verificamos que no es undefined arriba
@@ -279,7 +264,6 @@ export const getMultipleCarImages = async (
           
           if (!isBadDomain) {
             validImages.push(imageUrl);
-            console.log(`✅ Valid image ${validImages.length}: ${imageUrl}`);
           }
           
         } catch {
@@ -292,7 +276,6 @@ export const getMultipleCarImages = async (
       validImages.push(getDefaultCarImage(make));
     }
     
-    console.log(`📸 Found ${validImages.length} images for ${searchQuery}`);
     return validImages;
     
   } catch (error) {
@@ -326,7 +309,6 @@ export const clearImageCache = (): void => {
   Object.keys(imageCache).forEach(key => {
     delete imageCache[key];
   });
-  console.log('🧹 Image cache cleared');
 };
 
 export const getImageCacheStats = () => {

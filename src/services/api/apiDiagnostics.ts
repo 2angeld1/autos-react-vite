@@ -1,16 +1,5 @@
 // ✅ Diagnóstico completo de APIs
-export const runApiDiagnostics = async () => {
-  console.log('🔍 Iniciando diagnóstico de APIs...');
-  
-  // 1. Verificar variables de entorno
-  const envCheck = {
-    NINJA_API_KEY: !!import.meta.env.VITE_NINJA_API_KEY,
-    NINJA_API_URL: !!import.meta.env.VITE_NINJA_API_URL,
-    GOOGLE_API_KEY: !!import.meta.env.VITE_GOOGLE_API_KEY,
-    GOOGLE_CSE_ID: !!import.meta.env.VITE_GOOGLE_CSE_ID
-  };
-  
-  console.log('📋 Variables de entorno:', envCheck);
+export const runApiDiagnostics = async () => {  
   
   // 2. Probar API Ninja con diferentes configuraciones
   const apiKey = import.meta.env.VITE_NINJA_API_KEY;
@@ -44,9 +33,7 @@ export const runApiDiagnostics = async () => {
   ];
   
   for (const test of tests) {
-    try {
-      console.log(`🧪 ${test.name}...`);
-      
+    try {      
       // ✅ Crear URL con parámetros correctamente tipados
       const url = new URL(test.url);
       Object.entries(test.params).forEach(([key, value]) => {
@@ -58,27 +45,10 @@ export const runApiDiagnostics = async () => {
       const response = await fetch(url.toString(), {
         method: 'GET',
         headers: test.headers
-      });
-      
-      console.log(`📊 Status: ${response.status} ${response.statusText}`);
-      console.log(`📊 URL: ${url.toString()}`);
-      
+      });      
       if (response.ok) {
         const data = await response.json();
-        console.log(`✅ ${test.name} exitoso - ${Array.isArray(data) ? data.length : 'No array'} resultados`);
         return { success: true, data };
-      } else {
-        const errorText = await response.text();
-        console.log(`❌ Error ${response.status}: ${errorText}`);
-        
-        // ✅ Agregar más información de depuración
-        if (response.status === 400) {
-          console.log('🔍 Error 400 - Posibles causas:');
-          console.log('  - API Key incorrecta');
-          console.log('  - Parámetros mal formateados');
-          console.log('  - Rate limit excedido');
-          console.log(`  - Headers enviados:`, test.headers);
-        }
       }
     } catch (error) {
       console.error(`💥 ${test.name} falló:`, error);

@@ -74,7 +74,6 @@ export const clearAllCaches = (): void => {
     localStorage.removeItem('carImageCache');
     localStorage.removeItem('imageRequestFailed');
     
-    console.log('✅ Todos los caches limpiados completamente');
   } catch (error) {
     console.warn('⚠️ Error limpiando caches:', error);
   }
@@ -277,9 +276,7 @@ export const clearGeelyCacheEntries = (): void => {
       key.toLowerCase().includes('geely') || 
       key.toLowerCase().includes('coolray')
     );
-    
-    console.log(`🧹 Eliminando ${keysToDelete.length} entradas de cache de Geely:`, keysToDelete);
-    
+        
     keysToDelete.forEach(key => {
       delete imageCache[key];
       delete imageRequestFailed[key]; // También limpiar fallos
@@ -288,7 +285,6 @@ export const clearGeelyCacheEntries = (): void => {
     // Actualizar localStorage
     localStorage.setItem('carImageCache', JSON.stringify(imageCache));
     
-    console.log('✅ Cache de Geely limpiado exitosamente');
   } catch (error) {
     console.warn('⚠️ Error limpiando cache de Geely:', error);
   }
@@ -305,9 +301,7 @@ export const clearProblematicCache = (): void => {
              url.includes('logo') ||
              !url.includes('unsplash.com');
     });
-    
-    console.log(`🧹 Eliminando ${keysToDelete.length} entradas problemáticas del cache`);
-    
+        
     keysToDelete.forEach(key => {
       delete imageCache[key];
       delete imageRequestFailed[key];
@@ -316,7 +310,6 @@ export const clearProblematicCache = (): void => {
     // Actualizar localStorage
     localStorage.setItem('carImageCache', JSON.stringify(imageCache));
     
-    console.log('✅ Cache problemático limpiado');
   } catch (error) {
     console.warn('⚠️ Error limpiando cache problemático:', error);
   }
@@ -329,9 +322,7 @@ export const clearUnsplashCache = (): void => {
       const url = imageCache[key];
       return url.includes('unsplash.com') || url.includes('placeholder');
     });
-    
-    console.log(`🧹 Eliminando ${keysToDelete.length} imágenes de Unsplash del cache`);
-    
+        
     keysToDelete.forEach(key => {
       delete imageCache[key];
       delete imageRequestFailed[key];
@@ -341,7 +332,6 @@ export const clearUnsplashCache = (): void => {
     localStorage.setItem('carImageCache', JSON.stringify(imageCache));
     localStorage.setItem('imageRequestFailed', JSON.stringify(imageRequestFailed));
     
-    console.log('✅ Cache de Unsplash limpiado');
   } catch (error) {
     console.warn('⚠️ Error limpiando cache de Unsplash:', error);
   }
@@ -355,9 +345,7 @@ export const clearProblematicBrandsCache = (): void => {
     const keysToDelete = Object.keys(imageCache).filter(key => 
       problematicBrands.some(brand => key.toLowerCase().includes(brand.toLowerCase()))
     );
-    
-    console.log(`🧹 Eliminando ${keysToDelete.length} entradas de cache para marcas problemáticas`);
-    
+        
     keysToDelete.forEach(key => {
       delete imageCache[key];
       delete imageRequestFailed[key];
@@ -366,9 +354,7 @@ export const clearProblematicBrandsCache = (): void => {
     // Actualizar localStorage
     localStorage.setItem('carImageCache', JSON.stringify(imageCache));
     localStorage.setItem('imageRequestFailed', JSON.stringify(imageRequestFailed));
-    
-    console.log('✅ Cache de marcas problemáticas limpiado');
-  } catch (error) {
+    } catch (error) {
     console.warn('⚠️ Error limpiando cache de marcas problemáticas:', error);
   }
 };

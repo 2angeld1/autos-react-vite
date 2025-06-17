@@ -30,7 +30,6 @@ export interface BrandImages {
     'ford': 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80', // Ford
     'honda': 'https://images.unsplash.com/photo-1606220588913-b3aad8d29eb8?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&h=600&q=80' // Honda
   };
-  console.log(`🎯 Using brand-specific image for ${make.toLowerCase()}: ${brandImages[make.toLowerCase()] || DEFAULT_CAR_IMAGE}`);
   return brandImages[make.toLowerCase()] || DEFAULT_CAR_IMAGE;
 };
   

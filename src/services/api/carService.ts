@@ -477,11 +477,8 @@ const API_CONFIG = {
 // ✅ CORREGIDA: Función para probar la API
 const testApiAvailability = async (make: string): Promise<boolean> => {
   try {
-    console.log(`🧪 Testing ${make} availability in API...`);
-    
     const apiKey = import.meta.env.VITE_NINJA_API_KEY;
     if (!apiKey || !CAR_API_URL) {
-      console.log('❌ API not configured for test');
       return false;
     }
     
@@ -492,15 +489,13 @@ const testApiAvailability = async (make: string): Promise<boolean> => {
     });
     
     if (response.data && Array.isArray(response.data) && response.data.length > 0) {
-      console.log(`✅ ${make} found in API: ${response.data.length} vehicles`);
       return true;
     } else {
-      console.log(`⚠️ ${make} not available in API, will use fallback data only`);
       return false;
     }
     
   } catch (error) {
-    console.log(`❌ ${make} API test failed, using fallback data:`, error instanceof Error ? error.message : 'Unknown error');
+    console.error(`❌ Error testing API availability for ${make}:`, error);
     return false;
   }
 };
@@ -515,9 +510,7 @@ const fetchCarsFromApi = async (make: string, limit: number = 10): Promise<ApiCa
       console.warn('⚠️ API keys not configured, using fallback data');
       return getFallbackDataForMake(make, limit);
     }
-    
-    console.log(`🔍 Fetching from API: ${make} (limit: ${limit})`);
-    
+        
     const response = await carApiClient.get(apiUrl, {
       params: { make, limit },
       timeout: 8000,
@@ -525,7 +518,6 @@ const fetchCarsFromApi = async (make: string, limit: number = 10): Promise<ApiCa
     });
     
     if (response.data && Array.isArray(response.data)) {
-      console.log(`✅ API returned ${response.data.length} vehicles for ${make}`);
       return response.data;
     } else {
       console.warn(`⚠️ API returned no data for ${make}, using fallback`);
@@ -545,13 +537,11 @@ const getFallbackDataForMake = (make: string, limit: number): ApiCarData[] => {
     car.make.toLowerCase() === make.toLowerCase()
   );
   
-  console.log(`📦 Using ${makeData.length} fallback vehicles for ${make}`);
   return makeData.slice(0, limit);
 };
 
 // ✅ MODIFICADA: Función principal para asegurar Toyota, Kia, Hyundai en featured
 export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
-  console.log('🚀 Iniciando fetchCars con todas las marcas featured...');
   
   // ✅ LIMPIAR cache de Unsplash para forzar búsquedas reales
   const { clearUnsplashCache } = await import('./cache');
@@ -560,10 +550,8 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
   try {
     // Verificar cache
     if (carCache.length > 0 && carCache.length >= Math.min(limit, 15)) {
-      console.log('💾 Usando datos del cache:', carCache.length, 'autos');
       // ✅ USAR filterModernCars en el cache
       const modernCars = filterModernCars(carCache);
-      console.log(`🔄 Filtrados ${carCache.length - modernCars.length} autos antiguos del cache`);
       return modernCars.slice(0, limit);
     }
 
@@ -573,10 +561,8 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
       if (savedCache) {
         const cachedCars = JSON.parse(savedCache) as Car[];
         if (Array.isArray(cachedCars) && cachedCars.length >= Math.min(limit, 10)) {
-          console.log('💾 Cargando desde localStorage cache:', cachedCars.length, 'autos');
           // ✅ USAR filterModernCars en localStorage
           const modernCachedCars = filterModernCars(cachedCars);
-          console.log(`🔄 Filtrados ${cachedCars.length - modernCachedCars.length} autos antiguos del localStorage`);
           carCache = modernCachedCars;
           setCarsInCache(modernCachedCars);
           return modernCachedCars.slice(0, limit);
@@ -585,16 +571,13 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
     } catch (cacheError) {
       console.warn('⚠️ Error leyendo cache:', cacheError);
     }
-    
-    console.log('🌐 Cargando autos desde API y fallback...');
-    
+        
     const allCars: Car[] = [];
 
     // ✅ 1. FORZAR Toyota, Kia, Hyundai desde API primero
     const primaryMakes = ['toyota', 'kia', 'hyundai'];
     for (const make of primaryMakes) {
       try {
-        console.log(`🔍 Procesando marca de API: ${make}...`);
         const apiCars = await fetchCarsFromApi(make, API_CONFIG.CARS_PER_MAKE);
         
         for (const apiCar of apiCars.slice(0, API_CONFIG.CARS_PER_MAKE)) {
@@ -637,7 +620,6 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
     }
 
     // ✅ 3. Agregar datos de fallback para marcas que faltan
-    console.log('📦 Agregando autos de respaldo para completar...');
     const fallbackData = getFallbackCarData();
     
     // ✅ ASEGURAR que tenemos todas las marcas featured
@@ -657,7 +639,6 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
           const enhancedCar = await enhanceCarWithImage(fallbackCar as Car, allCars.length);
           if (enhancedCar) {
             allCars.push(enhancedCar);
-            console.log(`✅ Fallback: ${enhancedCar.make} ${enhancedCar.model} - Total: ${allCars.length}`);
           }
         }
       }
@@ -665,17 +646,14 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
 
     // ✅ USAR filterModernCars antes de finalizar
     const modernCars = filterModernCars(allCars);
-    console.log(`🔄 Filtrados ${allCars.length - modernCars.length} autos antiguos antes de finalizar`);
     
     const finalCars = modernCars.slice(0, limit);
-    console.log(`🏁 Total final: ${finalCars.length} autos modernos (todas las marcas featured incluidas)`);
     
     // ✅ VERIFICAR que tenemos las marcas principales
     const makesCounts: Record<string, number> = {};
     finalCars.forEach(car => {
       makesCounts[car.make.toLowerCase()] = (makesCounts[car.make.toLowerCase()] || 0) + 1;
     });
-    console.log('📊 Distribución por marca:', makesCounts);
     
     // Guardar en cache
     carCache = finalCars;
@@ -688,7 +666,6 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
     console.error('❌ Error crítico en fetchCars:', error);
     
     // Fallback completo
-    console.log('🆘 Usando solo datos de respaldo...');
     const fallbackData = getFallbackCarData();
     const enhancedFallback = await Promise.all(
       fallbackData.slice(0, limit).map(async (car, index) => {
@@ -700,7 +677,6 @@ export const fetchCars = async (limit: number = 24): Promise<Car[]> => {
     const validFallback = enhancedFallback.filter((car): car is Car => car !== null);
     // ✅ USAR filterModernCars en el fallback también
     const modernFallback = filterModernCars(validFallback);
-    console.log(`🔄 Filtrados ${validFallback.length - modernFallback.length} autos antiguos del fallback`);
     
     carCache = modernFallback;
     localStorage.setItem('carCatalogCache', JSON.stringify(modernFallback));
@@ -743,7 +719,6 @@ export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car 
                          imageUrl.includes('placeholder');
     
     if (needsNewImage) {
-      console.log(`🔍 Buscando imagen específica para: ${car.make} ${car.model} ${car.year}`);
       
       try {
         // ✅ CORREGIDO: Importar correctamente la función
@@ -754,22 +729,18 @@ export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car 
         
         // Si no funciona con año, intentar sin año
         if (!googleImage || googleImage.includes('placeholder') || googleImage === getDefaultCarImage(car.make)) {
-          console.log(`🔄 Intentando búsqueda alternativa sin año para ${car.make} ${car.model}`);
           googleImage = await getCarImageFromGoogle(car.make, car.model);
         }
         
         // Si aún no funciona, intentar solo con la marca
         if (!googleImage || googleImage.includes('placeholder') || googleImage === getDefaultCarImage(car.make)) {
-          console.log(`🔄 Intentando búsqueda con solo marca para ${car.make}`);
           googleImage = await getCarImageFromGoogle(`${car.make} car exterior`);
         }
         
         // Verificar si la imagen de Google es válida
         if (googleImage && isReliableImageUrl(googleImage) && !googleImage.includes('placeholder')) {
-          console.log(`✅ ÉXITO! Usando imagen de Google: ${googleImage}`);
           imageUrl = googleImage;
         } else {
-          console.log(`⚠️ Google no devolvió imagen válida, usando imagen de marca`);
           const { getDefaultCarImage } = await import('./carBrands');
           imageUrl = getDefaultCarImage(car.make);
         }
@@ -778,8 +749,6 @@ export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car 
         const { getDefaultCarImage } = await import('./carBrands');
         imageUrl = getDefaultCarImage(car.make);
       }
-    } else {
-      console.log(`✅ Imagen existente válida: ${imageUrl}`);
     }
 
     const enhancedCar: Car = {
@@ -794,12 +763,9 @@ export const enhanceCarWithImage = async (car: Car, index: number): Promise<Car 
     };
 
     if (enhancedCar.year < 2020) {
-      console.log(`⚠️ Skipping old car: ${enhancedCar.make} ${enhancedCar.model} ${enhancedCar.year}`);
       return null;
     }
 
-    const isUnsplashImage = imageUrl.includes('unsplash.com');
-    console.log(`✅ Enhanced car: ${enhancedCar.make} ${enhancedCar.model} - ${isUnsplashImage ? '⚠️ UNSPLASH FALLBACK' : '✓ GOOGLE IMAGES'}`);
     return enhancedCar;
 
   } catch (error) {
@@ -877,8 +843,6 @@ const simulatePremiumFields = (carData: ApiCarData): { city_mpg: number; highway
     const finalCityMpg = Math.max(15, Math.round(baseCityMpg * brandMultiplier));
     const finalHighwayMpg = Math.max(20, Math.round(baseHighwayMpg * brandMultiplier));
     const combinationMpg = Math.round((finalCityMpg + finalHighwayMpg) / 2);
-
-    console.log(`🔧 Simulated MPG for ${carData.make} ${carData.model}: City ${finalCityMpg}, Highway ${finalHighwayMpg}, Combined ${combinationMpg}`);
 
     return {
       city_mpg: finalCityMpg,
@@ -1054,9 +1018,7 @@ const generateRealisticPrice = (carData: ApiCarData): number => {
     const maxPrice = fuelType === 'electricity' ? 120000 : 80000;
     
     const clampedPrice = Math.max(minPrice, Math.min(maxPrice, finalPrice));
-    
-    console.log(`💰 Generated price for ${make} ${model} ${year}: $${clampedPrice.toLocaleString()}`);
-    
+        
     return clampedPrice;
 
   } catch (error) {
@@ -1084,7 +1046,6 @@ export const searchCars = async (filters: SearchFilters): Promise<Car[]> => {
       
       // ✅ USAR filterModernCars en los resultados de búsqueda
       const modernResults = filterModernCars(filteredResults);
-      console.log(`🔍 Búsqueda: ${filteredResults.length} resultados, ${modernResults.length} modernos`);
       return modernResults.slice(0, 20);
     }
     
@@ -1101,7 +1062,6 @@ export const searchCars = async (filters: SearchFilters): Promise<Car[]> => {
 
     // ✅ USAR filterModernCars en los resultados del cache
     const modernResults = filterModernCars(filteredResults);
-    console.log(`🔍 Búsqueda en cache: ${filteredResults.length} resultados, ${modernResults.length} modernos`);
     return modernResults.slice(0, 20);
 
   } catch (error) {
@@ -1115,13 +1075,11 @@ export const fetchFeaturedCars = async (): Promise<Car[]> => {
   try {
     if (carCache.length >= 12) {
       const modernCars = filterModernCars(carCache);
-      console.log(`🌟 Featured cars: ${carCache.length} en cache, ${modernCars.length} modernos`);
       return modernCars.slice(0, 12);
     }
 
     const cars = await fetchCars(24);
     const modernCars = filterModernCars(cars);
-    console.log(`🌟 Featured cars: ${cars.length} obtenidos, ${modernCars.length} modernos`);
     return modernCars.slice(0, 12);
 
   } catch (error) {
@@ -1135,19 +1093,16 @@ const filterModernCars = (cars: Car[]): Car[] => {
   return cars.filter(car => {
     // Filtrar autos muy antiguos
     if (car.year < 2018) {
-      console.log(`🗑️ Filtering out old car: ${car.make} ${car.model} ${car.year}`);
       return false;
     }
     
     // Filtrar datos incompletos o poco realistas
     if (!car.make || !car.model) {
-      console.log(`🗑️ Filtering out incomplete car data: ${car.make} ${car.model}`);
       return false;
     }
     
     // Filtrar precios poco realistas (muy bajos o muy altos)
     if (car.price && (car.price < 10000 || car.price > 200000)) {
-      console.log(`🗑️ Filtering out unrealistic price: ${car.make} ${car.model} - $${car.price}`);
       return false;
     }
     
@@ -1156,25 +1111,20 @@ const filterModernCars = (cars: Car[]): Car[] => {
 };
 
 export const fetchCarById = async (id: string): Promise<Car> => {
-  try {
-    console.log(`🔍 Buscando auto con ID: ${id}`);
-    
+  try {    
     // Primero buscar en el cache
     const cachedCars = getCarsFromCache();
     const cachedCar = cachedCars.find(car => car.id === id);
     
     if (cachedCar) {
-      console.log(`✅ Auto encontrado en cache: ${cachedCar.make} ${cachedCar.model}`);
       return cachedCar;
     }
 
     // Si no está en cache, intentar recargar todos los autos
-    console.log(`⚠️ Auto no encontrado en cache, recargando datos...`);
     const allCars = await fetchCars(30);
     const foundCar = allCars.find(car => car.id === id);
     
     if (foundCar) {
-      console.log(`✅ Auto encontrado después de recargar: ${foundCar.make} ${foundCar.model}`);
       return foundCar;
     }
 
@@ -1183,7 +1133,6 @@ export const fetchCarById = async (id: string): Promise<Car> => {
     const fallbackCar = fallbackData.find(car => car.id === id);
     
     if (fallbackCar) {
-      console.log(`✅ Auto encontrado en datos de fallback: ${fallbackCar.make} ${fallbackCar.model}`);
       return fallbackCar as Car;
     }
 
