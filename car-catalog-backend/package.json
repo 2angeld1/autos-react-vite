@@ -7,24 +7,19 @@
     "start": "node dist/server.js",
     "dev": "nodemon src/server.ts",
     "build": "tsc",
-    "clean": "rm -rf dist",
-    "seed": "ts-node src/scripts/seedData.ts",
-    "seed:cars": "ts-node src/scripts/seedData.ts seed",
-    "seed:clear": "ts-node src/scripts/seedData.ts clear",
-    "seed:reset": "ts-node src/scripts/seedData.ts reset",
-    "import": "ts-node src/scripts/importCars.ts",
-    "import:csv": "ts-node src/scripts/importCars.ts csv",
-    "import:api": "ts-node src/scripts/importCars.ts api",
-    "import:sample": "ts-node src/scripts/importCars.ts sample",
-    "db:migrate": "ts-node src/scripts/migrate.ts",
-    "db:status": "ts-node src/scripts/dbStatus.ts",
+    "clean": "rm -rf dist",    
+    "db:migrate": "ts-node -r tsconfig-paths/register src/scripts/migrate.ts",
+    "db:status": "ts-node -r tsconfig-paths/register src/scripts/dbStatus.ts",
+    "seed": "ts-node -r tsconfig-paths/register src/scripts/seedData.ts seed",
+    "seed:clear": "ts-node -r tsconfig-paths/register src/scripts/seedData.ts clear",
+    "seed:reset": "ts-node -r tsconfig-paths/register src/scripts/seedData.ts reset",
+    "import": "ts-node -r tsconfig-paths/register src/scripts/importCars.ts",
+    "import:sample": "ts-node -r tsconfig-paths/register src/scripts/importCars.ts sample",
     "lint": "eslint src/**/*.ts",
     "lint:fix": "eslint src/**/*.ts --fix",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage",
-    "docker:build": "docker build -t car-catalog-backend .",
-    "docker:run": "docker run -p 5000:5000 car-catalog-backend"
+    "test:coverage": "jest --coverage"
   },
   "keywords": [
     "car",
@@ -65,6 +60,7 @@
     "nodemailer": "^6.10.1",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   }
 }

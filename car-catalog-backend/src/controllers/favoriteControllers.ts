@@ -9,7 +9,7 @@ export class FavoriteController {
   /**
    * Get user's favorite cars
    */
-  static getFavorites = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static getFavorites = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { page = 1, limit = 20 } = req.query;
 
     const pageNum = Math.max(1, parseInt(page as string));
@@ -50,16 +50,17 @@ export class FavoriteController {
   /**
    * Add car to favorites
    */
-  static addFavorite = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static addFavorite = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { carId } = req.body;
 
     // Check if car exists and is available
     const car = await Car.findById(carId);
     if (!car || !car.isAvailable) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Car not found or not available'
       });
+      return;
     }
 
     // Check if already in favorites
@@ -69,10 +70,11 @@ export class FavoriteController {
     });
 
     if (existingFavorite) {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Car is already in favorites'
       });
+      return;
     }
 
     // Create favorite
@@ -98,7 +100,7 @@ export class FavoriteController {
   /**
    * Remove car from favorites
    */
-  static removeFavorite = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static removeFavorite = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { carId } = req.params;
 
     const favorite = await Favorite.findOneAndDelete({
@@ -107,10 +109,11 @@ export class FavoriteController {
     });
 
     if (!favorite) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Favorite not found'
       });
+      return;
     }
 
     logger.info(`User ${req.user?.email} removed car ${carId} from favorites`);
@@ -124,7 +127,7 @@ export class FavoriteController {
   /**
    * Check if car is in user's favorites
    */
-  static checkFavorite = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static checkFavorite = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { carId } = req.params;
 
     const favorite = await Favorite.findOne({
@@ -143,7 +146,7 @@ export class FavoriteController {
   /**
    * Get favorite statistics for user
    */
-  static getFavoriteStats = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static getFavoriteStats = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const stats = await Favorite.aggregate([
       { $match: { userId: req.user!.id } },
       {
@@ -190,7 +193,7 @@ export class FavoriteController {
   /**
    * Clear all favorites
    */
-  static clearFavorites = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static clearFavorites = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const result = await Favorite.deleteMany({ userId: req.user!.id });
 
     logger.info(`User ${req.user?.email} cleared all favorites (${result.deletedCount} items)`);

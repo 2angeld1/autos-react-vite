@@ -12,11 +12,11 @@ export class EmailService {
   private static transporter: nodemailer.Transporter;
 
   /**
-   * Initialize email service
+   * Initialize email service - CORREGIDO
    */
   static async initialize(): Promise<void> {
     try {
-      this.transporter = nodemailer.createTransporter({
+      this.transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST || 'smtp.gmail.com',
         port: parseInt(process.env.EMAIL_PORT || '587'),
         secure: process.env.EMAIL_PORT === '465',

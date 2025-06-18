@@ -10,7 +10,7 @@ export interface ICar {
   image: string;
   description: string;
   fuel_type: 'gas' | 'diesel' | 'electricity' | 'hybrid';
-  transmission: 'a' | 'm'; // automatic, manual
+  transmission: 'a' | 'm';
   cylinders: number;
   class: string;
   displacement: number;

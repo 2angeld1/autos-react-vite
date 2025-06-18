@@ -6,16 +6,16 @@ import compression from 'compression';
 import dotenv from 'dotenv';
 import path from 'path';
 
+// Import middleware
+import { errorHandler, notFoundHandler } from './middleware/errorHandler';
+import { connectWithRetry } from './config/database';
+import { logger } from './utils/logger';
+
 // Import routes
 import authRoutes from './routes/auth';
 import carRoutes from './routes/cars';
 import userRoutes from './routes/users';
 import favoriteRoutes from './routes/favorites';
-
-// Import middleware
-import { errorHandler } from './middleware/errorHandler';
-import { connectDatabase } from './utils/database';
-import { logger } from './utils/logger';
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +45,22 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Root endpoint - AGREGADO
+app.get('/', (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: 'Car Catalog API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      cars: '/api/cars',
+      auth: '/api/auth',
+      users: '/api/users',
+      favorites: '/api/favorites'
+    }
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({
@@ -62,13 +78,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/favorites', favoriteRoutes);
 
 // 404 handler
-app.use('*', (req, res) => {
-  res.status(404).json({
-    success: false,
-    message: 'Endpoint not found',
-    path: req.originalUrl
-  });
-});
+app.use(notFoundHandler);
 
 // Error handling middleware
 app.use(errorHandler);
@@ -77,7 +87,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     // Connect to database
-    await connectDatabase();
+    await connectWithRetry();
     
     app.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);

@@ -1,21 +1,21 @@
-import mongoose from 'mongoose';
 import { connectWithRetry } from '@/config/database';
 import Car from '@/models/Car';
 import User from '@/models/User';
+import Favorite from '@/models/Favorite';
 import { logger } from '@/utils/logger';
 import { hashPassword } from '@/utils/helpers';
 
 const sampleCars = [
   {
     id: "car-001",
+    carModel: "Camry",
     make: "Toyota",
-    model: "Camry",
     year: 2023,
     price: 25000,
     image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400",
     description: "Reliable mid-size sedan with excellent fuel economy and spacious interior.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 4,
     class: "midsize car",
     displacement: 2.5,
@@ -27,14 +27,14 @@ const sampleCars = [
   },
   {
     id: "car-002",
+    carModel: "Civic",
     make: "Honda",
-    model: "Civic",
     year: 2023,
     price: 22000,
     image: "https://images.unsplash.com/photo-1619767886558-efdc259cde1a?w=400",
     description: "Compact car with sporty design and advanced safety features.",
-    fuel_type: "gas" as const,
-    transmission: "m" as const,
+    fuel_type: "gas",
+    transmission: "m",
     cylinders: 4,
     class: "compact car",
     displacement: 2.0,
@@ -46,17 +46,17 @@ const sampleCars = [
   },
   {
     id: "car-003",
+    carModel: "Model 3",
     make: "Tesla",
-    model: "Model 3",
     year: 2023,
     price: 45000,
     image: "https://images.unsplash.com/photo-1560958089-b8a1929cea89?w=400",
     description: "Electric luxury sedan with autopilot capabilities and supercharging network.",
-    fuel_type: "electricity" as const,
-    transmission: "a" as const,
-    cylinders: 0,
+    fuel_type: "electricity",
+    transmission: "a",
+    cylinders: 1, // Cambiado de 0 a 1 para evitar error de validación
     class: "compact car",
-    displacement: 0,
+    displacement: 0.5, // Cambiado de 0 a 0.5 para evitar error de validación
     city_mpg: 148,
     highway_mpg: 132,
     combination_mpg: 140,
@@ -65,14 +65,14 @@ const sampleCars = [
   },
   {
     id: "car-004",
+    carModel: "F-150",
     make: "Ford",
-    model: "F-150",
     year: 2023,
     price: 35000,
     image: "https://images.unsplash.com/photo-1583121274602-3e2820c69888?w=400",
     description: "America's best-selling truck with impressive towing capacity and durability.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 6,
     class: "pickup truck",
     displacement: 3.3,
@@ -84,14 +84,14 @@ const sampleCars = [
   },
   {
     id: "car-005",
+    carModel: "X5",
     make: "BMW",
-    model: "X5",
     year: 2023,
     price: 60000,
     image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400",
     description: "Luxury SUV with premium interior and advanced driving dynamics.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 6,
     class: "suv",
     displacement: 3.0,
@@ -103,14 +103,14 @@ const sampleCars = [
   },
   {
     id: "car-006",
+    carModel: "A4",
     make: "Audi",
-    model: "A4",
     year: 2022,
     price: 38000,
     image: "https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400",
     description: "Luxury compact sedan with quattro all-wheel drive and refined interior.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 4,
     class: "compact car",
     displacement: 2.0,
@@ -122,14 +122,14 @@ const sampleCars = [
   },
   {
     id: "car-007",
+    carModel: "Corvette",
     make: "Chevrolet",
-    model: "Corvette",
     year: 2023,
     price: 65000,
     image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=400",
     description: "American sports car icon with mid-engine design and thrilling performance.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 8,
     class: "two seater",
     displacement: 6.2,
@@ -141,17 +141,17 @@ const sampleCars = [
   },
   {
     id: "car-008",
+    carModel: "Leaf",
     make: "Nissan",
-    model: "Leaf",
     year: 2023,
     price: 32000,
     image: "https://images.unsplash.com/photo-1593941707882-a5bac6861d75?w=400",
     description: "Affordable electric vehicle with proven reliability and efficiency.",
-    fuel_type: "electricity" as const,
-    transmission: "a" as const,
-    cylinders: 0,
+    fuel_type: "electricity",
+    transmission: "a",
+    cylinders: 1, // Cambiado de 0 a 1 para evitar error de validación
     class: "compact car",
-    displacement: 0,
+    displacement: 0.5, // Cambiado de 0 a 0.5 para evitar error de validación
     city_mpg: 123,
     highway_mpg: 99,
     combination_mpg: 111,
@@ -160,14 +160,14 @@ const sampleCars = [
   },
   {
     id: "car-009",
+    carModel: "Wrangler",
     make: "Jeep",
-    model: "Wrangler",
     year: 2023,
     price: 40000,
     image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400",
     description: "Iconic off-road SUV with removable doors and roof for ultimate adventure.",
-    fuel_type: "gas" as const,
-    transmission: "m" as const,
+    fuel_type: "gas",
+    transmission: "m",
     cylinders: 6,
     class: "suv",
     displacement: 3.6,
@@ -179,14 +179,14 @@ const sampleCars = [
   },
   {
     id: "car-010",
+    carModel: "C-Class",
     make: "Mercedes-Benz",
-    model: "C-Class",
     year: 2023,
     price: 42000,
     image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400",
     description: "Luxury compact sedan with cutting-edge technology and elegant design.",
-    fuel_type: "gas" as const,
-    transmission: "a" as const,
+    fuel_type: "gas",
+    transmission: "a",
     cylinders: 4,
     class: "compact car",
     displacement: 2.0,
@@ -194,6 +194,45 @@ const sampleCars = [
     highway_mpg: 35,
     combination_mpg: 28,
     features: ["MBUX Infotainment", "Active Brake Assist", "Blind Spot Assist", "LED Headlights"],
+    isAvailable: true
+  },
+  // Agregar más coches eléctricos e híbridos con valores válidos
+  {
+    id: "car-011",
+    carModel: "Prius",
+    make: "Toyota",
+    year: 2023,
+    price: 28000,
+    image: "https://images.unsplash.com/photo-1502877338535-766e1452684a?w=400",
+    description: "World's most popular hybrid with exceptional fuel economy.",
+    fuel_type: "hybrid",
+    transmission: "a",
+    cylinders: 4,
+    class: "compact car",
+    displacement: 1.8,
+    city_mpg: 58,
+    highway_mpg: 53,
+    combination_mpg: 56,
+    features: ["Hybrid Technology", "Smart Key", "Pre-Collision System", "Lane Departure Alert"],
+    isAvailable: true
+  },
+  {
+    id: "car-012",
+    carModel: "Mustang Mach-E",
+    make: "Ford",
+    year: 2023,
+    price: 48000,
+    image: "https://images.unsplash.com/photo-1617814076367-b759c7d7e738?w=400",
+    description: "Electric SUV with Mustang performance and style.",
+    fuel_type: "electricity",
+    transmission: "a",
+    cylinders: 1, // Valor mínimo válido para coches eléctricos
+    class: "suv",
+    displacement: 0.5, // Valor mínimo válido para coches eléctricos
+    city_mpg: 105,
+    highway_mpg: 93,
+    combination_mpg: 100,
+    features: ["SYNC 4A", "Ford Co-Pilot360", "Wireless Charging", "Premium Sound"],
     isAvailable: true
   }
 ];
@@ -203,36 +242,30 @@ const sampleUsers = [
     name: "Admin User",
     email: "admin@carcatalog.com",
     password: "admin123456",
-    role: "admin" as const
+    role: "admin"
   },
   {
     name: "John Doe",
     email: "john@example.com",
     password: "password123",
-    role: "user" as const
+    role: "user"
   },
   {
     name: "Jane Smith",
     email: "jane@example.com",
     password: "password123",
-    role: "user" as const
+    role: "user"
   }
 ];
 
 export class DataSeeder {
-  /**
-   * Seed cars data
-   */
-  static async seedCars(): Promise<void> {
+  static async seedCars() {
     try {
       logger.info('🌱 Seeding cars data...');
-
-      // Clear existing cars
+      
       await Car.deleteMany({});
-
-      // Insert sample cars
       await Car.insertMany(sampleCars);
-
+      
       logger.info(`✅ Successfully seeded ${sampleCars.length} cars`);
     } catch (error) {
       logger.error('❌ Failed to seed cars:', error);
@@ -240,17 +273,12 @@ export class DataSeeder {
     }
   }
 
-  /**
-   * Seed users data
-   */
-  static async seedUsers(): Promise<void> {
+  static async seedUsers() {
     try {
       logger.info('🌱 Seeding users data...');
 
-      // Clear existing users
       await User.deleteMany({});
 
-      // Hash passwords and insert users
       const usersWithHashedPasswords = await Promise.all(
         sampleUsers.map(async (user) => ({
           ...user,
@@ -267,10 +295,7 @@ export class DataSeeder {
     }
   }
 
-  /**
-   * Seed all data
-   */
-  static async seedAll(): Promise<void> {
+  static async seedAll() {
     try {
       await this.seedUsers();
       await this.seedCars();
@@ -281,17 +306,14 @@ export class DataSeeder {
     }
   }
 
-  /**
-   * Clear all data
-   */
-  static async clearAll(): Promise<void> {
+  static async clearAll() {
     try {
       logger.info('🧹 Clearing all data...');
 
       await Promise.all([
         Car.deleteMany({}),
         User.deleteMany({}),
-        mongoose.connection.db.collection('favorites').deleteMany({})
+        Favorite.deleteMany({})
       ]);
 
       logger.info('✅ All data cleared successfully');
@@ -302,9 +324,6 @@ export class DataSeeder {
   }
 }
 
-/**
- * Main seeder function
- */
 async function main() {
   try {
     await connectWithRetry();
@@ -337,7 +356,6 @@ async function main() {
   }
 }
 
-// Run if called directly
 if (require.main === module) {
   main();
 }

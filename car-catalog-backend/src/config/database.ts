@@ -32,7 +32,6 @@ export const connectWithRetry = async (maxRetries: number = 5): Promise<void> =>
       await mongoose.connect(config.url, config.options);
       logger.info(`✅ Connected to MongoDB (attempt ${attempt}/${maxRetries})`);
       
-      // Set up connection event listeners
       setupConnectionEvents();
       return;
       
@@ -43,7 +42,6 @@ export const connectWithRetry = async (maxRetries: number = 5): Promise<void> =>
         throw new Error(`Failed to connect to MongoDB after ${maxRetries} attempts`);
       }
       
-      // Wait before retrying (exponential backoff)
       const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
       logger.info(`⏳ Retrying connection in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -71,7 +69,6 @@ const setupConnectionEvents = (): void => {
     logger.info('🔄 Mongoose reconnected to MongoDB');
   });
 
-  // Handle application termination
   process.on('SIGINT', async () => {
     await mongoose.connection.close();
     logger.info('🔌 MongoDB connection closed through app termination');
@@ -90,13 +87,8 @@ export const createIndexes = async (): Promise<void> => {
 
     logger.info('📋 Creating database indexes...');
 
-    // Car indexes
     await Car.createIndexes();
-    
-    // User indexes
     await User.createIndexes();
-    
-    // Favorite indexes
     await Favorite.createIndexes();
 
     logger.info('✅ Database indexes created successfully');
@@ -126,7 +118,8 @@ export const checkDatabaseHealth = async (): Promise<{
       };
     }
 
-    if (!mongoose.connection.db) {
+    const db = mongoose.connection.db;
+    if (!db) {
       return {
         isConnected: false,
         status: 'no database connection',
@@ -134,9 +127,11 @@ export const checkDatabaseHealth = async (): Promise<{
       };
     }
 
-    const admin = mongoose.connection.db.admin();
-    const dbStats = await admin.serverStatus();
-    const collections = await mongoose.connection.db.listCollections().toArray();
+    const admin = db.admin();
+    const [dbStats, collections] = await Promise.all([
+      admin.serverStatus(),
+      db.listCollections().toArray()
+    ]);
 
     return {
       isConnected: true,

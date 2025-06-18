@@ -11,13 +11,12 @@ interface MongoServerError extends Error {
 }
 
 /**
- * Global error handling middleware
+ * Global error handling middleware - CORREGIDO
  */
 export const errorHandler = (
   error: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
 ): void => {
   logger.error(`Error ${error.statusCode || 500}: ${error.message}`, {
     url: req.url,
@@ -72,9 +71,6 @@ export const errorHandler = (
   }
 
   res.status(statusCode).json(errorResponse);
-  
-  // Call next to ensure middleware chain continues properly
-  next();
 };
 
 /**
@@ -91,12 +87,12 @@ export const notFoundHandler = (
 };
 
 /**
- * Async error handler wrapper
+ * Async error handler wrapper - CORREGIDO
  */
 export const asyncHandler = (
-  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<Response | void>
 ) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

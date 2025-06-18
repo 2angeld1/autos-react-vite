@@ -1,6 +1,13 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import { IUser } from '@/types/user';
+import { Types } from 'mongoose';
+
+// Interfaz para el payload del JWT
+interface JWTPayload {
+  id: Types.ObjectId | string;
+  email: string;
+  role: string;
+}
 
 /**
  * Hash password using bcrypt
@@ -18,20 +25,35 @@ export const comparePassword = async (password: string, hash: string): Promise<b
 };
 
 /**
- * Generate JWT token
+ * Generate JWT token - SIMPLIFICADO
  */
-export const generateToken = (payload: Record<string, unknown>): string => {
-  const secret = process.env.JWT_SECRET!;
-  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
+export const generateToken = (payload: JWTPayload): string => {
+  const secret = process.env.JWT_SECRET;
   
-  return jwt.sign(payload, secret, { expiresIn });
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  
+  const tokenPayload = {
+    id: payload.id.toString(),
+    email: payload.email,
+    role: payload.role
+  };
+  
+  // Usar directamente sin tipos complejos
+  return jwt.sign(tokenPayload, secret, { expiresIn: '7d' });
 };
 
 /**
  * Verify JWT token
  */
 export const verifyToken = (token: string): Record<string, unknown> => {
-  const secret = process.env.JWT_SECRET!;
+  const secret = process.env.JWT_SECRET;
+  
+  if (!secret) {
+    throw new Error('JWT_SECRET is not defined in environment variables');
+  }
+  
   return jwt.verify(token, secret) as Record<string, unknown>;
 };
 
@@ -45,9 +67,9 @@ export const generateUniqueId = (prefix: string = ''): string => {
 };
 
 /**
- * Sanitize user data (remove password)
+ * Sanitize user data (remove password) - SIMPLIFICADO
  */
-export const sanitizeUser = (user: IUser): Omit<IUser, 'password'> => {
+export const sanitizeUser = (user: Record<string, unknown>): Record<string, unknown> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { password, ...sanitizedUser } = user;
   return sanitizedUser;

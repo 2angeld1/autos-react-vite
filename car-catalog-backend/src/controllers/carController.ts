@@ -8,7 +8,7 @@ export class CarController {
   /**
    * Get all cars with filtering and pagination
    */
-  static getAllCars = asyncHandler(async (req: Request, res: Response) => {
+  static getAllCars = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const {
       page = 1,
       limit = 12,
@@ -28,7 +28,7 @@ export class CarController {
     const filters: Record<string, unknown> = { isAvailable: true };
 
     if (make) filters.make = new RegExp(make as string, 'i');
-    if (model) filters.model = new RegExp(model as string, 'i');
+    if (model) filters.carModel = new RegExp(model as string, 'i'); // Cambiado a carModel
     if (year) filters.year = parseInt(year as string);
     if (fuel_type) filters.fuel_type = fuel_type;
     if (transmission) filters.transmission = transmission;
@@ -79,7 +79,7 @@ export class CarController {
   /**
    * Get car by ID
    */
-  static getCarById = asyncHandler(async (req: Request, res: Response) => {
+  static getCarById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 
     const car = await Car.findOne({ 
@@ -88,10 +88,11 @@ export class CarController {
     }).lean();
 
     if (!car) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Car not found'
       });
+      return;
     }
 
     res.status(200).json({
@@ -103,7 +104,7 @@ export class CarController {
   /**
    * Get featured cars
    */
-  static getFeaturedCars = asyncHandler(async (req: Request, res: Response) => {
+  static getFeaturedCars = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { limit = 8 } = req.query;
 
     const featuredCars = await Car.find({ isAvailable: true })
@@ -120,7 +121,7 @@ export class CarController {
   /**
    * Get similar cars
    */
-  static getSimilarCars = asyncHandler(async (req: Request, res: Response) => {
+  static getSimilarCars = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
     const { limit = 4 } = req.query;
 
@@ -129,10 +130,11 @@ export class CarController {
     }).lean();
 
     if (!currentCar) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Car not found'
       });
+      return;
     }
 
     const similarCars = await Car.find({
@@ -165,12 +167,18 @@ export class CarController {
   /**
    * Create new car (Admin only)
    */
-  static createCar = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static createCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const carData = req.body;
     
     // Generate unique ID if not provided
     if (!carData.id) {
       carData.id = `car-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    }
+
+    // Cambiar model a carModel antes de crear
+    if (carData.model) {
+      carData.carModel = carData.model;
+      delete carData.model;
     }
 
     const car = new Car(carData);
@@ -188,9 +196,15 @@ export class CarController {
   /**
    * Update car (Admin only)
    */
-  static updateCar = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static updateCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
     const updateData = req.body;
+
+    // Cambiar model a carModel antes de actualizar
+    if (updateData.model) {
+      updateData.carModel = updateData.model;
+      delete updateData.model;
+    }
 
     const car = await Car.findOneAndUpdate(
       { $or: [{ _id: id }, { id: id }] },
@@ -199,10 +213,11 @@ export class CarController {
     );
 
     if (!car) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Car not found'
       });
+      return;
     }
 
     logger.info(`Car updated by admin ${req.user?.email}:`, car.id);
@@ -217,7 +232,7 @@ export class CarController {
   /**
    * Delete car (Admin only)
    */
-  static deleteCar = asyncHandler(async (req: AuthRequest, res: Response) => {
+  static deleteCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
     const car = await Car.findOneAndUpdate(
@@ -227,10 +242,11 @@ export class CarController {
     );
 
     if (!car) {
-      return res.status(404).json({
+      res.status(404).json({
         success: false,
         message: 'Car not found'
       });
+      return;
     }
 
     logger.info(`Car deleted by admin ${req.user?.email}:`, car.id);
@@ -244,7 +260,7 @@ export class CarController {
   /**
    * Get car statistics
    */
-  static getCarStats = asyncHandler(async (req: Request, res: Response) => {
+  static getCarStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const stats = await Car.aggregate([
       { $match: { isAvailable: true } },
       {
@@ -304,7 +320,7 @@ export class CarController {
   /**
    * Get unique makes
    */
-  static getMakes = asyncHandler(async (req: Request, res: Response) => {
+  static getMakes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const makes = await Car.distinct('make', { isAvailable: true });
     
     res.status(200).json({
@@ -316,10 +332,10 @@ export class CarController {
   /**
    * Get models by make
    */
-  static getModelsByMake = asyncHandler(async (req: Request, res: Response) => {
+  static getModelsByMake = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { make } = req.params;
     
-    const models = await Car.distinct('model', { 
+    const models = await Car.distinct('carModel', { // Cambiado a carModel
       make: new RegExp(make, 'i'),
       isAvailable: true 
     });
@@ -333,14 +349,15 @@ export class CarController {
   /**
    * Search cars
    */
-  static searchCars = asyncHandler(async (req: Request, res: Response) => {
+  static searchCars = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { q, limit = 10 } = req.query;
 
     if (!q || typeof q !== 'string') {
-      return res.status(400).json({
+      res.status(400).json({
         success: false,
         message: 'Search query is required'
       });
+      return;
     }
 
     const cars = await Car.find({
@@ -349,7 +366,7 @@ export class CarController {
         {
           $or: [
             { make: { $regex: q, $options: 'i' } },
-            { model: { $regex: q, $options: 'i' } },
+            { carModel: { $regex: q, $options: 'i' } }, // Cambiado a carModel
             { class: { $regex: q, $options: 'i' } },
             { description: { $regex: q, $options: 'i' } }
           ]
@@ -357,7 +374,7 @@ export class CarController {
       ]
     })
     .limit(parseInt(limit as string))
-    .select('id make model year price image')
+    .select('id make carModel year price image') // Incluir carModel
     .lean();
 
     res.status(200).json({

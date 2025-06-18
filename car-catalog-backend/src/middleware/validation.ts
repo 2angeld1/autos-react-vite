@@ -65,7 +65,7 @@ export const validateObjectId = (paramName: string = 'id') => {
 };
 
 /**
- * Middleware to sanitize input data
+ * Middleware to sanitize input data - CORREGIDO
  */
 export const sanitizeInput = (
   req: Request,
@@ -99,8 +99,28 @@ export const sanitizeInput = (
     req.body = sanitizeObject(req.body);
   }
 
-  if (req.query) {
-    req.query = sanitizeObject(req.query) as Record<string, string | string[]>;
+  // Para query params, crear una nueva estructura sin modificar req.query directamente
+  if (req.query && Object.keys(req.query).length > 0) {
+    const sanitizedQuery: Record<string, unknown> = {};
+    for (const key in req.query) {
+      if (Object.prototype.hasOwnProperty.call(req.query, key)) {
+        const value = req.query[key];
+        if (typeof value === 'string') {
+          sanitizedQuery[key] = value.trim();
+        } else if (Array.isArray(value)) {
+          sanitizedQuery[key] = value.map(v => typeof v === 'string' ? v.trim() : v);
+        } else {
+          sanitizedQuery[key] = value;
+        }
+      }
+    }
+    // Reemplazar req.query con el objeto sanitizado
+    Object.defineProperty(req, 'query', {
+      value: sanitizedQuery,
+      writable: true,
+      enumerable: true,
+      configurable: true
+    });
   }
 
   next();
@@ -156,7 +176,6 @@ export const validatePagination = (
       });
       return;
     }
-    req.query.page = pageNum.toString();
   }
 
   if (limit) {
@@ -168,7 +187,6 @@ export const validatePagination = (
       });
       return;
     }
-    req.query.limit = limitNum.toString();
   }
 
   next();

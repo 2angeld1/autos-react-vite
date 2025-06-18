@@ -51,9 +51,9 @@ export const authenticateToken = async (
       return;
     }
 
-    // Add user info to request
+    // Add user info to request - CORREGIDO
     req.user = {
-      id: user._id.toString(),
+      id: (user._id as string).toString(), // Cast explícito
       email: user.email,
       role: user.role,
       name: user.name
@@ -136,7 +136,7 @@ export const optionalAuth = async (
     const user = await User.findById(decoded.id).select('-password');
     if (user && user.isActive) {
       req.user = {
-        id: user._id.toString(),
+        id: (user._id as string).toString(), // Cast explícito
         email: user.email,
         role: user.role,
         name: user.name

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { FavoriteController } from '@/controllers/favoriteController';
+import { FavoriteController } from '@/controllers/favoriteControllers'; // Agregado "s" al final
 import { handleValidationErrors, sanitizeInput, validatePagination, validateObjectId } from '@/middleware/validation';
 import { authenticateToken } from '@/middleware/auth';
 import { body } from 'express-validator';
