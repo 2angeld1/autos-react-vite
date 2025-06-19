@@ -83,40 +83,50 @@ export class UserController {
   });
 
   /**
+   * Create new user (Admin only)
+   */
+  static createUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
+    const { name, email, password, role = 'user', isActive = true } = req.body;
+
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    if (existingUser) {
+      res.status(400).json({
+        success: false,
+        message: 'User already exists with this email'
+      });
+      return;
+    }
+
+    // Create new user
+    const user = new User({
+      name,
+      email: email.toLowerCase(),
+      password,
+      role,
+      isActive
+    });
+
+    await user.save();
+
+    logger.info(`User created by admin ${req.user?.email}:`, user.email);
+
+    res.status(201).json({
+      success: true,
+      data: user,
+      message: 'User created successfully'
+    });
+  });
+
+  /**
    * Update user (Admin only)
    */
   static updateUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
-    const { name, email, role, isActive } = req.body;
+    const updateData = req.body;
 
-    const updateData: Record<string, unknown> = {};
-    if (name) updateData.name = name;
-    if (email) updateData.email = email.toLowerCase();
-    if (role) updateData.role = role;
-    if (isActive !== undefined) updateData.isActive = isActive;
-
-    // Check if email is already taken
-    if (email) {
-      const existingUser = await User.findOne({ 
-        email: email.toLowerCase(),
-        _id: { $ne: id }
-      });
-      
-      if (existingUser) {
-        res.status(400).json({
-          success: false,
-          message: 'Email is already taken'
-        });
-        return;
-      }
-    }
-
-    const user = await User.findByIdAndUpdate(
-      id,
-      updateData,
-      { new: true, runValidators: true }
-    ).select('-password');
-
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
+    
     if (!user) {
       res.status(404).json({
         success: false,
@@ -140,21 +150,8 @@ export class UserController {
   static deleteUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    // Prevent admin from deleting themselves
-    if (id === req.user!.id) {
-      res.status(400).json({
-        success: false,
-        message: 'Cannot delete your own account'
-      });
-      return;
-    }
-
-    const user = await User.findByIdAndUpdate(
-      id,
-      { isActive: false },
-      { new: true }
-    ).select('-password');
-
+    const user = await User.findByIdAndDelete(id);
+    
     if (!user) {
       res.status(404).json({
         success: false,
@@ -163,11 +160,11 @@ export class UserController {
       return;
     }
 
-    logger.info(`User deactivated by admin ${req.user?.email}:`, user.email);
+    logger.info(`User deleted by admin ${req.user?.email}:`, user.email);
 
     res.status(200).json({
       success: true,
-      message: 'User deactivated successfully'
+      message: 'User deleted successfully'
     });
   });
 

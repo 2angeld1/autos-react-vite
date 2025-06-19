@@ -13,6 +13,23 @@ export interface IUser {
   updatedAt?: Date;
 }
 
+export interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  avatar?: string;
+  isActive: boolean;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 export interface IUserAuth {
   email: string;
   password: string;

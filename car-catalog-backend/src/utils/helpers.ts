@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Types } from 'mongoose';
+import { logger } from '@/utils/logger';
 
 // Interfaz para el payload del JWT
 interface JWTPayload {
@@ -31,7 +32,7 @@ export const generateToken = (payload: JWTPayload): string => {
   const secret = process.env.JWT_SECRET;
   
   if (!secret) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
+    throw new Error('JWT_SECRET is not configured');
   }
   
   const tokenPayload = {
@@ -51,7 +52,7 @@ export const verifyToken = (token: string): Record<string, unknown> => {
   const secret = process.env.JWT_SECRET;
   
   if (!secret) {
-    throw new Error('JWT_SECRET is not defined in environment variables');
+    throw new Error('JWT_SECRET is not configured');
   }
   
   return jwt.verify(token, secret) as Record<string, unknown>;
@@ -139,7 +140,7 @@ export const cleanObject = (obj: Record<string, unknown>): Record<string, unknow
   const cleaned: Record<string, unknown> = {};
   
   Object.keys(obj).forEach(key => {
-    if (obj[key] !== undefined && obj[key] !== null) {
+    if (obj[key] !== null && obj[key] !== undefined) {
       cleaned[key] = obj[key];
     }
   });
@@ -151,12 +152,7 @@ export const cleanObject = (obj: Record<string, unknown>): Record<string, unknow
  * Generate car slug for SEO
  */
 export const generateCarSlug = (make: string, model: string, year: number): string => {
-  const slug = `${make}-${model}-${year}`
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-  
-  return slug;
+  return `${make}-${model}-${year}`.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
 };
 
 /**

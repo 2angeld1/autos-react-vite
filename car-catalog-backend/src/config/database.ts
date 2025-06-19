@@ -2,49 +2,37 @@ import mongoose from 'mongoose';
 import { logger } from '@/utils/logger';
 
 export interface DatabaseConfig {
-  url: string;
+  uri: string;
   options: mongoose.ConnectOptions;
 }
 
 export const getDatabaseConfig = (): DatabaseConfig => {
-  return {
-    url: process.env.MONGODB_URI || 'mongodb://localhost:27017/car-catalog',
-    options: {
-      maxPoolSize: parseInt(process.env.DB_MAX_POOL_SIZE || '10'),
-      serverSelectionTimeoutMS: parseInt(process.env.DB_SERVER_SELECTION_TIMEOUT || '5000'),
-      socketTimeoutMS: parseInt(process.env.DB_SOCKET_TIMEOUT || '45000'),
-      retryWrites: true,
-      writeConcern: {
-        w: 'majority'
-      }
-    }
+  const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/car-catalog';
+  
+  const options: mongoose.ConnectOptions = {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
   };
+
+  return { uri, options };
 };
 
 /**
  * Connect to MongoDB with retry logic
  */
-export const connectWithRetry = async (maxRetries: number = 5): Promise<void> => {
-  const config = getDatabaseConfig();
+export const connectWithRetry = async (retries = 5): Promise<void> => {
+  const { uri, options } = getDatabaseConfig();
   
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  for (let i = 0; i < retries; i++) {
     try {
-      await mongoose.connect(config.url, config.options);
-      logger.info(`✅ Connected to MongoDB (attempt ${attempt}/${maxRetries})`);
-      
-      setupConnectionEvents();
+      await mongoose.connect(uri, options);
+      logger.info('✅ Connected to MongoDB');
       return;
-      
     } catch (error) {
-      logger.error(`❌ MongoDB connection attempt ${attempt}/${maxRetries} failed:`, error);
-      
-      if (attempt === maxRetries) {
-        throw new Error(`Failed to connect to MongoDB after ${maxRetries} attempts`);
-      }
-      
-      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 10000);
-      logger.info(`⏳ Retrying connection in ${delay}ms...`);
-      await new Promise(resolve => setTimeout(resolve, delay));
+      logger.error(`❌ MongoDB connection attempt ${i + 1} failed:`, error);
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 5000));
     }
   }
 };

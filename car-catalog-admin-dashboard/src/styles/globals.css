@@ -1,0 +1,140 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global styles */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Scrollbar styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
+}
+
+/* Focus styles */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Animation for loading states */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
+
+@layer base {
+   html {
+      font-family: 'Inter', system-ui, sans-serif;
+   }
+
+   body {
+      @apply bg-gray-50 text-gray-900;
+   }
+}
+
+@layer components {
+
+   /* Custom scrollbar */
+   .scrollbar-thin {
+      scrollbar-width: thin;
+      scrollbar-color: rgb(156 163 175) rgb(243 244 246);
+   }
+
+   .scrollbar-thin::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+   }
+
+   .scrollbar-thin::-webkit-scrollbar-track {
+      @apply bg-gray-100;
+   }
+
+   .scrollbar-thin::-webkit-scrollbar-thumb {
+      @apply bg-gray-400 rounded-full;
+   }
+
+   .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+      @apply bg-gray-500;
+   }
+
+   /* Loading animation */
+   .animate-fade-in {
+      animation: fadeIn 0.3s ease-in-out;
+   }
+
+   @keyframes fadeIn {
+      from {
+         opacity: 0;
+         transform: translateY(10px);
+      }
+
+      to {
+         opacity: 1;
+         transform: translateY(0);
+      }
+   }
+
+   /* Focus styles */
+   .focus-visible\:ring-2:focus-visible {
+      outline: 2px solid transparent;
+      outline-offset: 2px;
+      box-shadow: 0 0 0 2px var(--tw-ring-color);
+   }
+}
+
+@layer utilities {
+   .text-balance {
+      text-wrap: balance;
+   }
+}
