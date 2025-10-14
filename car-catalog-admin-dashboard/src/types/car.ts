@@ -1,9 +1,11 @@
 export interface Car {
   id: string;
+  _id: string;
   make: string;
   model: string;
   year: number;
   price: number;
+  image: string;
   description: string;
   fuel_type: 'gas' | 'diesel' | 'electricity' | 'hybrid';
   transmission: 'a' | 'm';
@@ -14,7 +16,6 @@ export interface Car {
   highway_mpg: number;
   combination_mpg: number;
   features?: string[];
-  image?: string;
   isAvailable: boolean;
   createdAt: string;
   updatedAt: string;

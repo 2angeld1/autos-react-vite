@@ -4,8 +4,10 @@ import { carValidationRules } from '@/utils/validators';
 import { handleValidationErrors, sanitizeInput, validatePagination } from '@/middleware/validation';
 import { authenticateToken, requireAdmin } from '@/middleware/auth';
 import { param } from 'express-validator';
+import multer from 'multer';
 
 const router = Router();
+const upload = multer({ dest: 'uploads/cars/' });
 
 /**
  * @route   GET /api/cars
@@ -84,27 +86,37 @@ router.get('/:id/similar', [
  * @desc    Create new car
  * @access  Private (Admin only)
  */
-router.post('/', [
-  authenticateToken,
-  requireAdmin,
-  sanitizeInput,
-  ...carValidationRules.create,
-  handleValidationErrors
-], CarController.createCar);
+router.post(
+  '/',
+  [
+    authenticateToken,
+    requireAdmin,
+    upload.single('image'),
+    sanitizeInput,
+    ...carValidationRules.create,
+    handleValidationErrors
+  ],
+  CarController.createCar
+);
 
 /**
  * @route   PUT /api/cars/:id
  * @desc    Update car
  * @access  Private (Admin only)
  */
-router.put('/:id', [
-  authenticateToken,
-  requireAdmin,
-  param('id').notEmpty().withMessage('ID is required'),
-  sanitizeInput,
-  ...carValidationRules.update,
-  handleValidationErrors
-], CarController.updateCar);
+router.put(
+  '/:id',
+  [
+    authenticateToken,
+    requireAdmin,
+    upload.single('image'),
+    param('id').notEmpty().withMessage('ID is required'),
+    sanitizeInput,
+    ...carValidationRules.update,
+    handleValidationErrors
+  ],
+  CarController.updateCar
+);
 
 /**
  * @route   DELETE /api/cars/:id

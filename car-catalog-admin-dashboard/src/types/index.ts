@@ -1,5 +1,4 @@
 export * from './car';
-export * from './user';
 export * from './auth';
 
 // Common API types
@@ -53,4 +52,7 @@ export interface TableProps<T = any> {
 
 // Import necessary React types
 import React from 'react';
-import { Car, User } from './car';
+import { Car } from './car';
+import { User } from './user';
+
+export type { User, AuthUser, LoginCredentials } from './user';

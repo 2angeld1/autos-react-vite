@@ -7,7 +7,10 @@ import Layout from '@/components/layout/Layout';
 
 // Lazy load pages for better performance
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'));
-const Cars = React.lazy(() => import('@/pages/Cars'));
+const Cars = React.lazy(() => import('@/pages/Cars/Cars'));
+const AddCar = React.lazy(() => import('@/pages/Cars/AddCar'));
+const EditCar = React.lazy(() => import('@/pages/Cars/EditCar'));
+const ViewCar = React.lazy(() => import('@/pages/Cars/ViewCar'));
 const Users = React.lazy(() => import('@/pages/Users'));
 const Login = React.lazy(() => import('@/pages/Login'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
@@ -20,7 +23,7 @@ const PageLoader = () => (
 );
 
 const AppRoutes: React.FC = () => {
-  const { isAuthenticated, loading, initializeAuth } = useAuthStore();
+  const { loading, initializeAuth } = useAuthStore();
 
   // Initialize auth on app start
   React.useEffect(() => {
@@ -37,7 +40,7 @@ const AppRoutes: React.FC = () => {
       <Routes>
         {/* Public Routes */}
         <Route path="/login" element={<Login />} />
-        
+
         {/* Protected Routes */}
         <Route
           path="/"
@@ -50,40 +53,43 @@ const AppRoutes: React.FC = () => {
           {/* Dashboard Routes */}
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
-          
+
           {/* Cars Routes */}
           <Route path="cars" element={<Cars />} />
-          
+          <Route path="cars/add" element={<AddCar />} />
+          <Route path="cars/:id/edit" element={<EditCar />} /> {/* Nueva ruta */}
+          <Route path="cars/:id" element={<ViewCar />} /> {/* Nueva ruta */}
+
           {/* Users Routes - Admin only */}
-          <Route 
-            path="users" 
+          <Route
+            path="users"
             element={
               <ProtectedRoute requiredRole="admin">
                 <Users />
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Settings Routes - Admin only */}
-          <Route 
-            path="settings/*" 
+          <Route
+            path="settings/*"
             element={
               <ProtectedRoute requiredRole="admin">
                 <div>Settings Page (Coming Soon)</div>
               </ProtectedRoute>
-            } 
+            }
           />
-          
+
           {/* Analytics Routes */}
-          <Route 
-            path="analytics" 
-            element={<div>Analytics Page (Coming Soon)</div>} 
+          <Route
+            path="analytics"
+            element={<div>Analytics Page (Coming Soon)</div>}
           />
-          
+
           {/* Images Routes */}
-          <Route 
-            path="images" 
-            element={<div>Images Page (Coming Soon)</div>} 
+          <Route
+            path="images"
+            element={<div>Images Page (Coming Soon)</div>}
           />
         </Route>
 

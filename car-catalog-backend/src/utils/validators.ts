@@ -7,7 +7,7 @@ export const carValidationRules = {
     body('model').trim().notEmpty().withMessage('Model is required').isLength({ max: 50 }),
     body('year').isInt({ min: 1900, max: new Date().getFullYear() + 2 }).withMessage('Valid year is required'),
     body('price').isFloat({ min: 0 }).withMessage('Price must be a positive number'),
-    body('image').trim().notEmpty().withMessage('Image URL is required'),
+    // body('image').trim().notEmpty().withMessage('Image URL is required'),
     body('description').trim().notEmpty().withMessage('Description is required').isLength({ max: 1000 }),
     body('fuel_type').isIn(['gas', 'diesel', 'electricity', 'hybrid']).withMessage('Invalid fuel type'),
     body('transmission').isIn(['a', 'm']).withMessage('Invalid transmission type'),
@@ -17,9 +17,26 @@ export const carValidationRules = {
     body('city_mpg').isInt({ min: 1, max: 200 }).withMessage('City MPG must be between 1 and 200'),
     body('highway_mpg').isInt({ min: 1, max: 200 }).withMessage('Highway MPG must be between 1 and 200'),
     body('combination_mpg').isInt({ min: 1, max: 200 }).withMessage('Combination MPG must be between 1 and 200'),
-    body('features').optional().isArray().withMessage('Features must be an array')
+    body('features').optional().custom((value) => {
+      if (value === undefined || value === null) return true;
+
+      if (typeof value === 'string') {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          throw new Error('Features must be a valid JSON string or array');
+        }
+      }
+
+      if (Array.isArray(value)) {
+        return true;
+      }
+
+      throw new Error('Features must be an array or JSON string');
+    })
   ],
-  
+
   update: [
     body('make').optional().trim().isLength({ max: 50 }),
     body('model').optional().trim().isLength({ max: 50 }),
@@ -35,7 +52,24 @@ export const carValidationRules = {
     body('city_mpg').optional().isInt({ min: 1, max: 200 }),
     body('highway_mpg').optional().isInt({ min: 1, max: 200 }),
     body('combination_mpg').optional().isInt({ min: 1, max: 200 }),
-    body('features').optional().isArray()
+    body('features').optional().custom((value) => {
+      if (value === undefined || value === null) return true;
+
+      if (typeof value === 'string') {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          throw new Error('Features must be a valid JSON string or array');
+        }
+      }
+
+      if (Array.isArray(value)) {
+        return true;
+      }
+
+      throw new Error('Features must be an array or JSON string');
+    })
   ]
 };
 
@@ -52,12 +86,12 @@ export const userValidationRules = {
       return true;
     })
   ],
-  
+
   login: [
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
     body('password').notEmpty().withMessage('Password is required')
   ],
-  
+
   updateProfile: [
     body('name').optional().trim().isLength({ min: 2, max: 50 }),
     body('email').optional().isEmail().normalizeEmail()
@@ -68,9 +102,9 @@ export const userValidationRules = {
 export const queryValidationRules = {
   pagination: [
     query('page').optional().isInt({ min: 1 }).withMessage('Page must be a positive integer'),
-    query('limit').optional().isInt({ min: 1, max: 50 }).withMessage('Limit must be between 1 and 50')
+    query('limit').optional().isInt({ min: 1, max: 9999 }).withMessage('Limit must be between 1 and 9999')
   ],
-  
+
   carFilters: [
     query('make').optional().trim().isLength({ max: 50 }),
     query('model').optional().trim().isLength({ max: 50 }),

@@ -48,20 +48,19 @@ export class CarController {
 
     // Calculate pagination
     const pageNum = Math.max(1, parseInt(page as string));
-    const limitNum = Math.max(1, Math.min(50, parseInt(limit as string)));
-    const skip = (pageNum - 1) * limitNum;
+    const limitNum = limit ? Math.max(1, Math.min(9999, parseInt(limit as string))) : undefined;
+    const skip = limitNum ? (pageNum - 1) * limitNum : 0;
 
     // Execute query
     const [cars, total] = await Promise.all([
       Car.find(filters)
         .sort(sort as string)
         .skip(skip)
-        .limit(limitNum)
-        .lean(),
+        .limit(limitNum || 0), // 0 means no limit
       Car.countDocuments(filters)
     ]);
 
-    const totalPages = Math.ceil(total / limitNum);
+    const totalPages = limitNum ? Math.ceil(total / limitNum) : 1;
 
     res.status(200).json({
       success: true,
@@ -81,11 +80,12 @@ export class CarController {
    */
   static getCarById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
+    const trimmedId = id.trim();
 
-    const car = await Car.findOne({ 
-      $or: [{ _id: id }, { id: id }],
-      isAvailable: true 
-    }).lean();
+    logger.info(`Getting car by id: ${trimmedId}`);
+
+    // Obtener auto por ID
+    const car = await Car.findOne({ id: trimmedId }).lean({ virtuals: true });
 
     if (!car) {
       res.status(404).json({
@@ -123,11 +123,13 @@ export class CarController {
    */
   static getSimilarCars = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
+    const trimmedId = id.trim();
     const { limit = 4 } = req.query;
 
-    const currentCar = await Car.findOne({ 
-      $or: [{ _id: id }, { id: id }] 
-    }).lean();
+    logger.info(`Getting similar cars for id: ${trimmedId}`);
+
+    // Obtener auto similar
+    const currentCar = await Car.findOne({ id: trimmedId }).lean();
 
     if (!currentCar) {
       res.status(404).json({
@@ -145,7 +147,7 @@ export class CarController {
           $or: [
             { make: currentCar.make },
             { class: currentCar.class },
-            { 
+            {
               price: {
                 $gte: currentCar.price * 0.8,
                 $lte: currentCar.price * 1.2
@@ -155,8 +157,8 @@ export class CarController {
         }
       ]
     })
-    .limit(parseInt(limit as string))
-    .lean();
+      .limit(parseInt(limit as string))
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -169,7 +171,31 @@ export class CarController {
    */
   static createCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const carData = req.body;
-    
+
+    logger.info(`req.file: ${req.file ? req.file.filename : 'no file'}`);
+    logger.info(`carData.image before processing:`, carData.image);
+
+    // Procesar imagen subida
+    if (req.file) {
+      carData.image = `/uploads/cars/${req.file.filename}`;
+      logger.info(`Image processed from file: ${carData.image}`);
+    } else if (typeof carData.image === 'object' || !carData.image) {
+      // Si image es un objeto vacío o no existe, elimínalo
+      delete carData.image;
+      logger.info('Image field deleted because no file uploaded');
+    }
+
+    logger.info(`carData.image after processing:`, carData.image);
+
+    // Parse features if it's a string (from form data)
+    if (carData.features && typeof carData.features === 'string') {
+      try {
+        carData.features = JSON.parse(carData.features);
+      } catch (error) {
+        carData.features = [];
+      }
+    }
+
     // Generate unique ID if not provided
     if (!carData.id) {
       carData.id = `car-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -180,6 +206,8 @@ export class CarController {
       carData.carModel = carData.model;
       delete carData.model;
     }
+
+    logger.info(`Final carData before save:`, carData);
 
     const car = new Car(carData);
     await car.save();
@@ -198,7 +226,25 @@ export class CarController {
    */
   static updateCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
+    const trimmedId = id.trim();
     const updateData = req.body;
+
+    // Procesar imagen subida
+    if (req.file) {
+      updateData.image = `/uploads/cars/${req.file.filename}`;
+    } else if (typeof updateData.image === 'object' || !updateData.image) {
+      // Si image es un objeto vacío o no existe, elimínalo para no actualizar
+      delete updateData.image;
+    }
+
+    // Parse features if it's a string (from form data)
+    if (updateData.features && typeof updateData.features === 'string') {
+      try {
+        updateData.features = JSON.parse(updateData.features);
+      } catch (error) {
+        updateData.features = [];
+      }
+    }
 
     // Cambiar model a carModel antes de actualizar
     if (updateData.model) {
@@ -206,8 +252,9 @@ export class CarController {
       delete updateData.model;
     }
 
+    // Actualizar auto
     const car = await Car.findOneAndUpdate(
-      { $or: [{ _id: id }, { id: id }] },
+      { id: trimmedId },
       updateData,
       { new: true, runValidators: true }
     );
@@ -234,14 +281,19 @@ export class CarController {
    */
   static deleteCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
+    const trimmedId = id.trim();
 
+    logger.info(`Deleting car with id: ${trimmedId}`);
+
+    // Eliminar auto
     const car = await Car.findOneAndUpdate(
-      { $or: [{ _id: id }, { id: id }] },
+      { id: trimmedId },
       { isAvailable: false },
       { new: true }
     );
 
     if (!car) {
+      logger.info(`Car not found for deletion: ${trimmedId}`);
       res.status(404).json({
         success: false,
         message: 'Car not found'
@@ -249,7 +301,7 @@ export class CarController {
       return;
     }
 
-    logger.info(`Car deleted by admin ${req.user?.email}:`, car.id);
+    logger.info(`Car deleted successfully: ${car.id}`);
 
     res.status(200).json({
       success: true,
@@ -322,7 +374,7 @@ export class CarController {
    */
   static getMakes = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const makes = await Car.distinct('make', { isAvailable: true });
-    
+
     res.status(200).json({
       success: true,
       data: makes.sort()
@@ -334,12 +386,13 @@ export class CarController {
    */
   static getModelsByMake = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { make } = req.params;
-    
-    const models = await Car.distinct('carModel', { // Cambiado a carModel
-      make: new RegExp(make, 'i'),
-      isAvailable: true 
+    const trimmedMake = make.trim();
+
+    const models = await Car.distinct('carModel', { // Cambado a carModel
+      make: new RegExp(trimmedMake, 'i'),
+      isAvailable: true
     });
-    
+
     res.status(200).json({
       success: true,
       data: models.sort()
@@ -366,16 +419,16 @@ export class CarController {
         {
           $or: [
             { make: { $regex: q, $options: 'i' } },
-            { carModel: { $regex: q, $options: 'i' } }, // Cambiado a carModel
+            { carModel: { $regex: q, $options: 'i' } }, // Cambado a carModel
             { class: { $regex: q, $options: 'i' } },
             { description: { $regex: q, $options: 'i' } }
           ]
         }
       ]
     })
-    .limit(parseInt(limit as string))
-    .select('id make carModel year price image') // Incluir carModel
-    .lean();
+      .limit(parseInt(limit as string))
+      .select('id make carModel year price image') // Incluir carModel
+      .lean();
 
     res.status(200).json({
       success: true,

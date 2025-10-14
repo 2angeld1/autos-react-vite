@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCarSide, faUser } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
     const [isActive, setIsActive] = useState<boolean>(false);
@@ -13,7 +15,7 @@ const Header: React.FC = () => {
         };
 
         window.addEventListener('scroll', handleScroll);
-        
+
         // Cleanup the event listener
         return () => {
             window.removeEventListener('scroll', handleScroll);
@@ -26,16 +28,16 @@ const Header: React.FC = () => {
                 <div className="navbar-brand">
                     <Link className="navbar-item brand-logo" to="/">
                         <span className="icon has-text-accent mr-2">
-                            <i className="fas fa-car-side"></i>
+                            <FontAwesomeIcon icon={faCarSide} />
                         </span>
                         <span className="brand-name">AutoShowcase</span>
                     </Link>
 
-                    <a 
-                        role="button" 
-                        className={`navbar-burger ${isActive ? 'is-active' : ''}`} 
-                        aria-label="menu" 
-                        aria-expanded="false" 
+                    <a
+                        role="button"
+                        className={`navbar-burger ${isActive ? 'is-active' : ''}`}
+                        aria-label="menu"
+                        aria-expanded="false"
                         onClick={() => setIsActive(!isActive)}
                     >
                         <span aria-hidden="true"></span>
@@ -57,9 +59,9 @@ const Header: React.FC = () => {
                         </NavLink>
                         <div className="navbar-item">
                             <div className="buttons">
-                                <a className="button is-accent">
+                                <a href="http://localhost:3001" className="button is-accent" target="_blank" rel="noopener noreferrer">
                                     <span className="icon">
-                                        <i className="fas fa-user"></i>
+                                        <FontAwesomeIcon icon={faUser} />
                                     </span>
                                     <span>Iniciar Sesión</span>
                                 </a>

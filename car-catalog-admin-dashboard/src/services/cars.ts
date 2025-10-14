@@ -32,11 +32,11 @@ export interface CarQueryParams extends Partial<CarFilters> {
 }
 
 class CarsService {
-  private readonly baseUrl = '/admin/cars';
+  private readonly baseUrl = '/cars'; // Cambiado de '/admin/cars' a '/cars'
 
   async getCars(params?: CarQueryParams): Promise<PaginatedResponse<Car>> {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {
@@ -58,7 +58,7 @@ class CarsService {
 
   async createCar(carData: CreateCarData): Promise<Car> {
     const formData = new FormData();
-    
+
     // Add all car fields to FormData
     Object.entries(carData).forEach(([key, value]) => {
       if (key === 'features' && Array.isArray(value)) {
@@ -80,7 +80,7 @@ class CarsService {
 
   async updateCar(id: string, carData: Partial<CreateCarData>): Promise<Car> {
     const formData = new FormData();
-    
+
     Object.entries(carData).forEach(([key, value]) => {
       if (key === 'features' && Array.isArray(value)) {
         formData.append(key, JSON.stringify(value));
@@ -116,7 +116,7 @@ class CarsService {
 
   async exportCars(params?: CarQueryParams): Promise<Blob> {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== '') {

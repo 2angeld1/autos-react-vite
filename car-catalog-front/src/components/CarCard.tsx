@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useCarContext } from '../context/CarContext';
 import ErrorBoundaryImage from './ErrorBoundaryImage';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import type { Car } from '@/types';
 
 interface CarCardProps {
@@ -16,7 +18,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     const [imgError, setImgError] = useState<boolean>(false);
     const { toggleFavorite, isFavorite } = useCarContext();
     const isCarFavorite: boolean = isFavorite(car.id.toString());
-    
+
     const getBrandColor = (make: string | undefined): string => {
         const brandColors: BrandColors = {
             toyota: '#e50000',
@@ -28,10 +30,10 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
             audi: '#bb0a30',
             mercedes: '#00adef'
         };
-        
+
         return brandColors[make?.toLowerCase() || ''] || '#6b7280';
     };
-    
+
     const handleImageError = (): void => {
         setImgError(true);
     };
@@ -41,7 +43,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
             <div className="card car-card">
                 <div className="card-image">
                     {imgError ? (
-                        <div 
+                        <div
                             className="image is-4by3 has-text-centered is-flex is-justify-content-center is-align-items-center has-text-white has-text-weight-bold"
                             style={{ backgroundColor: getBrandColor(car.make) }}
                         >
@@ -49,15 +51,15 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         </div>
                     ) : (
                         <figure className="image is-4by3">
-                            <ErrorBoundaryImage 
-                                src={car.image} 
+                            <ErrorBoundaryImage
+                                src={car.image}
                                 alt={`${car.make} ${car.model} ${car.year}`}
                                 fallbackSrc={`https://placehold.co/800x450/1a1a1a/ffffff?text=${car.make}+${car.model}`}
                                 className="card-img-top"
                                 onError={handleImageError}
                             />
-                            <span 
-                                className="car-brand-badge" 
+                            <span
+                                className="car-brand-badge"
                                 style={{ backgroundColor: getBrandColor(car.make), color: 'white' }}
                             >
                                 {car.make}
@@ -72,13 +74,13 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                             <p className="subtitle is-6">{car.year}</p>
                         </div>
                         <div className="media-right">
-                            <button 
+                            <button
                                 className={`button is-rounded ${isCarFavorite ? 'is-danger' : 'is-light'}`}
                                 onClick={() => toggleFavorite(car.id.toString())}
                                 aria-label={isCarFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                             >
                                 <span className="icon">
-                                    <i className="fas fa-heart"></i>
+                                    <FontAwesomeIcon icon={faHeart} />
                                 </span>
                             </button>
                         </div>
@@ -102,7 +104,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                 <footer className="card-footer">
                     <Link to={`/car/${car.id}`} className="card-footer-item button is-primary">
                         <span className="icon">
-                            <i className="fas fa-info-circle"></i>
+                            <FontAwesomeIcon icon={faInfoCircle} />
                         </span>
                         <span>Ver detalles</span>
                     </Link>

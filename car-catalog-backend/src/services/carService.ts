@@ -15,11 +15,11 @@ export class CarService {
       try {
         // Check if car already exists
         const existingCar = await Car.findOne({ id: carData.id });
-        
+
         if (existingCar) {
           // Update existing car
-          await Car.findByIdAndUpdate(existingCar._id, carData, { 
-            runValidators: true 
+          await Car.findByIdAndUpdate(existingCar._id, carData, {
+            runValidators: true
           });
           success++;
         } else {
@@ -36,7 +36,7 @@ export class CarService {
     }
 
     logger.info(`Car import completed: ${success} success, ${failed} failed`);
-    
+
     return { success, failed, errors };
   }
 
@@ -69,7 +69,7 @@ export class CarService {
         isAvailable: true
       }).lean();
 
-      return cars;
+      return cars as unknown as ICar[];
     } catch (error) {
       logger.error('Get cars by price range failed:', error);
       throw error;
@@ -85,10 +85,10 @@ export class CarService {
         combination_mpg: { $gte: minMpg },
         isAvailable: true
       })
-      .sort({ combination_mpg: -1 })
-      .lean();
+        .sort({ combination_mpg: -1 })
+        .lean();
 
-      return cars;
+      return cars as unknown as ICar[];
     } catch (error) {
       logger.error('Get efficient cars failed:', error);
       throw error;
@@ -131,7 +131,7 @@ export class CarService {
         .limit(limit)
         .lean();
 
-      return cars;
+      return cars as unknown as ICar[];
     } catch (error) {
       logger.error('Get recommendations failed:', error);
       throw error;
@@ -149,7 +149,7 @@ export class CarService {
         .limit(limit)
         .lean();
 
-      return cars;
+      return cars as unknown as ICar[];
     } catch (error) {
       logger.error('Get trending cars failed:', error);
       throw error;
@@ -230,7 +230,7 @@ export class CarService {
         Car.countDocuments(query)
       ]);
 
-      return { cars, total };
+      return { cars: cars as unknown as ICar[], total };
     } catch (error) {
       logger.error('Advanced search failed:', error);
       throw error;
@@ -268,7 +268,11 @@ export class CarService {
         }).lean()
       ]);
 
-      return { oldCars, expensiveCars, lowEfficiencyCars };
+      return {
+        oldCars: oldCars as unknown as ICar[],
+        expensiveCars: expensiveCars as unknown as ICar[],
+        lowEfficiencyCars: lowEfficiencyCars as unknown as ICar[]
+      };
     } catch (error) {
       logger.error('Get cars needing attention failed:', error);
       throw error;

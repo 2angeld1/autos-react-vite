@@ -20,9 +20,8 @@ interface UseApiReturn<T> {
   reset: () => void;
 }
 
-export function useApi<T = unknown>(options: UseApiOptions = {}): UseApiReturn<T> {
-  const { immediate = false } = options;
-  
+export function useApi<T = unknown>(_options: UseApiOptions = {}): UseApiReturn<T> {
+
   const [state, setState] = useState<ApiState<T>>({
     data: null,
     loading: false,
@@ -81,13 +80,10 @@ export function useApi<T = unknown>(options: UseApiOptions = {}): UseApiReturn<T
 // Hook específicos para métodos HTTP
 export function useGet<T = unknown>(url?: string, options: UseApiOptions = {}) {
   const apiHook = useApi<T>(options);
-  
-  const execute = useCallback((customUrl?: string) => {
-    const targetUrl = customUrl || url;
-    if (!targetUrl) {
-      throw new Error('URL is required');
-    }
-    return apiHook.execute(targetUrl, { method: 'GET' });
+
+  const execute = useCallback((additionalPath = '', params?: Record<string, any>) => {
+    const fullUrl = `${url || ''}${additionalPath}`;
+    return apiHook.execute(fullUrl, { method: 'GET', params });
   }, [apiHook.execute, url]);
 
   // Auto-execute if immediate and URL provided
@@ -105,9 +101,9 @@ export function useGet<T = unknown>(url?: string, options: UseApiOptions = {}) {
 
 export function usePost<T = unknown>() {
   const apiHook = useApi<T>();
-  
+
   const execute = useCallback((url: string, data?: any) => {
-    return apiHook.execute(url, { 
+    return apiHook.execute(url, {
       method: 'POST',
       data,
     });
@@ -121,9 +117,9 @@ export function usePost<T = unknown>() {
 
 export function usePut<T = unknown>() {
   const apiHook = useApi<T>();
-  
+
   const execute = useCallback((url: string, data?: any) => {
-    return apiHook.execute(url, { 
+    return apiHook.execute(url, {
       method: 'PUT',
       data,
     });
@@ -137,7 +133,7 @@ export function usePut<T = unknown>() {
 
 export function useDelete<T = unknown>() {
   const apiHook = useApi<T>();
-  
+
   const execute = useCallback((url: string) => {
     return apiHook.execute(url, { method: 'DELETE' });
   }, [apiHook.execute]);

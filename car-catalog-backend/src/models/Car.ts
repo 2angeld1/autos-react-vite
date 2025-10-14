@@ -132,10 +132,20 @@ const CarSchema = new Schema<ICarDocument>({
     min: 1,
     max: 200
   },
-  features: [{
-    type: String,
-    trim: true
-  }],
+  features: {
+    type: [String],
+    default: [],
+    set: function (value: string | string[]) {
+      if (typeof value === 'string') {
+        try {
+          return JSON.parse(value);
+        } catch {
+          return [];
+        }
+      }
+      return value;
+    }
+  },
   isAvailable: {
     type: Boolean,
     default: true,
@@ -143,18 +153,18 @@ const CarSchema = new Schema<ICarDocument>({
   }
 }, {
   timestamps: true,
-  toJSON: { 
+  toJSON: {
     virtuals: true,
-    transform: function(_doc, ret) {
+    transform: function (_doc, ret) {
       // Cambiamos carModel de vuelta a model en la salida JSON
       ret.model = ret.carModel;
       delete ret.carModel;
       return ret;
     }
   },
-  toObject: { 
+  toObject: {
     virtuals: true,
-    transform: function(_doc, ret) {
+    transform: function (_doc, ret) {
       // Cambiamos carModel de vuelta a model en el objeto
       ret.model = ret.carModel;
       delete ret.carModel;
@@ -167,10 +177,10 @@ const CarSchema = new Schema<ICarDocument>({
 CarSchema.index({ make: 1, carModel: 1, year: 1 });
 CarSchema.index({ price: 1, year: 1 });
 CarSchema.index({ class: 1, fuel_type: 1 });
-CarSchema.index({ 
-  make: 'text', 
-  carModel: 'text', 
-  description: 'text' 
+CarSchema.index({
+  make: 'text',
+  carModel: 'text',
+  description: 'text'
 }, {
   weights: {
     make: 10,
@@ -180,26 +190,26 @@ CarSchema.index({
 });
 
 // Virtual for full name
-CarSchema.virtual('fullName').get(function(this: ICarDocument) {
+CarSchema.virtual('fullName').get(function (this: ICarDocument) {
   return `${this.make} ${this.carModel} ${this.year}`;
 });
 
 // Virtual for fuel efficiency
-CarSchema.virtual('avgMpg').get(function(this: ICarDocument) {
+CarSchema.virtual('avgMpg').get(function (this: ICarDocument) {
   return Math.round((this.city_mpg + this.highway_mpg) / 2);
 });
 
 // Virtual para model (para que funcione como antes)
-CarSchema.virtual('model').get(function(this: ICarDocument) {
+CarSchema.virtual('model').get(function (this: ICarDocument) {
   return this.carModel;
 });
 
-CarSchema.virtual('model').set(function(this: ICarDocument, value: string) {
+CarSchema.virtual('model').set(function (this: ICarDocument, value: string) {
   this.carModel = value;
 });
 
 // Pre-save middleware
-CarSchema.pre('save', function(this: ICarDocument, next) {
+CarSchema.pre('save', function (this: ICarDocument, next) {
   if (this.isModified('make')) {
     this.make = this.make.charAt(0).toUpperCase() + this.make.slice(1).toLowerCase();
   }
@@ -210,14 +220,14 @@ CarSchema.pre('save', function(this: ICarDocument, next) {
 });
 
 // Static methods
-CarSchema.statics.findByMake = function(make: string) {
+CarSchema.statics.findByMake = function (make: string) {
   return this.find({ make: new RegExp(make, 'i'), isAvailable: true });
 };
 
-CarSchema.statics.findInPriceRange = function(minPrice: number, maxPrice: number) {
-  return this.find({ 
+CarSchema.statics.findInPriceRange = function (minPrice: number, maxPrice: number) {
+  return this.find({
     price: { $gte: minPrice, $lte: maxPrice },
-    isAvailable: true 
+    isAvailable: true
   });
 };
 

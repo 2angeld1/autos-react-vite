@@ -1,13 +1,16 @@
 import React from 'react';
 import { Plus, Download, Upload } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Car, CarFilters } from '@/types';
-import { useGet, usePost, usePut } from '@/hooks/useApi';
+import { useGet } from '@/hooks/useApi';
 import Button from '@/components/common/Button';
-import { CarTable, CarForm, CarFilters as CarFiltersComponent } from '@/components/cars';
+import { CarTable, CarFilters as CarFiltersComponent } from '@/pages/Cars';
 import { Breadcrumb } from '@/components/layout';
 import toast from 'react-hot-toast';
 
 const Cars: React.FC = () => {
+  const navigate = useNavigate();
+
   const [filters, setFilters] = React.useState<CarFilters>({
     search: '',
     make: '',
@@ -19,55 +22,34 @@ const Cars: React.FC = () => {
     maxYear: '',
     isAvailable: '',
   });
-  
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const [pageSize] = React.useState(10);
-  const [sortKey, setSortKey] = React.useState<string>('createdAt');
-  const [sortDirection, setSortDirection] = React.useState<'asc' | 'desc'>('desc');
-  
-  const [showCarForm, setShowCarForm] = React.useState(false);
-  const [selectedCar, setSelectedCar] = React.useState<Car | undefined>();
 
   // API hooks
-  const { 
-    data: carsResponse, 
-    loading: carsLoading, 
-    execute: fetchCars 
-  } = useGet<{ cars: Car[]; total: number; pages: number }>('/admin/cars');
-
-  const { execute: createCar, loading: createLoading } = usePost('/admin/cars');
-  const { execute: updateCar, loading: updateLoading } = usePut('/admin/cars');
+  const {
+    data: carsResponse,
+    loading: carsLoading,
+    execute: fetchCars
+  } = useGet<{
+    success: boolean;
+    data: Car[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+    filters: any;
+  }>('/cars');
 
   // Fetch cars when filters or pagination changes
   React.useEffect(() => {
-    const params = new URLSearchParams();
-    
-    // Add filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) params.append(key, value);
-    });
-    
-    // Add pagination and sorting
-    params.append('page', currentPage.toString());
-    params.append('limit', pageSize.toString());
-    params.append('sortBy', sortKey);
-    params.append('sortOrder', sortDirection);
-
-    fetchCars(`?${params.toString()}`);
-  }, [filters, currentPage, sortKey, sortDirection, fetchCars, pageSize]);
+    fetchCars('', {});
+  }, [fetchCars]);
 
   const breadcrumbItems = [
     { label: 'Cars', current: true },
   ];
 
   const handleAddCar = () => {
-    setSelectedCar(undefined);
-    setShowCarForm(true);
+    navigate('/cars/add');
   };
 
   const handleEditCar = (car: Car) => {
-    setSelectedCar(car);
-    setShowCarForm(true);
+    navigate(`/cars/${car.id}/edit`); // ✅ Ahora sí navega al "edit"
   };
 
   const handleDeleteCar = (car: Car) => {
@@ -75,33 +57,11 @@ const Cars: React.FC = () => {
   };
 
   const handleViewCar = (car: Car) => {
-    console.log('View car:', car);
-  };
-
-  const handleCarSubmit = async (formData: FormData) => {
-    try {
-      if (selectedCar) {
-        await updateCar(`/${selectedCar.id}`, formData);
-        toast.success('Car updated successfully');
-      } else {
-        await createCar('', formData);
-        toast.success('Car created successfully');
-      }
-      setShowCarForm(false);
-      fetchCars();
-    } catch (error: any) {
-      toast.error(error.message || 'Something went wrong');
-    }
-  };
-
-  const handleSort = (key: string, direction: 'asc' | 'desc') => {
-    setSortKey(key);
-    setSortDirection(direction);
+    navigate(`/cars/${car.id}`); // ✅ Usa el campo id
   };
 
   const handleFiltersChange = (newFilters: CarFilters) => {
     setFilters(newFilters);
-    setCurrentPage(1);
   };
 
   const handleResetFilters = () => {
@@ -116,7 +76,6 @@ const Cars: React.FC = () => {
       maxYear: '',
       isAvailable: '',
     });
-    setCurrentPage(1);
   };
 
   return (
@@ -130,7 +89,7 @@ const Cars: React.FC = () => {
           <h1 className="text-2xl font-bold text-gray-900">Cars</h1>
           <p className="text-gray-600">Manage your car inventory</p>
         </div>
-        
+
         <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
@@ -165,23 +124,11 @@ const Cars: React.FC = () => {
 
       {/* Table */}
       <CarTable
-        cars={carsResponse?.cars || []}
+        cars={carsResponse?.data || []}
         loading={carsLoading}
         onEdit={handleEditCar}
         onDelete={handleDeleteCar}
         onView={handleViewCar}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-      />
-
-      {/* Car Form Modal */}
-      <CarForm
-        car={selectedCar}
-        isOpen={showCarForm}
-        onClose={() => setShowCarForm(false)}
-        onSubmit={handleCarSubmit}
-        loading={createLoading || updateLoading}
       />
     </div>
   );

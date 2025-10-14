@@ -1,14 +1,13 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Car, 
-  Users, 
+import {
+  LayoutDashboard,
+  Car,
+  Users,
   Image,
-  BarChart3, 
+  BarChart3,
   Settings,
   Shield,
-  FileText,
   ChevronDown,
   ChevronRight,
   X
@@ -41,9 +40,7 @@ const navigation: NavItem[] = [
     icon: Car,
     badge: 'New',
     children: [
-      { name: 'All Cars', href: '/cars', icon: Car },
-      { name: 'Add Car', href: '/cars/add', icon: Car },
-      { name: 'Import CSV', href: '/cars/import', icon: FileText },
+      { name: 'All Cars', href: '/cars', icon: Car }
     ],
   },
   {
@@ -86,13 +83,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
     setExpandedItems(newExpanded);
   };
 
-  const NavItemComponent: React.FC<{ item: NavItem; level?: number }> = ({ 
-    item, 
-    level = 0 
+  const NavItemComponent: React.FC<{ item: NavItem; level?: number }> = ({
+    item,
+    level = 0
   }) => {
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedItems.has(item.name);
-    const paddingLeft = level === 0 ? 'pl-6' : 'pl-12';
+    const paddingLeft = level === 0 ? 'pl-1' : 'pl-12';
 
     if (hasChildren) {
       return (
@@ -100,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           <button
             onClick={() => toggleExpanded(item.name)}
             className={clsx(
-              'w-full flex items-center justify-between py-2 px-3 mx-3 rounded-md text-sm font-medium transition-colors',
+              'flex items-center justify-between py-2 px-3 mx-3 rounded-md text-sm font-medium transition-colors',
               paddingLeft,
               'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
             )}
@@ -143,12 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
           )
         }
-        onClick={() => {
-          // Close mobile sidebar when navigating
-          if (window.innerWidth < 1024) {
-            onClose();
-          }
-        }}
+        onClick={onClose} // Cerrar al navegar
       >
         <item.icon className="h-5 w-5" />
         <span>{item.name}</span>
@@ -163,10 +155,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
   return (
     <>
-      {/* Mobile overlay */}
+      {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black bg-opacity-50 z-40"
           onClick={onClose}
         />
       )}
@@ -174,10 +166,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <div
         className={clsx(
-          'fixed top-0 left-0 z-50 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0',
+          'fixed top-0 left-0 z-50 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out',
           'w-64',
-          isOpen ? 'translate-x-0' : '-translate-x-full',
-          'lg:z-30'
+          isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo section */}
@@ -188,19 +179,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             </div>
             <span className="ml-3 font-semibold text-gray-900">Car Admin</span>
           </div>
-          
+
           <Button
             variant="ghost"
             size="sm"
             onClick={onClose}
-            className="lg:hidden"
             icon={<X className="h-5 w-5" />}
             aria-label="Close sidebar"
           />
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6 overflow-y-auto scrollbar-thin">
+        <nav className="flex-1 py-6">
           <div className="space-y-1">
             {navigation.map((item) => (
               <NavItemComponent key={item.name} item={item} />
