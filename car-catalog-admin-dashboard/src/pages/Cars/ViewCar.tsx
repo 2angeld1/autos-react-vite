@@ -6,6 +6,9 @@ import { Car } from '@/types';
 import Button from '@/components/common/Button';
 import Badge from '@/components/common/Badge';
 import { ArrowLeft, Edit, Trash } from 'lucide-react';
+import { api } from '@/services/api'; // Asegúrate de importar api
+import toast from 'react-hot-toast'; // Si no está importado
+import Swal from 'sweetalert2'; // Agrega esta importación si no está
 
 const ViewCar: React.FC = () => {
     const { id } = useParams<{ id: string }>();
@@ -27,6 +30,30 @@ const ViewCar: React.FC = () => {
 
     const handleEditCar = () => {
         navigate(`/cars/${id}/edit`);
+    };
+
+    const handleDeleteCar = async (car: Car) => {
+        const result = await Swal.fire({
+            title: '¿Estás seguro?',
+            text: `¿Quieres eliminar el auto "${car.make} ${car.model}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await api.delete(`/cars/${car.id}`);
+                toast.success('Auto eliminado exitosamente');
+                // Refrescar la lista de autos
+                fetchCar('', {});
+            } catch (error: any) {
+                toast.error(error.message || 'Error al eliminar el auto');
+            }
+        }
     };
 
     const breadcrumbItems = [
@@ -66,7 +93,7 @@ const ViewCar: React.FC = () => {
                     </Button>
                     <Button
                         variant="outline"
-                        onClick={() => console.log('Delete car')}
+                        onClick={() => handleDeleteCar(car)} // Cambia de console.log a handleDeleteCar
                         icon={<Trash className="h-4 w-4" />}
                     >
                         Delete

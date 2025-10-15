@@ -6,7 +6,9 @@ import { useGet } from '@/hooks/useApi';
 import Button from '@/components/common/Button';
 import { CarTable, CarFilters as CarFiltersComponent } from '@/pages/Cars';
 import { Breadcrumb } from '@/components/layout';
+import { api } from '@/services/api'; // Asegúrate de importar api
 import toast from 'react-hot-toast';
+import Swal from 'sweetalert2'; // Agrega esta importación si no está
 
 const Cars: React.FC = () => {
   const navigate = useNavigate();
@@ -52,8 +54,28 @@ const Cars: React.FC = () => {
     navigate(`/cars/${car.id}/edit`); // ✅ Ahora sí navega al "edit"
   };
 
-  const handleDeleteCar = (car: Car) => {
-    console.log('Delete car:', car);
+  const handleDeleteCar = async (car: Car) => {
+    const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Quieres eliminar el auto "${car.make} ${car.model}"?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar'
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/cars/${car.id}`);
+        toast.success('Auto eliminado exitosamente');
+        // Refrescar la lista de autos
+        fetchCars('', {});
+      } catch (error: any) {
+        toast.error(error.message || 'Error al eliminar el auto');
+      }
+    }
   };
 
   const handleViewCar = (car: Car) => {
