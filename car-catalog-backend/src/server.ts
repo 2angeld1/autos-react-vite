@@ -30,6 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 
 // Static files
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads/files', express.static(path.join(__dirname, '../uploads/files')));
 
 // Health check for root
 app.get('/', (req, res) => {

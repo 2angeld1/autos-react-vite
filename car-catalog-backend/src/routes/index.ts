@@ -4,6 +4,7 @@ import carRoutes from './cars';
 import userRoutes from './users';
 import favoriteRoutes from './favorites';
 import adminRoutes from './admin';
+import fileRoutes from './files';
 
 const router = Router();
 
@@ -13,6 +14,7 @@ router.use('/cars', carRoutes);
 router.use('/users', userRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/admin', adminRoutes);
+router.use('/files', fileRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

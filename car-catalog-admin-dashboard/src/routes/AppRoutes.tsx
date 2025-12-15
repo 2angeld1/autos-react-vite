@@ -14,6 +14,7 @@ const ViewCar = React.lazy(() => import('@/pages/Cars/ViewCar'));
 const Users = React.lazy(() => import('@/pages/Users'));
 const Login = React.lazy(() => import('@/pages/Login'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
+const Images = React.lazy(() => import('@/pages/Images'));
 
 // Loading component
 const PageLoader = () => (
@@ -89,7 +90,7 @@ const AppRoutes: React.FC = () => {
           {/* Images Routes */}
           <Route
             path="images"
-            element={<div>Images Page (Coming Soon)</div>}
+            element={<Images />}
           />
         </Route>
 

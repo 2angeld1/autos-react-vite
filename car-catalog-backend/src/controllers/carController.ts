@@ -174,11 +174,17 @@ export class CarController {
 
     logger.info(`req.file: ${req.file ? req.file.filename : 'no file'}`);
     logger.info(`carData.image before processing:`, carData.image);
+    logger.info(`carData.imageUrl before processing:`, carData.imageUrl);
 
     // Procesar imagen subida
     if (req.file) {
       carData.image = `/uploads/cars/${req.file.filename}`;
       logger.info(`Image processed from file: ${carData.image}`);
+    } else if (carData.imageUrl) {
+      // Si se seleccionó una imagen del gestor de archivos
+      carData.image = carData.imageUrl;
+      delete carData.imageUrl;
+      logger.info(`Image processed from file manager: ${carData.image}`);
     } else if (typeof carData.image === 'object' || !carData.image) {
       // Si image es un objeto vacío o no existe, elimínalo
       delete carData.image;
@@ -232,9 +238,22 @@ export class CarController {
     // Procesar imagen subida
     if (req.file) {
       updateData.image = `/uploads/cars/${req.file.filename}`;
-    } else if (typeof updateData.image === 'object' || !updateData.image) {
-      // Si image es un objeto vacío o no existe, elimínalo para no actualizar
+      logger.info(`Image processed from file upload: ${updateData.image}`);
+    } else if (updateData.imageUrl) {
+      // Si se seleccionó una imagen del gestor de archivos
+      updateData.image = updateData.imageUrl;
+      delete updateData.imageUrl;
+      logger.info(`Image processed from file manager: ${updateData.image}`);
+    } else if (updateData.removeImage === 'true') {
+      // Si el usuario quiere eliminar la imagen
+      updateData.image = ''; // O puedes usar una imagen por defecto
+      delete updateData.removeImage;
+      logger.info('Image removed by user');
+    } else {
+      // No se envió imagen, no actualizar el campo
       delete updateData.image;
+      delete updateData.imageUrl;
+      delete updateData.removeImage;
     }
 
     // Parse features if it's a string (from form data)

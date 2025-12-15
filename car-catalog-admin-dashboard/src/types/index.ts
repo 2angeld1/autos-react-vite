@@ -1,5 +1,6 @@
 export * from './car';
 export * from './auth';
+export * from './file';
 
 // Common API types
 export interface ApiResponse<T = any> {

@@ -1,9 +1,11 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, X } from 'lucide-react';
+import { ImageIcon, Trash2 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
-import { Car } from '@/types';
+import { ImagePicker } from '@/components/files';
+import { filesService } from '@/services/files';
+import { Car, FileItem } from '@/types';
 
 interface CarFormData {
   make: string;
@@ -38,9 +40,26 @@ const CarForm: React.FC<CarFormProps> = ({
   loading = false,
 }) => {
   const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
-  const [imagePreview, setImagePreview] = React.useState<string | null>(
-    car?.image || null
-  );
+  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
+  const [selectedFileItem, setSelectedFileItem] = React.useState<FileItem | null>(null);
+  const [showImagePicker, setShowImagePicker] = React.useState(false);
+  const [removeCurrentImage, setRemoveCurrentImage] = React.useState(false);
+
+  // Initialize image preview from car data
+  React.useEffect(() => {
+    if (car?.image) {
+      // Check if it's a relative URL and prepend base URL
+      const imageUrl = car.image.startsWith('http') 
+        ? car.image 
+        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${car.image}`;
+      setImagePreview(imageUrl);
+    } else {
+      setImagePreview(null);
+    }
+    setRemoveCurrentImage(false);
+    setSelectedImage(null);
+    setSelectedFileItem(null);
+  }, [car]);
 
   const {
     register,
@@ -71,6 +90,8 @@ const CarForm: React.FC<CarFormProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       setSelectedImage(file);
+      setSelectedFileItem(null);
+      setRemoveCurrentImage(false);
       const reader = new FileReader();
       reader.onload = () => {
         setImagePreview(reader.result as string);
@@ -79,9 +100,18 @@ const CarForm: React.FC<CarFormProps> = ({
     }
   };
 
+  const handleImagePickerSelect = (file: FileItem) => {
+    setSelectedFileItem(file);
+    setSelectedImage(null);
+    setRemoveCurrentImage(false);
+    setImagePreview(filesService.getFileUrl(file));
+  };
+
   const removeImage = () => {
     setSelectedImage(null);
-    setImagePreview(car?.image || null);
+    setSelectedFileItem(null);
+    setImagePreview(null);
+    setRemoveCurrentImage(true);
   };
 
   const onFormSubmit = async (data: CarFormData) => {
@@ -98,13 +128,21 @@ const CarForm: React.FC<CarFormProps> = ({
       }
     });
 
-    // Add image if selected and has size
+    // Handle image
     if (selectedImage && selectedImage.size > 0) {
+      // New file upload
       formData.append('image', selectedImage);
       console.log('Image added to FormData:', selectedImage.name, 'size:', selectedImage.size);
-    } else {
-      console.log('No image selected or image has no size');
+    } else if (selectedFileItem) {
+      // Image selected from file manager
+      formData.append('imageUrl', filesService.getFileUrl(selectedFileItem));
+      console.log('Image URL added to FormData:', filesService.getFileUrl(selectedFileItem));
+    } else if (removeCurrentImage) {
+      // User wants to remove the image
+      formData.append('removeImage', 'true');
+      console.log('Remove image flag added');
     }
+    // If none of the above, don't send image field (keep existing)
 
     // Add car ID if editing
     if (car) {
@@ -113,7 +151,7 @@ const CarForm: React.FC<CarFormProps> = ({
 
     // Log all FormData contents
     console.log('FormData contents:');
-    for (let [key, value] of formData.entries()) {
+    for (const [key, value] of formData.entries()) {
       if (value instanceof File) {
         console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
       } else {
@@ -128,7 +166,9 @@ const CarForm: React.FC<CarFormProps> = ({
   const handleClose = () => {
     reset();
     setSelectedImage(null);
-    setImagePreview(car?.image || null);
+    setSelectedFileItem(null);
+    setImagePreview(null);
+    setRemoveCurrentImage(false);
     onClose();
   };
 
@@ -145,22 +185,68 @@ const CarForm: React.FC<CarFormProps> = ({
               src={imagePreview}
               alt="Vista previa del auto"
               className="h-32 w-48 object-cover rounded-lg border"
+              onError={(e) => {
+                // If image fails to load, show placeholder
+                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="128" viewBox="0 0 192 128"><rect fill="%23f3f4f6" width="192" height="128"/><text x="96" y="64" text-anchor="middle" fill="%239ca3af" font-size="12">Image not found</text></svg>';
+              }}
             />
             <button
               type="button"
               onClick={removeImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md transition-colors"
+              title="Eliminar imagen"
             >
-              <X className="h-4 w-4" />
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         ) : (
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-            <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+            <div className="flex flex-col items-center gap-2">
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={() => setShowImagePicker(true)}
+              >
+                Seleccionar del Gestor de Archivos
+              </Button>
+              <span className="text-xs text-gray-400">o</span>
+              <label className="cursor-pointer">
+                <span className="text-sm font-medium text-primary-600 hover:text-primary-500">
+                  Subir una imagen nueva
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageChange}
+                  className="hidden"
+                />
+              </label>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">PNG, JPG, WEBP hasta 5MB</p>
+          </div>
+        )}
+        
+        {/* Show option to change image when one is selected */}
+        {imagePreview && (
+          <div className="mt-2 flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setShowImagePicker(true)}
+            >
+              Cambiar imagen
+            </Button>
             <label className="cursor-pointer">
-              <span className="text-sm font-medium text-primary-600 hover:text-primary-500">
-                Subir una imagen
-              </span>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+              >
+                Subir nueva
+              </Button>
               <input
                 type="file"
                 accept="image/*"
@@ -168,7 +254,6 @@ const CarForm: React.FC<CarFormProps> = ({
                 className="hidden"
               />
             </label>
-            <p className="text-xs text-gray-500 mt-1">PNG, JPG, WEBP hasta 5MB</p>
           </div>
         )}
       </div>
@@ -368,6 +453,15 @@ const CarForm: React.FC<CarFormProps> = ({
           {car ? 'Actualizar Auto' : 'Agregar Auto'}
         </Button>
       </div>
+
+      {/* Image Picker Modal */}
+      <ImagePicker
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImagePickerSelect}
+        currentImage={imagePreview}
+        title="Seleccionar Imagen del Auto"
+      />
     </div>
   );
 };
