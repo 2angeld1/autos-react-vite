@@ -2,7 +2,7 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 
-interface StatsCardProps {
+export interface StatsCardProps {
   title: string;
   value: string | number;
   icon: LucideIcon;

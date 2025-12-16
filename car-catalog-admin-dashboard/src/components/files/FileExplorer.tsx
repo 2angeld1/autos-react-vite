@@ -33,6 +33,7 @@ import Swal from 'sweetalert2';
 interface FileExplorerProps {
   onFileSelect?: (file: FileItem) => void;
   onFilesSelect?: (files: FileItem[]) => void;
+  onFilesChanged?: () => void;
   selectionMode?: 'single' | 'multiple' | 'none';
   filterType?: 'all' | 'images' | 'pdfs';
   className?: string;
@@ -41,6 +42,7 @@ interface FileExplorerProps {
 const FileExplorer: React.FC<FileExplorerProps> = ({
   onFileSelect,
   onFilesSelect,
+  onFilesChanged,
   selectionMode = 'none',
   filterType = 'all',
   className = ''
@@ -169,6 +171,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
       setShowNewFolderModal(false);
       setNewFolderName('');
       fetchFiles();
+      onFilesChanged?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error creating folder');
     }
@@ -188,6 +191,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
       setShowUploadModal(false);
       setUploadFiles([]);
       fetchFiles();
+      onFilesChanged?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error uploading files');
     } finally {
@@ -209,6 +213,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
       setEditingFile(null);
       setRenameValue('');
       fetchFiles();
+      onFilesChanged?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error renaming');
     }
@@ -232,6 +237,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
         await filesService.deleteFile(file.id);
         toast.success('Deleted successfully');
         fetchFiles();
+        onFilesChanged?.();
       } catch (error: any) {
         toast.error(error.response?.data?.message || 'Error deleting');
       }
@@ -249,6 +255,7 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
       setEditingFile(null);
       setSelectedMoveTarget(null);
       fetchFiles();
+      onFilesChanged?.();
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Error moving');
     }

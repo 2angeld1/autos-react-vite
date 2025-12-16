@@ -2,7 +2,7 @@ import React from 'react';
 import { Car, User, Image, Settings } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
-interface Activity {
+export interface Activity {
   id: string;
   type: 'car_added' | 'user_registered' | 'image_uploaded' | 'settings_changed';
   title: string;
@@ -11,7 +11,7 @@ interface Activity {
   user?: string;
 }
 
-interface RecentActivityProps {
+export interface RecentActivityProps {
   activities?: Activity[];
   loading?: boolean;
 }

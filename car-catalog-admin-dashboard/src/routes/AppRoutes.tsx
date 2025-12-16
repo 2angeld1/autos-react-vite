@@ -15,6 +15,13 @@ const Users = React.lazy(() => import('@/pages/Users'));
 const Login = React.lazy(() => import('@/pages/Login'));
 const NotFound = React.lazy(() => import('@/pages/NotFound'));
 const Images = React.lazy(() => import('@/pages/Images'));
+const Settings = React.lazy(() => import('@/pages/Settings'));
+const Analytics = React.lazy(() => import('@/pages/Analytics'));
+const Accessories = React.lazy(() => import('@/pages/Accessories'));
+const Brands = React.lazy(() => import('@/pages/Brands'));
+const Bookings = React.lazy(() => import('@/pages/Bookings'));
+const Promotions = React.lazy(() => import('@/pages/Promotions'));
+const Categories = React.lazy(() => import('@/pages/Categories'));
 
 // Loading component
 const PageLoader = () => (
@@ -58,8 +65,17 @@ const AppRoutes: React.FC = () => {
           {/* Cars Routes */}
           <Route path="cars" element={<Cars />} />
           <Route path="cars/add" element={<AddCar />} />
-          <Route path="cars/:id/edit" element={<EditCar />} /> {/* Nueva ruta */}
-          <Route path="cars/:id" element={<ViewCar />} /> {/* Nueva ruta */}
+          <Route path="cars/:id/edit" element={<EditCar />} />
+          <Route path="cars/:id" element={<ViewCar />} />
+
+          {/* Inventory Routes */}
+          <Route path="accessories" element={<Accessories />} />
+          <Route path="brands" element={<Brands />} />
+          <Route path="categories" element={<Categories />} />
+
+          {/* Sales Routes */}
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="promotions" element={<Promotions />} />
 
           {/* Users Routes - Admin only */}
           <Route
@@ -71,27 +87,21 @@ const AppRoutes: React.FC = () => {
             }
           />
 
-          {/* Settings Routes - Admin only */}
+          {/* Settings Routes */}
           <Route
-            path="settings/*"
+            path="settings"
             element={
               <ProtectedRoute requiredRole="admin">
-                <div>Settings Page (Coming Soon)</div>
+                <Settings />
               </ProtectedRoute>
             }
           />
 
           {/* Analytics Routes */}
-          <Route
-            path="analytics"
-            element={<div>Analytics Page (Coming Soon)</div>}
-          />
+          <Route path="analytics" element={<Analytics />} />
 
-          {/* Images Routes */}
-          <Route
-            path="images"
-            element={<Images />}
-          />
+          {/* Images/Files Routes */}
+          <Route path="images" element={<Images />} />
         </Route>
 
         {/* 404 Page */}

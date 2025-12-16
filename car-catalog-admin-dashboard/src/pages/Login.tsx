@@ -7,7 +7,7 @@ import { useAuthStore } from '@/store/authSlice';
 const Login: React.FC = () => {
   const { isAuthenticated, requires2FA, user } = useAuthStore();
   const location = useLocation();
-  const [email, setEmail] = React.useState('');
+  const [email] = React.useState('');
   const [show2FA, setShow2FA] = React.useState(false);
 
   // Redirect if already authenticated

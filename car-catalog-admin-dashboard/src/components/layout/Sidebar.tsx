@@ -7,145 +7,137 @@ import {
   Image,
   BarChart3,
   Settings,
-  Shield,
-  ChevronDown,
-  ChevronRight,
-  X
+  X,
+  Wrench,
+  Tag,
+  CalendarCheck,
+  Percent,
+  Building2
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
+import { useTranslation } from 'react-i18next';
 
 interface SidebarProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface NavItem {
+export interface NavItem {
   name: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
-  children?: NavItem[];
 }
 
-const navigation: NavItem[] = [
-  {
-    name: 'Dashboard',
-    href: '/dashboard',
-    icon: LayoutDashboard,
-  },
-  {
-    name: 'Cars',
-    href: '/cars',
-    icon: Car,
-    badge: 'New',
-    children: [
-      { name: 'All Cars', href: '/cars', icon: Car }
-    ],
-  },
-  {
-    name: 'Users',
-    href: '/users',
-    icon: Users,
-  },
-  {
-    name: 'Images',
-    href: '/images',
-    icon: Image,
-  },
-  {
-    name: 'Analytics',
-    href: '/analytics',
-    icon: BarChart3,
-  },
-  {
-    name: 'Settings',
-    href: '/settings',
-    icon: Settings,
-    children: [
-      { name: 'General', href: '/settings', icon: Settings },
-      { name: 'Security', href: '/settings/security', icon: Shield },
-      { name: 'API Keys', href: '/settings/api', icon: Shield },
-    ],
-  },
-];
+interface NavSection {
+  titleKey?: string;
+  items: NavItem[];
+}
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
-  const [expandedItems, setExpandedItems] = React.useState<Set<string>>(new Set());
+  const { t } = useTranslation();
 
-  const toggleExpanded = (itemName: string) => {
-    const newExpanded = new Set(expandedItems);
-    if (newExpanded.has(itemName)) {
-      newExpanded.delete(itemName);
-    } else {
-      newExpanded.add(itemName);
-    }
-    setExpandedItems(newExpanded);
-  };
-
-  const NavItemComponent: React.FC<{ item: NavItem; level?: number }> = ({
-    item,
-    level = 0
-  }) => {
-    const hasChildren = item.children && item.children.length > 0;
-    const isExpanded = expandedItems.has(item.name);
-    const paddingLeft = level === 0 ? 'pl-1' : 'pl-12';
-
-    if (hasChildren) {
-      return (
-        <div>
-          <button
-            onClick={() => toggleExpanded(item.name)}
-            className={clsx(
-              'flex items-center justify-between py-2 px-3 mx-3 rounded-md text-sm font-medium transition-colors',
-              paddingLeft,
-              'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <item.icon className="h-5 w-5" />
-              <span>{item.name}</span>
-              {item.badge && (
-                <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
-                  {item.badge}
-                </span>
-              )}
-            </div>
-            {isExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
-          </button>
-          {isExpanded && (
-            <div className="mt-1">
-              {item.children?.map((child) => (
-                <NavItemComponent key={child.name} item={child} level={level + 1} />
-              ))}
-            </div>
-          )}
-        </div>
-      );
-    }
-
+  const navigationSections: NavSection[] = [
+    {
+      items: [
+        {
+          name: t('nav.dashboard'),
+          href: '/dashboard',
+          icon: LayoutDashboard,
+        },
+      ],
+    },
+    {
+      titleKey: 'nav.inventory',
+      items: [
+        {
+          name: t('nav.cars'),
+          href: '/cars',
+          icon: Car,
+        },
+        {
+          name: t('nav.accessories'),
+          href: '/accessories',
+          icon: Wrench,
+          badge: 'New',
+        },
+        {
+          name: t('nav.brands'),
+          href: '/brands',
+          icon: Building2,
+        },
+      ],
+    },
+    {
+      titleKey: 'nav.sales',
+      items: [
+        {
+          name: t('nav.bookings'),
+          href: '/bookings',
+          icon: CalendarCheck,
+        },
+        {
+          name: t('nav.promotions'),
+          href: '/promotions',
+          icon: Percent,
+        },
+      ],
+    },
+    {
+      titleKey: 'nav.content',
+      items: [
+        {
+          name: t('nav.images'),
+          href: '/images',
+          icon: Image,
+        },
+        {
+          name: t('nav.categories'),
+          href: '/categories',
+          icon: Tag,
+        },
+      ],
+    },
+    {
+      titleKey: 'nav.system',
+      items: [
+        {
+          name: t('nav.users'),
+          href: '/users',
+          icon: Users,
+        },
+        {
+          name: t('nav.analytics'),
+          href: '/analytics',
+          icon: BarChart3,
+        },
+        {
+          name: t('nav.settings'),
+          href: '/settings',
+          icon: Settings,
+        },
+      ],
+    },
+  ];
+  const NavItemComponent: React.FC<{ item: NavItem }> = ({ item }) => {
     return (
       <NavLink
         to={item.href}
         className={({ isActive }) =>
           clsx(
-            'flex items-center gap-3 py-2 px-3 mx-3 rounded-md text-sm font-medium transition-colors',
-            paddingLeft,
+            'flex items-center gap-3 py-2.5 px-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200',
             isActive
-              ? 'bg-primary-100 text-primary-900 border-r-2 border-primary-600'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+              ? 'bg-primary-100 text-primary-900 shadow-sm'
+              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
           )
         }
-        onClick={onClose} // Cerrar al navegar
+        onClick={onClose}
       >
         <item.icon className="h-5 w-5" />
-        <span>{item.name}</span>
+        <span className="flex-1">{item.name}</span>
         {item.badge && (
-          <span className="bg-primary-100 text-primary-800 text-xs px-2 py-1 rounded-full">
+          <span className="bg-primary-500 text-white text-xs px-2 py-0.5 rounded-full">
             {item.badge}
           </span>
         )}
@@ -167,14 +159,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       <div
         className={clsx(
           'fixed top-0 left-0 z-50 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out',
-          'w-64',
+          'w-64 flex flex-col',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo section */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-primary-600 rounded-lg flex items-center justify-center">
+            <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-lg">CA</span>
             </div>
             <span className="ml-3 font-semibold text-gray-900">Car Admin</span>
@@ -190,17 +182,26 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 py-6">
-          <div className="space-y-1">
-            {navigation.map((item) => (
-              <NavItemComponent key={item.name} item={item} />
-            ))}
-          </div>
+        <nav className="flex-1 py-4 overflow-y-auto">
+          {navigationSections.map((section, index) => (
+            <div key={index} className="mb-4">
+              {section.titleKey && (
+                <h3 className="px-6 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                  {t(section.titleKey)}
+                </h3>
+              )}
+              <div className="space-y-0.5">
+                {section.items.map((item) => (
+                  <NavItemComponent key={item.name} item={item} />
+                ))}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200">
-          <div className="bg-primary-50 rounded-lg p-4">
+        <div className="p-4 border-t border-gray-200">
+          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-4">
             <p className="text-xs text-primary-800 font-medium">
               Car Catalog Admin v1.0.0
             </p>

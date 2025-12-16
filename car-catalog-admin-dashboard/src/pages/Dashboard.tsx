@@ -1,61 +1,116 @@
 import React from 'react';
-import { 
-  Car, 
-  Users, 
+import {
+  Car,
+  Users,
   Image, // Cambiado de 'Images' a 'Image'
-  TrendingUp 
+  TrendingUp
 } from 'lucide-react';
 import { useGet } from '@/hooks/useApi';
 import { DashboardStats } from '@/types';
 import StatsCard from '@/components/dashboard/StatsCard';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import Table, { Column } from '@/components/common/Table';
+import { formatCurrency } from '@/utils/formatters';
+import { formatDistanceToNow } from 'date-fns';
 import { Breadcrumb } from '@/components/layout';
+import { useTranslation } from 'react-i18next';
 
-// Mock data for activities
-const mockActivities = [
-  {
-    id: '1',
-    type: 'car_added' as const,
-    title: 'New car added',
-    description: 'Tesla Model 3 2023 has been added to the catalog',
-    timestamp: new Date(Date.now() - 1000 * 60 * 15),
-    user: 'Admin User',
-  },
-  {
-    id: '2',
-    type: 'user_registered' as const,
-    title: 'New user registration',
-    description: 'John Doe registered a new account',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2),
-  },
-  {
-    id: '3',
-    type: 'image_uploaded' as const,
-    title: 'Images uploaded',
-    description: '5 new car images have been uploaded',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 4),
-    user: 'Admin User',
-  },
-  {
-    id: '4',
-    type: 'settings_changed' as const,
-    title: 'Settings updated',
-    description: 'API configuration has been updated',
-    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24),
-    user: 'Admin User',
-  },
-];
+// Activities will be derived from backend stats (recentCars and recentUsers)
 
 const Dashboard: React.FC = () => {
+  const { t } = useTranslation();
   const { 
     data: stats, 
     loading: statsLoading, 
     error: statsError 
   } = useGet<DashboardStats>('/admin/stats', { immediate: true });
 
+  const {
+    data: carsResponse,
+    loading: carsLoading,
+    execute: fetchCars,
+  } = useGet<any>('/cars');
+
+  const {
+    data: usersResponse,
+    loading: usersLoading,
+    execute: fetchUsers,
+  } = useGet<any>('/users');
+
+  const {
+    data: filesStatsResponse,
+    loading: filesLoading,
+    execute: fetchFilesStats,
+  } = useGet<any>('/files/stats');
+
   const breadcrumbItems = [
-    { label: 'Dashboard', current: true },
+    { label: t('nav.dashboard'), current: true },
   ];
+
+  const activities = React.useMemo(() => {
+    if (!stats) return [];
+
+    const carActivities = (stats.recentCars || []).map((c) => ({
+      id: c.id || c._id || `car-${c.id}`,
+      type: 'car_added' as const,
+      title: `${c.make} ${c.model} ${c.year}`,
+      description: c.price ? formatCurrency(c.price) : '',
+      timestamp: new Date(c.createdAt),
+      user: undefined,
+    }));
+
+    const userActivities = (stats.recentUsers || []).map((u) => ({
+      id: u.id || u._id,
+      type: 'user_registered' as const,
+      title: u.name,
+      description: u.email,
+      timestamp: new Date(u.createdAt),
+      user: u.name,
+    }));
+
+    return [...carActivities, ...userActivities].sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  }, [stats]);
+
+  // Normalize responses: some endpoints return { success, data }
+  const recentCarsList = React.useMemo(() => {
+    if (carsResponse) {
+      const payload = (carsResponse as any).data || carsResponse;
+      return Array.isArray(payload) ? payload : (payload?.data || []);
+    }
+    return stats?.recentCars || [];
+  }, [carsResponse, stats]);
+
+  const recentUsersList = React.useMemo(() => {
+    if (usersResponse) {
+      const payload = (usersResponse as any).data || usersResponse;
+      return Array.isArray(payload) ? payload : (payload?.data || payload?.users || []);
+    }
+    return stats?.recentUsers || [];
+  }, [usersResponse, stats]);
+
+  // Fetch small lists on mount
+  React.useEffect(() => {
+    fetchCars('?limit=6&sort=-createdAt');
+    fetchUsers('?limit=6');
+    fetchFilesStats();
+  }, [fetchCars, fetchUsers]);
+
+  // Table columns
+  const carColumns: Column<any>[] = React.useMemo(() => [
+    { key: '_id', title: 'ID', width: '80px' },
+    { key: 'make', title: t('cars.make') },
+    { key: 'model', title: t('cars.model') },
+    { key: 'year', title: t('cars.year'), width: '80px' },
+    { key: 'price', title: t('cars.price'), render: (v: any) => (v ? formatCurrency(v) : '-') },
+  ], [t]);
+
+  const userColumns: Column<any>[] = React.useMemo(() => [
+    { key: '_id', title: 'ID', width: '80px' },
+    { key: 'name', title: t('users.name') },
+    { key: 'email', title: t('users.email') },
+    { key: 'role', title: t('users.role') },
+    { key: 'createdAt', title: t('users.createdAt'), render: (v: any) => formatDistanceToNow(new Date(v), { addSuffix: true }) },
+  ], [t]);
 
   if (statsError) {
     return (
@@ -64,7 +119,7 @@ const Dashboard: React.FC = () => {
           <TrendingUp className="h-12 w-12 mx-auto" />
         </div>
         <h3 className="text-lg font-medium text-gray-900 mb-2">
-          Error loading dashboard
+          {t('errors.somethingWentWrong')}
         </h3>
         <p className="text-gray-500">{statsError}</p>
       </div>
@@ -78,20 +133,20 @@ const Dashboard: React.FC = () => {
 
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <p className="text-gray-600">
-          Welcome to the Car Catalog Admin Dashboard
+          {t('dashboard.overview')}
         </p>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatsCard
-          title="Total Cars"
+          title={t('dashboard.totalCars')}
           value={stats?.totalCars || 0}
           icon={Car}
           color="blue"
-          loading={statsLoading}
+          loading={filesLoading}
           change={{
             value: 12,
             type: 'increase',
@@ -99,7 +154,7 @@ const Dashboard: React.FC = () => {
           }}
         />
         <StatsCard
-          title="Total Users"
+          title={t('dashboard.totalUsers')}
           value={stats?.totalUsers || 0}
           icon={Users}
           color="green"
@@ -111,7 +166,7 @@ const Dashboard: React.FC = () => {
           }}
         />
         <StatsCard
-          title="Active Cars"
+          title={t('cars.available')}
           value={stats?.activeCars || 0}
           icon={Car}
           color="purple"
@@ -123,8 +178,8 @@ const Dashboard: React.FC = () => {
           }}
         />
         <StatsCard
-          title="Images"
-          value="1,247"
+          title={t('dashboard.totalImages')}
+          value={filesStatsResponse?.data?.totalFiles || filesStatsResponse?.totalFiles || 0}
           icon={Image} // Corregido aquí también
           color="yellow"
           loading={statsLoading}
@@ -138,46 +193,59 @@ const Dashboard: React.FC = () => {
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Cars */}
-        <div className="lg:col-span-2">
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6 border-b border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900">Recent Cars</h3>
-            </div>
-            <div className="p-6">
-              <p className="text-gray-500 text-center">Recent cars will appear here</p>
-            </div>
+        {/* Recent Cars & Users tables */}
+        <div className="lg:col-span-2 space-y-6">
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.recentCars')}</h3>
+            <Table
+              columns={carColumns}
+              data={recentCarsList}
+              loading={carsLoading}
+              rowKey={(r) => r._id || r.id}
+              emptyText={t('common.noResults')}
+            />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.recentUsers')}</h3>
+            <Table
+              columns={userColumns}
+              data={recentUsersList}
+              loading={usersLoading}
+              rowKey={(r) => r._id || r.id}
+              emptyText={t('common.noResults')}
+            />
           </div>
         </div>
 
         {/* Recent Activity */}
         <div>
-          <RecentActivity 
-            activities={mockActivities} 
-            loading={statsLoading}
-          />
+            <RecentActivity
+              activities={activities}
+              loading={statsLoading}
+            />
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">{t('dashboard.quickActions')}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
             <Car className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">Add New Car</span>
+            <span className="text-sm text-gray-600">{t('cars.addCar')}</span>
           </button>
           <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
             <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">Add New User</span>
+            <span className="text-sm text-gray-600">{t('users.addUser')}</span>
           </button>
           <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
             <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">Upload Images</span>
+            <span className="text-sm text-gray-600">{t('images.upload')}</span>
           </button>
           <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
             <TrendingUp className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">View Analytics</span>
+            <span className="text-sm text-gray-600">{t('nav.analytics')}</span>
           </button>
         </div>
       </div>

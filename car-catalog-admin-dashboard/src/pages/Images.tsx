@@ -16,22 +16,21 @@ const Images: React.FC = () => {
   });
   const [, setLoadingStats] = useState(true);
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
-
-  const fetchStats = async () => {
+  const fetchStats = React.useCallback(async () => {
     setLoadingStats(true);
     try {
       const data = await filesService.getStats();
       setStats(data);
     } catch (error) {
       console.error('Error loading stats:', error);
-      // Use default stats if API fails
     } finally {
       setLoadingStats(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    void fetchStats();
+  }, [fetchStats]);
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
@@ -158,6 +157,7 @@ const Images: React.FC = () => {
       <FileExplorer 
         selectionMode="none"
         filterType="all"
+        onFilesChanged={fetchStats}
       />
     </div>
   );

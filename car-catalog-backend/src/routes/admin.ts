@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { authenticateToken, requireAdmin, AuthRequest } from '@/middleware/auth';
 import { errorHandler } from '@/middleware/errorHandler';
+import { UserController } from '@/controllers/userController';
+import { body } from 'express-validator';
+import { sanitizeInput, handleValidationErrors } from '@/middleware/validation';
 import Car from '@/models/Car';
 import User from '@/models/User';
 import { logger } from '@/utils/logger';
@@ -227,5 +230,19 @@ router.get('/users', async (req: AuthRequest, res) => {
     });
   }
 });
+
+/**
+ * @route   POST /api/admin/users
+ * @desc    Create new user (Admin only)
+ * @access  Private (Admin only)
+ */
+router.post('/users', [
+  sanitizeInput,
+  body('name').notEmpty().withMessage('Name is required').trim().isLength({ min: 2, max: 50 }),
+  body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Invalid email').normalizeEmail(),
+  body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
+  body('role').optional().isIn(['user', 'admin']),
+  handleValidationErrors
+], UserController.createUser);
 
 export default router;

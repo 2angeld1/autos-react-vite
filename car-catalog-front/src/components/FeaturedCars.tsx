@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useCarContext } from '../context/CarContext';
 import { useCarImage } from '../hooks/useCarImage';
-import { getDefaultCarImage } from '../services/api/carBrands';
 import type { Car } from '@/types';
 
 const FeaturedCars: React.FC = () => {
@@ -122,10 +121,10 @@ const FeaturedCars: React.FC = () => {
 };
 
 const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
-    // Usar imagen precargada para evitar errores
+    // Usar imagen del backend
     const carImageHook = useCarImage({ 
         car,
-        fallbackImage: getDefaultCarImage(car.make) // Asegurar un fallback específico por marca
+        fallbackImage: car.image // Usar imagen del auto desde backend
     });
     
     // ✅ Determinar si es marca china

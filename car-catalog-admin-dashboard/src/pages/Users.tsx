@@ -1,5 +1,6 @@
 import React from 'react';
-import { Plus, Download, UserPlus, Trash2, Shield, ShieldOff } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Download, UserPlus, Trash2, Shield, ShieldOff } from 'lucide-react';
 import Button from '@/components/common/Button';
 import UserTable from '@/components/users/UserTable';
 import UserForm from '@/components/users/UserForm';
@@ -11,6 +12,7 @@ import { User, ApiResponse } from '@/types';
 import toast from 'react-hot-toast';
 
 const Users: React.FC = () => {
+  const { t } = useTranslation();
   const [filters, setFilters] = React.useState<UserFilters>({
     search: '',
     role: '',
@@ -29,6 +31,8 @@ const Users: React.FC = () => {
   const [userToDelete, setUserToDelete] = React.useState<User | null>(null);
   const [showToggleStatusModal, setShowToggleStatusModal] = React.useState(false);
   const [userToToggle, setUserToToggle] = React.useState<User | null>(null);
+  const [generatedPassword, setGeneratedPassword] = React.useState<string | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = React.useState(false);
 
   // API hooks
   const { 
@@ -37,10 +41,18 @@ const Users: React.FC = () => {
     execute: fetchUsers 
   } = useGet<{ users: User[]; total: number; pages: number }>('/admin/users');
 
-  const { execute: createUser, loading: createLoading } = usePost('/admin/users');
-  const { execute: updateUser, loading: updateLoading } = usePut('/admin/users');
-  const { execute: deleteUser, loading: deleteLoading } = useDelete('/admin/users');
-  const { execute: toggleUserStatus, loading: toggleLoading } = usePut('/admin/users');
+  // Normalize API response shape: some endpoints return { success, data: { users,... } }
+  const usersData: any = React.useMemo(() => {
+    if (!usersResponse) return null;
+    // If API returned wrapper { success, data } unwrap it
+    if ((usersResponse as any).data) return (usersResponse as any).data;
+    return usersResponse;
+  }, [usersResponse]);
+
+  const { execute: createUser, loading: createLoading } = usePost<ApiResponse<any>>();
+  const { execute: updateUser, loading: updateLoading } = usePut<ApiResponse<any>>();
+  const { execute: deleteUser, loading: deleteLoading } = useDelete<ApiResponse<any>>();
+  const { execute: toggleUserStatus, loading: toggleLoading } = usePut<ApiResponse<any>>();
 
   // Fetch users when filters or pagination changes
   React.useEffect(() => {
@@ -61,7 +73,7 @@ const Users: React.FC = () => {
   }, [filters, currentPage, sortKey, sortDirection, fetchUsers, pageSize]);
 
   const breadcrumbItems = [
-    { label: 'Users', current: true },
+    { label: t('nav.users'), current: true },
   ];
 
   const handleAddUser = () => {
@@ -93,38 +105,68 @@ const Users: React.FC = () => {
     try {
       if (selectedUser) {
         // Update existing user
-        const response = await updateUser(`/${selectedUser.id}`, formData);
+        const response = await updateUser(`/admin/users/${selectedUser.id}`, formData);
         if (response?.success) {
-          toast.success('User updated successfully');
+          toast.success(t('users.userUpdated'));
           fetchUsers();
         }
       } else {
         // Create new user
-        const response = await createUser('', formData);
+        // If no password provided, generate one client-side and set it in the FormData
+        let generated: string | null = null;
+        const pw = formData.get('password');
+        if (!pw || (typeof pw === 'string' && pw.trim() === '')) {
+          generated = generatePassword(12);
+          formData.set('password', generated);
+        }
+
+        const response = await createUser('/admin/users', formData);
         if (response?.success) {
-          toast.success('User created successfully');
+          toast.success(t('users.userCreated'));
           fetchUsers();
+          if (generated) {
+            setGeneratedPassword(generated);
+            setShowPasswordModal(true);
+          }
         }
       }
       setShowUserForm(false);
     } catch (error: any) {
-      toast.error(error.message || 'Something went wrong');
+      toast.error(error.message || t('errors.somethingWentWrong'));
     }
+  };
+
+  // Generate a random secure password
+  const generatePassword = (length = 12) => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
+    let result = '';
+    const array = new Uint32Array(length);
+    if (window.crypto && window.crypto.getRandomValues) {
+      window.crypto.getRandomValues(array);
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(array[i] % chars.length);
+      }
+    } else {
+      for (let i = 0; i < length; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+    }
+    return result;
   };
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
 
     try {
-      const response = await deleteUser(`/${userToDelete.id}`);
+      const response = await deleteUser(`/admin/users/${userToDelete.id}`);
       if (response?.success) {
-        toast.success('User deleted successfully');
+        toast.success(t('users.userDeleted'));
         setShowDeleteModal(false);
         setUserToDelete(null);
         fetchUsers();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete user');
+      toast.error(error.message || t('errors.failedToDelete'));
     }
   };
 
@@ -132,15 +174,15 @@ const Users: React.FC = () => {
     if (!userToToggle) return;
 
     try {
-      const response = await toggleUserStatus(`/${userToToggle.id}/toggle-status`, {});
+      const response = await toggleUserStatus(`/admin/users/${userToToggle.id}/toggle-status`, {});
       if (response?.success) {
-        toast.success(`User ${userToToggle.isActive ? 'deactivated' : 'activated'} successfully`);
+        toast.success(userToToggle.isActive ? t('users.userDeactivated') : t('users.userActivated'));
         setShowToggleStatusModal(false);
         setUserToToggle(null);
         fetchUsers();
       }
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update user status');
+      toast.error(error.message || t('errors.failedToUpdate'));
     }
   };
 
@@ -166,7 +208,7 @@ const Users: React.FC = () => {
 
   const exportUsers = () => {
     // Implement CSV export
-    toast.success('Export feature coming soon');
+    toast.success(t('common.comingSoon'));
   };
 
   return (
@@ -177,10 +219,10 @@ const Users: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Users</h1>
+          <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
           <p className="text-gray-600">
-            Manage user accounts and permissions
-            {usersResponse && ` • ${usersResponse.total} total users`}
+            {t('users.manageUsers')}
+            {usersData && ` • ${usersData.total} ${t('common.total').toLowerCase()}`}
           </p>
         </div>
         
@@ -190,13 +232,13 @@ const Users: React.FC = () => {
             onClick={exportUsers}
             icon={<Download className="h-4 w-4" />}
           >
-            Export
+            {t('common.export')}
           </Button>
           <Button
             onClick={handleAddUser}
             icon={<UserPlus className="h-4 w-4" />}
           >
-            Add User
+            {t('users.addUser')}
           </Button>
         </div>
       </div>
@@ -211,7 +253,7 @@ const Users: React.FC = () => {
 
       {/* Table */}
       <UserTable
-        users={usersResponse?.users || []}
+        users={usersData?.users || []}
         loading={usersLoading}
         onEdit={handleEditUser}
         onDelete={handleDeleteUser}
@@ -223,12 +265,12 @@ const Users: React.FC = () => {
       />
 
       {/* Pagination */}
-      {usersResponse && usersResponse.pages > 1 && (
+      {usersData && usersData.pages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-700">
-            Showing {((currentPage - 1) * pageSize) + 1} to{' '}
-            {Math.min(currentPage * pageSize, usersResponse.total)} of{' '}
-            {usersResponse.total} results
+            {t('table.showing')} {((currentPage - 1) * pageSize) + 1} {t('table.to')}{' '}
+            {Math.min(currentPage * pageSize, usersData.total)} {t('table.of')}{' '}
+            {usersData.total} {t('table.results')}
           </p>
           
           <div className="flex gap-2">
@@ -238,13 +280,13 @@ const Users: React.FC = () => {
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(currentPage - 1)}
             >
-              Previous
+              {t('table.previous')}
             </Button>
             
             {/* Page numbers */}
-            {[...Array(Math.min(5, usersResponse.pages))].map((_, i) => {
+            {[...Array(Math.min(5, usersData.pages))].map((_, i) => {
               const pageNumber = Math.max(1, currentPage - 2) + i;
-              if (pageNumber > usersResponse.pages) return null;
+              if (pageNumber > usersData.pages) return null;
               
               return (
                 <Button
@@ -261,10 +303,10 @@ const Users: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              disabled={currentPage === usersResponse.pages}
+              disabled={currentPage === usersData.pages}
               onClick={() => setCurrentPage(currentPage + 1)}
             >
-              Next
+              {t('table.next')}
             </Button>
           </div>
         </div>
@@ -283,7 +325,7 @@ const Users: React.FC = () => {
       <Modal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
-        title="Delete User"
+        title={t('users.deleteUser')}
         footer={
           <>
             <Button
@@ -291,7 +333,7 @@ const Users: React.FC = () => {
               onClick={() => setShowDeleteModal(false)}
               disabled={deleteLoading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               variant="danger"
@@ -299,7 +341,7 @@ const Users: React.FC = () => {
               loading={deleteLoading}
               icon={<Trash2 className="h-4 w-4" />}
             >
-              Delete User
+              {t('users.deleteUser')}
             </Button>
           </>
         }
@@ -309,16 +351,55 @@ const Users: React.FC = () => {
             <Trash2 className="h-6 w-6 text-red-600" />
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Are you sure you want to delete this user?
+            {t('users.confirmDelete')}
           </h3>
           {userToDelete && (
             <p className="text-sm text-gray-500 mb-4">
-              {userToDelete.name} ({userToDelete.email}) will be permanently removed.
+              {userToDelete.name} ({userToDelete.email}) {t('users.willBeRemoved')}
             </p>
           )}
           <p className="text-sm text-gray-400">
-            This action cannot be undone.
+            {t('common.cannotBeUndone')}
           </p>
+        </div>
+      </Modal>
+
+      {/* Generated Password Modal */}
+      <Modal
+        isOpen={showPasswordModal}
+        onClose={() => { setShowPasswordModal(false); setGeneratedPassword(null); }}
+        title={t('users.generatedPassword')}
+        footer={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => { setShowPasswordModal(false); setGeneratedPassword(null); }}
+            >
+              {t('common.close')}
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => {
+                if (generatedPassword) {
+                  navigator.clipboard?.writeText(generatedPassword).then(() => {
+                    toast.success(t('users.passwordCopied'));
+                  }).catch(() => {
+                    toast.error(t('users.passwordCopyFailed'));
+                  });
+                }
+              }}
+            >
+              {t('users.copyPassword')}
+            </Button>
+          </>
+        }
+      >
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('users.userCreated')}</h3>
+          <p className="text-sm text-gray-500 mb-4">{t('users.passwordGenerated')}</p>
+          <div className="mx-auto bg-gray-100 px-4 py-3 rounded-md inline-block">
+            <code className="text-sm break-all">{generatedPassword}</code>
+          </div>
         </div>
       </Modal>
 
@@ -326,7 +407,7 @@ const Users: React.FC = () => {
       <Modal
         isOpen={showToggleStatusModal}
         onClose={() => setShowToggleStatusModal(false)}
-        title={`${userToToggle?.isActive ? 'Deactivate' : 'Activate'} User`}
+        title={userToToggle?.isActive ? t('users.deactivateUser') : t('users.activateUser')}
         footer={
           <>
             <Button
@@ -334,7 +415,7 @@ const Users: React.FC = () => {
               onClick={() => setShowToggleStatusModal(false)}
               disabled={toggleLoading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               variant={userToToggle?.isActive ? "danger" : "primary"}
@@ -342,7 +423,7 @@ const Users: React.FC = () => {
               loading={toggleLoading}
               icon={userToToggle?.isActive ? <ShieldOff className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
             >
-              {userToToggle?.isActive ? 'Deactivate' : 'Activate'} User
+              {userToToggle?.isActive ? t('users.deactivate') : t('users.activate')}
             </Button>
           </>
         }
@@ -358,12 +439,12 @@ const Users: React.FC = () => {
             )}
           </div>
           <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {userToToggle?.isActive ? 'Deactivate' : 'Activate'} user account?
+            {userToToggle?.isActive ? t('users.confirmDeactivate') : t('users.confirmActivate')}
           </h3>
           {userToToggle && (
             <p className="text-sm text-gray-500 mb-4">
-              {userToToggle.name} ({userToToggle.email}) will be{' '}
-              {userToToggle.isActive ? 'deactivated and unable to log in' : 'activated and able to log in'}.
+              {userToToggle.name} ({userToToggle.email}){' '}
+              {userToToggle.isActive ? t('users.willBeDeactivated') : t('users.willBeActivated')}
             </p>
           )}
         </div>

@@ -236,7 +236,7 @@ const UserForm: React.FC<UserFormProps> = ({
           {/* Password Fields */}
           <div className="space-y-4">
             <h4 className="text-sm font-medium text-gray-900">
-              {isEditing ? 'Change Password (Optional)' : 'Password'}
+              {isEditing ? 'Change Password (Optional)' : 'Password (leave empty to auto-generate)'}
             </h4>
             
             <div className="relative">
@@ -244,14 +244,14 @@ const UserForm: React.FC<UserFormProps> = ({
                 label="Password"
                 type={showPassword ? 'text' : 'password'}
                 {...register('password', {
-                  required: !isEditing ? 'Password is required' : false,
+                  required: false,
                   minLength: { 
                     value: 6, 
                     message: 'Password must be at least 6 characters' 
                   }
                 })}
                 error={errors.password?.message}
-                placeholder={isEditing ? 'Leave blank to keep current password' : 'Enter password'}
+                placeholder={isEditing ? 'Leave blank to keep current password' : 'Leave blank to auto-generate password'}
               />
               <button
                 type="button"
@@ -262,13 +262,13 @@ const UserForm: React.FC<UserFormProps> = ({
               </button>
             </div>
 
-            {(watchPassword || !isEditing) && (
+            {watchPassword && (
               <div className="relative">
                 <Input
                   label="Confirm Password"
                   type={showConfirmPassword ? 'text' : 'password'}
                   {...register('confirmPassword', {
-                    required: (watchPassword || !isEditing) ? 'Please confirm password' : false,
+                    required: watchPassword ? 'Please confirm password' : false,
                     validate: value => 
                       value === watchPassword || 'Passwords do not match'
                   })}

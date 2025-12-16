@@ -226,9 +226,9 @@ export const validateForm = <T extends Record<string, any>>(
   data: T,
   validators: Record<keyof T, (value: any) => string | null>
 ): Record<keyof T, string> => {
-  const errors: Record<keyof T, string> = {} as Record<keyof T, string>;
+  const errors: Partial<Record<keyof T, string>> = {};
   
-  Object.keys(validators).forEach((key) => {
+  (Object.keys(validators) as Array<keyof T>).forEach((key) => {
     const validator = validators[key];
     const error = validator(data[key]);
     if (error) {
@@ -236,7 +236,7 @@ export const validateForm = <T extends Record<string, any>>(
     }
   });
   
-  return errors;
+  return errors as Record<keyof T, string>;
 };
 
 // Validation result type

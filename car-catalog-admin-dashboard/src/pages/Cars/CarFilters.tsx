@@ -2,6 +2,7 @@ import React from 'react';
 import { Search, Filter, X } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import { useTranslation } from 'react-i18next';
 
 export interface CarFilters {
   search: string;
@@ -28,6 +29,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
   onReset,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [showAdvanced, setShowAdvanced] = React.useState(false);
 
   const updateFilter = (key: keyof CarFilters, value: string) => {
@@ -49,7 +51,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
           <Input
-            placeholder="Search cars by make, model, or description..."
+            placeholder={t('cars.searchPlaceholder')}
             value={filters.search}
             onChange={(e) => updateFilter('search', e.target.value)}
             startIcon={<Search className="h-4 w-4" />}
@@ -62,7 +64,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
             onClick={() => setShowAdvanced(!showAdvanced)}
             icon={<Filter className="h-4 w-4" />}
           >
-            {showAdvanced ? 'Hide' : 'Show'} Filters
+            {showAdvanced ? t('cars.hideAdvancedFilters') : t('cars.advancedFilters')}
           </Button>
           
           {hasActiveFilters && (
@@ -71,7 +73,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
               onClick={onReset}
               icon={<X className="h-4 w-4" />}
             >
-              Clear
+              {t('cars.clearFilters')}
             </Button>
           )}
         </div>
@@ -84,7 +86,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
             {/* Make */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Make
+                {t('cars.make')}
               </label>
               <select
                 value={filters.make}
@@ -112,7 +114,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
             {/* Fuel Type */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fuel Type
+                {t('cars.fuelType')}
               </label>
               <select
                 value={filters.fuelType}
@@ -131,7 +133,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
             {/* Transmission */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Transmission
+                {t('cars.transmission')}
               </label>
               <select
                 value={filters.transmission}
@@ -148,7 +150,7 @@ const CarFiltersComponent: React.FC<CarFiltersProps> = ({
             {/* Availability */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Availability
+                {t('cars.isAvailable')}
               </label>
               <select
                 value={filters.isAvailable}

@@ -6,6 +6,7 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { useAuthStore } from '@/store/authSlice';
 import toast from 'react-hot-toast';
+import { useTranslation } from 'react-i18next';
 
 interface LoginFormData {
   email: string;
@@ -14,6 +15,7 @@ interface LoginFormData {
 }
 
 const LoginForm: React.FC = () => {
+  const { t } = useTranslation();
   const [showPassword, setShowPassword] = React.useState(false);
   const { login, loading, error } = useAuthStore();
   
@@ -29,10 +31,10 @@ const LoginForm: React.FC = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(data.email, data.password, data.rememberMe);
-      toast.success('Welcome back!');
+      await login(data.email, data.password);
+      toast.success(t('auth.welcomeBack'));
     } catch (error: any) {
-      toast.error(error.message || 'Login failed');
+      toast.error(error.message || t('auth.loginFailed'));
     }
   };
 
@@ -45,10 +47,10 @@ const LoginForm: React.FC = () => {
             <span className="text-white font-bold text-xl">CA</span>
           </div>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
-            Sign in to your account
+            {t('auth.signIn')}
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Access the Car Catalog Admin Dashboard
+            {t('auth.accessDashboard')}
           </p>
         </div>
 
@@ -59,7 +61,7 @@ const LoginForm: React.FC = () => {
               <AlertCircle className="h-5 w-5 text-red-400" />
               <div className="ml-3">
                 <h3 className="text-sm font-medium text-red-800">
-                  Authentication Error
+                  {t('auth.authError')}
                 </h3>
                 <p className="mt-1 text-sm text-red-700">{error}</p>
               </div>
@@ -71,14 +73,14 @@ const LoginForm: React.FC = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <Input
-              label="Email Address"
+              label={t('auth.email')}
               type="email"
               autoComplete="email"
               {...register('email', {
-                required: 'Email is required',
+                required: t('validation.required'),
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address',
+                  message: t('validation.invalidEmail'),
                 },
               })}
               error={errors.email?.message}
@@ -89,19 +91,19 @@ const LoginForm: React.FC = () => {
 
             <div className="relative">
               <Input
-                label="Password"
+                label={t('auth.password')}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="current-password"
                 {...register('password', {
-                  required: 'Password is required',
+                  required: t('validation.required'),
                   minLength: {
                     value: 6,
-                    message: 'Password must be at least 6 characters',
+                    message: t('validation.minLength', { min: 6 }),
                   },
                 })}
                 error={errors.password?.message}
                 startIcon={<Lock className="h-4 w-4" />}
-                placeholder="Enter your password"
+                placeholder={t('auth.password')}
                 fullWidth
               />
               <button
@@ -128,7 +130,7 @@ const LoginForm: React.FC = () => {
                 className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
               />
               <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-                Remember me
+                {t('auth.rememberMe')}
               </label>
             </div>
 
@@ -137,7 +139,7 @@ const LoginForm: React.FC = () => {
                 to="/forgot-password"
                 className="font-medium text-primary-600 hover:text-primary-500"
               >
-                Forgot your password?
+                {t('auth.forgotPassword')}
               </Link>
             </div>
           </div>
@@ -149,20 +151,20 @@ const LoginForm: React.FC = () => {
             fullWidth
             size="lg"
           >
-            Sign in
+            {t('auth.signInButton')}
           </Button>
 
           {/* Demo Credentials */}
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <h4 className="text-sm font-medium text-blue-800 mb-2">
-              Demo Credentials
+              {t('auth.demoCredentials')}
             </h4>
             <div className="text-xs text-blue-700 space-y-1">
               <div>
-                <strong>Admin:</strong> admin@example.com / admin123
+                <strong>{t('auth.admin')}:</strong> admin@example.com / admin123
               </div>
               <div>
-                <strong>User:</strong> user@example.com / user123
+                <strong>{t('auth.user')}:</strong> user@example.com / user123
               </div>
             </div>
           </div>

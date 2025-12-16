@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchCarById, getHighResCarImage } from '../services/api';
+import { fetchCarById } from '../services/api';
 import { useCarContext } from '../context/CarContext';
 import { useCarImage } from '../hooks/useCarImage';
 import type { Car } from '@/types';
@@ -72,43 +72,19 @@ const CarDetails: React.FC = () => {
         window.scrollTo(0, 0);
     }, [id, cars]);
 
-    // ✅ useEffect para background - mejorado para wallpapers específicos
+    // ✅ useEffect para background - usar imagen del backend
     useEffect(() => {
-        if (!car || car.id === 'loading' || !carImageHook.imageSrc) {
+        if (!car || car.id === 'loading') {
             return;
         }
 
-        const timeoutId = setTimeout(async () => {
-            try {
-                setBgLoading(true);
-                
-                // Intentar obtener wallpaper específico del auto
-                const wallpaperImage = await getHighResCarImage(car.make, car.model, car.year);
-                
-                // Precargar la imagen para verificar que funciona
-                const img = new Image();
-                img.onload = () => {
-                    setBgImage(wallpaperImage);
-                    setBgLoading(false);
-                };
-                img.onerror = () => {
-                    console.warn(`⚠️ Failed to load wallpaper, using standard car image`);
-                    setBgImage(carImageHook.imageSrc);
-                    setBgLoading(false);
-                };
-                
-                // Agregar crossOrigin para evitar problemas de CORS
-                img.crossOrigin = 'anonymous';
-                img.src = wallpaperImage;
-                
-            } catch (imgErr) {
-                console.error("❌ Error loading wallpaper image:", imgErr);
-                setBgImage(carImageHook.imageSrc);
-                setBgLoading(false);
-            }
-        }, 300); // Reducir delay para carga más rápida
-
-        return () => clearTimeout(timeoutId);
+        // Usar la imagen del auto desde el backend
+        const imageUrl = car.image || carImageHook.imageSrc;
+        
+        if (imageUrl) {
+            setBgImage(imageUrl);
+        }
+        setBgLoading(false);
     }, [car, carImageHook.imageSrc]);
 
     if (loading) return (

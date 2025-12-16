@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Download, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Car, CarFilters } from '@/types';
@@ -12,6 +13,7 @@ import Swal from 'sweetalert2'; // Agrega esta importación si no está
 
 const Cars: React.FC = () => {
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   const [filters, setFilters] = React.useState<CarFilters>({
     search: '',
@@ -43,7 +45,7 @@ const Cars: React.FC = () => {
   }, [fetchCars]);
 
   const breadcrumbItems = [
-    { label: 'Cars', current: true },
+    { label: t('nav.cars'), current: true },
   ];
 
   const handleAddCar = () => {
@@ -108,30 +110,30 @@ const Cars: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Cars</h1>
-          <p className="text-gray-600">Manage your car inventory</p>
+          <h1 className="text-2xl font-bold text-gray-900">{t('nav.cars')}</h1>
+          <p className="text-gray-600">{t('cars.manageCars')}</p>
         </div>
 
         <div className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
-            onClick={() => toast.success('Export feature coming soon')}
+            onClick={() => toast.success(t('common.comingSoon'))}
             icon={<Download className="h-4 w-4" />}
           >
-            Export
+            {t('common.export')}
           </Button>
           <Button
             variant="outline"
-            onClick={() => toast.success('Import feature coming soon')}
+            onClick={() => toast.success(t('common.comingSoon'))}
             icon={<Upload className="h-4 w-4" />}
           >
-            Import
+            {t('common.import')}
           </Button>
           <Button
             onClick={handleAddCar}
             icon={<Plus className="h-4 w-4" />}
           >
-            Add Car
+            {t('cars.addCar')}
           </Button>
         </div>
       </div>

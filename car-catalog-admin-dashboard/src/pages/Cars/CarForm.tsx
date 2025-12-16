@@ -2,6 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { ImageIcon, Trash2 } from 'lucide-react';
 import Button from '@/components/common/Button';
+import { useTranslation } from 'react-i18next';
 import Input from '@/components/common/Input';
 import { ImagePicker } from '@/components/files';
 import { filesService } from '@/services/files';
@@ -39,6 +40,7 @@ const CarForm: React.FC<CarFormProps> = ({
   onSubmit,
   loading = false,
 }) => {
+  const { t } = useTranslation();
   const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
   const [imagePreview, setImagePreview] = React.useState<string | null>(null);
   const [selectedFileItem, setSelectedFileItem] = React.useState<FileItem | null>(null);
@@ -69,7 +71,7 @@ const CarForm: React.FC<CarFormProps> = ({
   } = useForm<CarFormData>({
     defaultValues: car ? {
       make: car.make,
-      model: car.model,
+      model: (car as any).model ?? (car as any).carModel ?? '',
       year: car.year,
       price: car.price,
       description: car.description,
@@ -85,6 +87,29 @@ const CarForm: React.FC<CarFormProps> = ({
       isAvailable: car.isAvailable,
     } : undefined,
   });
+
+  // When the `car` prop changes (e.g. loaded from API), populate the form
+  React.useEffect(() => {
+    if (car) {
+      reset({
+        make: car.make,
+        model: (car as any).model ?? (car as any).carModel ?? '',
+        year: car.year,
+        price: car.price,
+        description: car.description,
+        fuel_type: car.fuel_type,
+        transmission: car.transmission,
+        cylinders: car.cylinders,
+        class: car.class,
+        displacement: car.displacement,
+        city_mpg: car.city_mpg,
+        highway_mpg: car.highway_mpg,
+        combination_mpg: car.combination_mpg,
+        features: car.features?.join(', ') || '',
+        isAvailable: car.isAvailable,
+      });
+    }
+  }, [car, reset]);
 
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -261,19 +286,18 @@ const CarForm: React.FC<CarFormProps> = ({
       {/* Basic Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Input
-          label="Marca"
+          label={t('cars.make')}
           {...register('make', { required: 'La marca es requerida' })}
           error={errors.make?.message}
-          placeholder="Toyota, Honda, etc."
+          placeholder={t('cars.exampleMake')}
         />
         <Input
-          label="Modelo"
+          label={t('cars.model')}
           {...register('model', { required: 'El modelo es requerido' })}
           error={errors.model?.message}
-          placeholder="Camry, Civic, etc."
+          placeholder={t('cars.exampleModel')}
         />
         <Input
-          label="Año"
           type="number"
           {...register('year', {
             required: 'El año es requerido',
@@ -281,31 +305,30 @@ const CarForm: React.FC<CarFormProps> = ({
             max: { value: new Date().getFullYear() + 1, message: 'El año no puede ser en el futuro' }
           })}
           error={errors.year?.message}
-          placeholder="2023"
+          placeholder={t('cars.exampleYear')}
         />
         <Input
-          label="Precio"
           type="number"
           {...register('price', {
             required: 'El precio es requerido',
             min: { value: 0, message: 'El precio debe ser positivo' }
           })}
           error={errors.price?.message}
-          placeholder="25000"
+          placeholder={t('cars.examplePrice')}
         />
       </div>
 
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Descripción
+          {t('cars.description')}
         </label>
-        <textarea
-          {...register('description', { required: 'La descripción es requerida' })}
-          rows={3}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-          placeholder="Describe las características y condición del auto..."
-        />
+          <textarea
+            {...register('description', { required: t('validation.required') as string })}
+            rows={3}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder={t('cars.descriptionPlaceholder')}
+          />
         {errors.description && (
           <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
         )}
@@ -315,17 +338,17 @@ const CarForm: React.FC<CarFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Tipo de Combustible
+            {t('cars.fuelType')}
           </label>
           <select
-            {...register('fuel_type', { required: 'El tipo de combustible es requerido' })}
+            {...register('fuel_type', { required: t('validation.required') as string })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">Seleccionar tipo de combustible</option>
-            <option value="gas">Gasolina</option>
-            <option value="diesel">Diésel</option>
-            <option value="electricity">Electricidad</option>
-            <option value="hybrid">Híbrido</option>
+            <option value="">{t('common.select') || 'Select fuel type'}</option>
+            <option value="gas">{t('cars.gas')}</option>
+            <option value="diesel">{t('cars.diesel')}</option>
+            <option value="electricity">{t('cars.electric')}</option>
+            <option value="hybrid">{t('cars.hybrid')}</option>
           </select>
           {errors.fuel_type && (
             <p className="mt-1 text-sm text-red-600">{errors.fuel_type.message}</p>
@@ -334,15 +357,15 @@ const CarForm: React.FC<CarFormProps> = ({
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Transmisión
+            {t('cars.transmission')}
           </label>
           <select
-            {...register('transmission', { required: 'La transmisión es requerida' })}
+            {...register('transmission', { required: t('validation.required') as string })}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           >
-            <option value="">Seleccionar transmisión</option>
-            <option value="a">Automática</option>
-            <option value="m">Manual</option>
+            <option value="">{t('common.select') || 'Select'}</option>
+            <option value="a">{t('cars.automatic')}</option>
+            <option value="m">{t('cars.manual')}</option>
           </select>
           {errors.transmission && (
             <p className="mt-1 text-sm text-red-600">{errors.transmission.message}</p>
@@ -350,7 +373,7 @@ const CarForm: React.FC<CarFormProps> = ({
         </div>
 
         <Input
-          label="Cilindros"
+          label={t('cars.cylinders')}
           type="number"
           {...register('cylinders', {
             required: 'Los cilindros son requeridos',
@@ -361,52 +384,52 @@ const CarForm: React.FC<CarFormProps> = ({
         />
 
         <Input
-          label="Clase"
-          {...register('class', { required: 'La clase es requerida' })}
+          label={t('cars.class')}
+          {...register('class', { required: t('validation.required') as string })}
           error={errors.class?.message}
-          placeholder="Compacto, SUV, etc."
+          placeholder={t('cars.searchPlaceholder')}
         />
 
         <Input
-          label="Desplazamiento (L)"
+          label={t('cars.displacement')}
           type="number"
           step="0.1"
           {...register('displacement', {
-            required: 'El desplazamiento es requerido',
-            min: { value: 0, message: 'Debe ser positivo' }
+            required: t('validation.required') as string,
+            min: { value: 0, message: t('validation.minValue', { min: 0 }) }
           })}
           error={errors.displacement?.message}
           placeholder="2.0"
         />
 
         <Input
-          label="MPG Ciudad"
+          label={t('cars.cityMpg')}
           type="number"
           {...register('city_mpg', {
-            required: 'MPG Ciudad es requerido',
-            min: { value: 0, message: 'Debe ser positivo' }
+            required: t('validation.required') as string,
+            min: { value: 0, message: t('validation.minValue', { min: 0 }) }
           })}
           error={errors.city_mpg?.message}
           placeholder="25"
         />
 
         <Input
-          label="MPG Carretera"
+          label={t('cars.highwayMpg')}
           type="number"
           {...register('highway_mpg', {
-            required: 'MPG Carretera es requerido',
-            min: { value: 0, message: 'Must be positive' }
+            required: t('validation.required') as string,
+            min: { value: 0, message: t('validation.minValue', { min: 0 }) }
           })}
           error={errors.highway_mpg?.message}
           placeholder="32"
         />
 
         <Input
-          label="MPG Combinado"
+          label={t('cars.combinedMpg')}
           type="number"
           {...register('combination_mpg', {
-            required: 'MPG Combinado es requerido',
-            min: { value: 0, message: 'Debe ser positivo' }
+            required: t('validation.required') as string,
+            min: { value: 0, message: t('validation.minValue', { min: 0 }) }
           })}
           error={errors.combination_mpg?.message}
           placeholder="28"
@@ -415,11 +438,11 @@ const CarForm: React.FC<CarFormProps> = ({
 
       {/* Features */}
       <Input
-        label="Características"
+        label={t('cars.features')}
         {...register('features')}
         error={errors.features?.message}
-        placeholder="Bluetooth, GPS, Asientos de cuero, etc."
-        helperText="Ingresar características separadas por comas"
+        placeholder={t('cars.featuresPlaceholder')}
+        helperText={t('cars.featuresPlaceholder')}
       />
 
       {/* Availability */}
@@ -431,7 +454,7 @@ const CarForm: React.FC<CarFormProps> = ({
           className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
         />
         <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-900">
-          El auto está disponible para venta
+          {t('cars.isAvailable')}
         </label>
       </div>
     </form>
@@ -443,14 +466,14 @@ const CarForm: React.FC<CarFormProps> = ({
       {formContent}
       <div className="flex justify-end space-x-4">
         <Button variant="outline" onClick={handleClose} disabled={loading}>
-          Cancelar
+          {t('common.cancel')}
         </Button>
         <Button
           type="submit"
           loading={loading}
           form="car-form"
         >
-          {car ? 'Actualizar Auto' : 'Agregar Auto'}
+          {car ? t('cars.editCar') : t('cars.addCar')}
         </Button>
       </div>
 
@@ -460,7 +483,7 @@ const CarForm: React.FC<CarFormProps> = ({
         onClose={() => setShowImagePicker(false)}
         onSelect={handleImagePickerSelect}
         currentImage={imagePreview}
-        title="Seleccionar Imagen del Auto"
+        title={t('cars.selectImage')}
       />
     </div>
   );

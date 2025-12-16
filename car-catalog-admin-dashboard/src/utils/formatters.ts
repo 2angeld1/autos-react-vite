@@ -24,16 +24,16 @@ export const formatPercent = (value: number, decimals: number = 1): string => {
 export const formatDate = (date: string | Date, format: 'short' | 'medium' | 'long' = 'medium'): string => {
   const dateObj = typeof date === 'string' ? new Date(date) : date;
   
-  const options: Intl.DateTimeFormatOptions = {
+  const options: Record<'short' | 'medium' | 'long', Intl.DateTimeFormatOptions> = {
     short: { year: 'numeric', month: 'short', day: 'numeric' },
     medium: { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' },
-    long: { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric', 
-      hour: '2-digit', 
+    long: {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
       minute: '2-digit',
-      second: '2-digit' 
+      second: '2-digit',
     },
   };
 

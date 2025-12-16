@@ -63,6 +63,32 @@ class AuthService {
   }
 
   /**
+   * Update profile
+   */
+  async updateProfile(data: any): Promise<AuthUser> {
+    try {
+      const response = await api.put<{
+        success: boolean;
+        data?: AuthUser;
+        user?: AuthUser;
+      }>('/auth/profile', data);
+
+      if (response.data.success) {
+        const user = response.data.data || response.data.user!;
+        if (user) {
+          setToStorage('user', user);
+        }
+        return user;
+      }
+
+      throw new Error('Failed to update profile');
+    } catch (error: any) {
+      console.error('❌ Update profile error:', error);
+      throw new Error(error.response?.data?.message || 'Failed to update profile');
+    }
+  }
+
+  /**
    * Get current user profile
    */
   async getProfile(): Promise<AuthUser> {
