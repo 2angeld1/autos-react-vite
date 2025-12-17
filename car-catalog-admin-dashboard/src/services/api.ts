@@ -59,10 +59,16 @@ api.interceptors.response.use(
     });
 
     if (error.response?.status === 401) {
-      removeFromStorage(ACCESS_TOKEN_KEY);
-      removeFromStorage('user');
-      window.location.href = '/login';
-      toast.error('Session expired. Please login again.');
+        // Avoid redirecting to login for authentication endpoints (login/register/2fa)
+        const requestUrl = error.config?.url || '';
+        const isAuthEndpoint = /auth\/(login|register|verify-2fa|resend-2fa)/i.test(requestUrl);
+
+        if (!isAuthEndpoint) {
+          removeFromStorage(ACCESS_TOKEN_KEY);
+          removeFromStorage('user');
+          window.location.href = '/login';
+          toast.error('Session expired. Please login again.');
+        }
     } else if (error.response?.status === 403) {
       toast.error('Access denied. Insufficient permissions.');
     } else if (error.response?.status >= 500) {
