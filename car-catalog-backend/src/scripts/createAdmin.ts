@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
-import prisma from '@/config/prisma';
+import mongoose from 'mongoose';
+import User from '@/models/User';
 import { hashPassword } from '@/utils/helpers';
 
 // Load environment variables
@@ -7,12 +8,17 @@ dotenv.config();
 
 async function createAdmin(): Promise<void> {
   try {
-    console.log('🔧 Starting admin creation (Prisma)...');
+    console.log('🔧 Starting admin creation (Mongoose)...');
+
+    // Connect to MongoDB
+    const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/car-catalog';
+    await mongoose.connect(mongoUri);
+    console.log('✅ Connected to MongoDB');
 
     const email = 'admin@carcatalog.com';
 
     // Check if admin already exists
-    const existingAdmin = await prisma.user.findUnique({ where: { email } });
+    const existingAdmin = await User.findOne({ email });
 
     if (existingAdmin) {
       console.log('⚠️  Admin user already exists with email:', email);
@@ -21,9 +27,14 @@ async function createAdmin(): Promise<void> {
       const newPassword = 'admin123';
       const hashedPassword = await hashPassword(newPassword);
 
-      await prisma.user.update({ where: { id: existingAdmin.id }, data: { password: hashedPassword, isActive: true, role: 'admin' } });
+      await User.findByIdAndUpdate(existingAdmin._id, { 
+        password: hashedPassword, 
+        isActive: true, 
+        role: 'admin' 
+      });
 
       console.log('🔄 Admin password updated to: admin123');
+      await mongoose.disconnect();
       process.exit(0);
     }
 
@@ -40,7 +51,13 @@ async function createAdmin(): Promise<void> {
     const hashedPassword = await hashPassword(adminData.password);
 
     // Create admin user
-    await prisma.user.create({ data: { name: adminData.name, email: adminData.email, password: hashedPassword, role: adminData.role, isActive: true } });
+    await User.create({ 
+      name: adminData.name, 
+      email: adminData.email, 
+      password: hashedPassword, 
+      role: adminData.role, 
+      isActive: true 
+    });
 
     console.log('✅ Admin user created successfully!');
     console.log('📧 Email:', email);
@@ -48,9 +65,11 @@ async function createAdmin(): Promise<void> {
     console.log('👤 Role: admin');
     console.log('🚀 You can now login to the admin dashboard');
 
+    await mongoose.disconnect();
     process.exit(0);
   } catch (error) {
     console.error('❌ Error creating admin user:', error);
+    await mongoose.disconnect();
     process.exit(1);
   }
 }

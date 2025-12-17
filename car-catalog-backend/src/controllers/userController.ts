@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import prisma from '@/config/prisma';
+import User from '@/models/User';
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { AuthRequest } from '@/middleware/auth';
@@ -16,35 +16,24 @@ export class UserController {
     const limitNum = Math.max(1, Math.min(50, parseInt(limit as string)));
     const skip = (pageNum - 1) * limitNum;
 
-    const where: any = {};
+    const filter: Record<string, any> = {};
     if (search && typeof search === 'string') {
-      where.OR = [
-        { name: { contains: search, mode: 'insensitive' } },
-        { email: { contains: search, mode: 'insensitive' } }
+      filter.$or = [
+        { name: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
       ];
     }
-    if (role && typeof role === 'string') where.role = role;
-    if (isActive !== undefined) where.isActive = isActive === 'true';
+    if (role && typeof role === 'string') filter.role = role;
+    if (isActive !== undefined) filter.isActive = isActive === 'true';
 
     const [users, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take: limitNum,
-        orderBy: { createdAt: 'desc' },
-        select: {
-          id: true,
-          name: true,
-          email: true,
-          role: true,
-          avatar: true,
-          isActive: true,
-          lastLogin: true,
-          createdAt: true,
-          updatedAt: true
-        }
-      }),
-      prisma.user.count({ where })
+      User.find(filter)
+        .select('-password')
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limitNum)
+        .lean(),
+      User.countDocuments(filter)
     ]);
 
     const totalPages = Math.ceil(total / limitNum);
@@ -62,20 +51,7 @@ export class UserController {
   static getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await prisma.user.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
-        isActive: true,
-        lastLogin: true,
-        createdAt: true,
-        updatedAt: true
-      }
-    });
+    const user = await User.findById(id).select('-password').lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
@@ -91,7 +67,7 @@ export class UserController {
   static createUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { name, email, password = 'password123', role = 'user', isActive = true } = req.body;
 
-    const existing = await prisma.user.findUnique({ where: { email: (email || '').toLowerCase() } });
+    const existing = await User.findOne({ email: (email || '').toLowerCase() });
     if (existing) {
       res.status(400).json({ success: false, message: 'User already exists with this email' });
       return;
@@ -99,28 +75,20 @@ export class UserController {
 
     const hashed = await hashPassword(password);
 
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: (email || '').toLowerCase(),
-        password: hashed,
-        role,
-        isActive
-      },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
-        isActive: true,
-        createdAt: true
-      }
+    const user = await User.create({
+      name,
+      email: (email || '').toLowerCase(),
+      password: hashed,
+      role,
+      isActive
     });
+
+    const userResponse: Record<string, any> = user.toObject();
+    delete userResponse.password;
 
     logger.info(`User created by admin ${req.user?.email}: ${user.email}`);
 
-    res.status(201).json({ success: true, data: user, message: 'User created successfully' });
+    res.status(201).json({ success: true, data: userResponse, message: 'User created successfully' });
   });
 
   /**
@@ -135,19 +103,9 @@ export class UserController {
       updateData.password = await hashPassword(updateData.password);
     }
 
-    const user = await prisma.user.update({
-      where: { id },
-      data: updateData,
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        role: true,
-        avatar: true,
-        isActive: true,
-        updatedAt: true
-      }
-    }).catch(() => null);
+    const user = await User.findByIdAndUpdate(id, updateData, { new: true })
+      .select('-password')
+      .lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
@@ -165,7 +123,9 @@ export class UserController {
   static deleteUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await prisma.user.update({ where: { id }, data: { isActive: false } }).catch(() => null);
+    const user = await User.findByIdAndUpdate(id, { isActive: false }, { new: true })
+      .select('-password')
+      .lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
@@ -181,18 +141,19 @@ export class UserController {
    * Get user statistics (Admin only)
    */
   static getUserStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const total = await prisma.user.count();
-    const active = await prisma.user.count({ where: { isActive: true } });
-    const inactive = await prisma.user.count({ where: { isActive: false } });
-    const admins = await prisma.user.count({ where: { role: 'admin' } });
-    const users = await prisma.user.count({ where: { role: 'user' } });
+    const [total, active, inactive, admins, users] = await Promise.all([
+      User.countDocuments(),
+      User.countDocuments({ isActive: true }),
+      User.countDocuments({ isActive: false }),
+      User.countDocuments({ role: 'admin' }),
+      User.countDocuments({ role: 'user' })
+    ]);
 
-    const recentUsers = await prisma.user.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
-      take: 5,
-      select: { id: true, name: true, email: true, createdAt: true }
-    });
+    const recentUsers = await User.find({ isActive: true })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('_id name email createdAt')
+      .lean();
 
     res.status(200).json({
       success: true,
@@ -209,11 +170,9 @@ export class UserController {
   static activateUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await prisma.user.update({
-      where: { id },
-      data: { isActive: true },
-      select: { id: true, name: true, email: true, isActive: true }
-    }).catch(() => null);
+    const user = await User.findByIdAndUpdate(id, { isActive: true }, { new: true })
+      .select('_id name email isActive')
+      .lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
@@ -231,11 +190,9 @@ export class UserController {
   static makeAdmin = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await prisma.user.update({
-      where: { id },
-      data: { role: 'admin' },
-      select: { id: true, name: true, email: true, role: true }
-    }).catch(() => null);
+    const user = await User.findByIdAndUpdate(id, { role: 'admin' }, { new: true })
+      .select('_id name email role')
+      .lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });

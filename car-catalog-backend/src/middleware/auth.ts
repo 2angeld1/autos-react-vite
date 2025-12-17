@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import prisma from '@/config/prisma';
+import User from '@/models/User';
 import { logger } from '@/utils/logger';
 
 // Extend Request interface to include user
@@ -50,8 +50,8 @@ export const authenticateToken = async (
       role: string;
     };
 
-    // Find user with Prisma
-    const user = await prisma.user.findUnique({ where: { id: decoded.id as string } });
+    // Find user with Mongoose
+    const user = await User.findById(decoded.id);
 
     if (!user || user.isActive === false) {
       res.status(401).json({
@@ -63,7 +63,7 @@ export const authenticateToken = async (
 
     // Add user to request
     req.user = {
-      id: user.id.toString(),
+      id: user._id.toString(),
       email: user.email,
       role: user.role,
       name: user.name
@@ -179,11 +179,11 @@ export const optionalAuth = async (
       role: string;
     };
 
-    const user = await prisma.user.findUnique({ where: { id: decoded.id as string } });
+    const user = await User.findById(decoded.id);
 
     if (user && user.isActive) {
       req.user = {
-        id: user.id.toString(),
+        id: user._id.toString(),
         email: user.email,
         role: user.role,
         name: user.name

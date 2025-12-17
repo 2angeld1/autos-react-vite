@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import prisma from '@/config/prisma';
+import User from '@/models/User';
 import { generateToken, sanitizeUser, hashPassword, comparePassword } from '@/utils/helpers';
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
@@ -13,7 +13,7 @@ export class AuthController {
     const { name, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const existingUser = await User.findOne({ email: email.toLowerCase() });
     if (existingUser) {
       res.status(400).json({
         success: false,
@@ -24,24 +24,22 @@ export class AuthController {
 
     // Create new user
     const hashed = await hashPassword(password);
-    const user = await prisma.user.create({
-      data: {
-        name,
-        email: email.toLowerCase(),
-        password: hashed,
-        role: 'user'
-      }
+    const user = await User.create({
+      name,
+      email: email.toLowerCase(),
+      password: hashed,
+      role: 'user'
     });
 
-    // Generate token - CORREGIDO
-    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
+    // Generate token
+    const token = generateToken({ id: user._id.toString(), email: user.email, role: user.role });
 
     logger.info(`New user registered: ${user.email}`);
 
     res.status(201).json({
       success: true,
       token,
-      user: sanitizeUser(user as unknown as Record<string, unknown>),
+      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>),
       message: 'User registered successfully'
     });
   });
@@ -53,9 +51,7 @@ export class AuthController {
     const { email, password } = req.body;
 
     // Find user and include password
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() }
-    });
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
 
     if (!user || user.isActive === false) {
       res.status(401).json({
@@ -76,17 +72,17 @@ export class AuthController {
     }
 
     // Update last login
-    await prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } });
+    await User.findByIdAndUpdate(user._id, { lastLogin: new Date() });
 
-    // Generate token - CORREGIDO
-    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
+    // Generate token
+    const token = generateToken({ id: user._id.toString(), email: user.email, role: user.role });
 
     logger.info(`User logged in: ${user.email}`);
 
     res.status(200).json({
       success: true,
       token,
-      user: sanitizeUser(user as unknown as Record<string, unknown>),
+      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>),
       message: 'Login successful'
     });
   });
@@ -95,7 +91,7 @@ export class AuthController {
    * Get current user profile
    */
   static getProfile = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    const user = await User.findById(req.user!.id);
 
     if (!user) {
       res.status(404).json({
@@ -107,7 +103,7 @@ export class AuthController {
 
     res.status(200).json({
       success: true,
-      data: sanitizeUser(user as unknown as Record<string, unknown>)
+      data: sanitizeUser(user.toObject() as unknown as Record<string, unknown>)
     });
   });
 
@@ -121,7 +117,10 @@ export class AuthController {
     if (name) updateData.name = name;
     if (email) {
       // Check if email is already taken by another user
-      const existingUser = await prisma.user.findFirst({ where: { email: email.toLowerCase(), NOT: { id: req.user!.id } } });
+      const existingUser = await User.findOne({ 
+        email: email.toLowerCase(), 
+        _id: { $ne: req.user!.id } 
+      });
       
       if (existingUser) {
         res.status(400).json({
@@ -134,7 +133,11 @@ export class AuthController {
       updateData.email = email.toLowerCase();
     }
 
-    const user = await prisma.user.update({ where: { id: req.user!.id }, data: updateData });
+    const user = await User.findByIdAndUpdate(
+      req.user!.id, 
+      updateData, 
+      { new: true }
+    );
 
     if (!user) {
       res.status(404).json({
@@ -148,7 +151,7 @@ export class AuthController {
 
     res.status(200).json({
       success: true,
-      data: sanitizeUser(user as unknown as Record<string, unknown>),
+      data: sanitizeUser(user.toObject() as unknown as Record<string, unknown>),
       message: 'Profile updated successfully'
     });
   });
@@ -160,7 +163,7 @@ export class AuthController {
     const { currentPassword, newPassword } = req.body;
 
     // Find user with password
-    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    const user = await User.findById(req.user!.id).select('+password');
 
     if (!user) {
       res.status(404).json({
@@ -182,7 +185,7 @@ export class AuthController {
 
     // Update password
     const hashed = await hashPassword(newPassword);
-    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
+    await User.findByIdAndUpdate(user._id, { password: hashed });
 
     logger.info(`Password changed for user: ${user.email}`);
 
@@ -196,7 +199,11 @@ export class AuthController {
    * Delete account
    */
   static deleteAccount = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await prisma.user.update({ where: { id: req.user!.id }, data: { isActive: false } });
+    const user = await User.findByIdAndUpdate(
+      req.user!.id, 
+      { isActive: false }, 
+      { new: true }
+    );
 
     if (!user) {
       res.status(404).json({
@@ -218,7 +225,7 @@ export class AuthController {
    * Refresh token
    */
   static refreshToken = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
+    const user = await User.findById(req.user!.id);
 
     if (!user || user.isActive === false) {
       res.status(401).json({
@@ -228,13 +235,13 @@ export class AuthController {
       return;
     }
 
-    // Generate new token - CORREGIDO
-    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
+    // Generate new token
+    const token = generateToken({ id: user._id.toString(), email: user.email, role: user.role });
 
     res.status(200).json({
       success: true,
       token,
-      user: sanitizeUser(user as unknown as Record<string, unknown>)
+      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>)
     });
   });
 }

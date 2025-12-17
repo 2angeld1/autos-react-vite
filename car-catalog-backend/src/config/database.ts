@@ -23,14 +23,6 @@ export const getDatabaseConfig = (): DatabaseConfig => {
  */
 export const connectWithRetry = async (retries = 5): Promise<void> => {
   const { uri, options } = getDatabaseConfig();
-  
-    // If a Postgres DATABASE_URL is configured we assume Prisma will be used
-    // and skip attempting to connect to MongoDB. This allows the app to start
-    // on Render while the codebase is migrated from Mongoose -> Prisma.
-    if (process.env.DATABASE_URL) {
-      logger.info('Detected DATABASE_URL; skipping MongoDB connection (using Postgres/Prisma).');
-      return;
-    }
 
     for (let i = 0; i < retries; i++) {
       try {

@@ -1,6 +1,7 @@
 import { connectWithRetry, checkDatabaseHealth } from '@/config/database';
 import { logger } from '@/utils/logger';
-import prisma from '@/config/prisma';
+import Car from '@/models/Car';
+import User from '@/models/User';
 
 interface MakeStats {
   _id: string;
@@ -18,14 +19,14 @@ async function checkStatus(): Promise<void> {
     
     const health = await checkDatabaseHealth();
     
-    // Get collection counts (Prisma)
+    // Get collection counts (Mongoose)
     const [carCount, userCount] = await Promise.all([
-      prisma.car.count(),
-      prisma.user.count()
+      Car.countDocuments(),
+      User.countDocuments()
     ]);
 
-    const activeCarCount = await prisma.car.count({ where: { isAvailable: true } });
-    const activeUserCount = await prisma.user.count({ where: { isActive: true } });
+    const activeCarCount = await Car.countDocuments({ isAvailable: true });
+    const activeUserCount = await User.countDocuments({ isActive: true });
 
     logger.info('='.repeat(50));
     logger.info('📈 DATABASE STATUS');
@@ -51,20 +52,19 @@ async function checkStatus(): Promise<void> {
     logger.info(`Cars: ${carCount} total, ${activeCarCount} available`);
     logger.info(`Users: ${userCount} total, ${activeUserCount} active`);
 
-    // Get top makes (Prisma groupBy)
-    const topMakes = await prisma.car.groupBy(({
-      by: ['make'],
-      where: { isAvailable: true },
-      _count: { id: true },
-      orderBy: { _count: { id: 'desc' } },
-      take: 5
-    } as unknown) as any) as { make: string; _count?: { id?: number } }[];
+    // Get top makes (Mongoose aggregate)
+    const topMakes = await Car.aggregate([
+      { $match: { isAvailable: true } },
+      { $group: { _id: '$make', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]) as MakeStats[];
 
     logger.info('='.repeat(50));
     logger.info('🚗 TOP CAR MAKES');
     logger.info('='.repeat(50));
     topMakes.forEach((m, index) => {
-      logger.info(`${index + 1}. ${m.make}: ${m._count?.id ?? 0} cars`);
+      logger.info(`${index + 1}. ${m._id}: ${m.count} cars`);
     });
 
     process.exit(0);
