@@ -1,6 +1,6 @@
 # Backend - Catálogo de Autos
 
-API REST construida con Node.js, Express, TypeScript y Prisma para PostgreSQL.
+API REST construida con Node.js, Express, TypeScript y Mongoose (MongoDB).
 
 ## 🚀 Características
 
@@ -8,7 +8,7 @@ API REST construida con Node.js, Express, TypeScript y Prisma para PostgreSQL.
 - Gestión de usuarios y roles
 - Catálogo de autos con filtros avanzados
 - Sistema de archivos para imágenes
-- Migración completa de MongoDB a PostgreSQL con Prisma
+   - Uso de MongoDB con Mongoose
 - Desplegado en Render
 
 ## 📋 Prerrequisitos
@@ -50,22 +50,21 @@ Edita el archivo `.env` con tus configuraciones.
 
 ## 🗄️ Base de Datos
 
-### Configuración de Prisma
+### Configuración de MongoDB / Mongoose
 
-1. Instala Prisma CLI (si no está instalado):
+1. Crea un clúster en MongoDB Atlas (o usa una instancia local).
+
+2. Añade la conexión a las variables de entorno en `.env`:
 ```bash
-npm install -g prisma
+MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/your_db?retryWrites=true&w=majority
 ```
 
-2. Ejecuta las migraciones:
+3. Instala dependencias (si no lo has hecho):
 ```bash
-npx prisma migrate dev
+npm install
 ```
 
-3. Genera el cliente:
-```bash
-npx prisma generate
-```
+No se requiere un paso de "migrate" como con Prisma; los modelos se crean/actualizan mediante Mongoose.
 
 ### Migración de datos (opcional)
 
@@ -118,7 +117,7 @@ npm start
 
 3. **Configurar servicio**:
    - **Environment**: `Node`
-   - **Build Command**: `npm install && npx prisma generate`
+   - **Build Command**: `npm install && npm run build`
    - **Start Command**: `npm start`
 
 4. **Variables de entorno**: Agrega todas las variables del `.env`
@@ -140,12 +139,11 @@ npm start
 ## 📝 Scripts Disponibles
 
 ```bash
-npm run dev          # Desarrollo con nodemon
+npm run dev          # Desarrollo con ts-node
 npm run build        # Compilar TypeScript
-npm start           # Ejecutar en producción
-npm run migrate     # Ejecutar migraciones Prisma
-npm run seed        # Poblar base de datos
-npm run test        # Ejecutar tests
+npm start            # Ejecutar en producción
+npm run seed         # Poblar base de datos (Mongoose/Atlas)
+npm run test         # Ejecutar tests
 ```
 
 ## 🧪 Testing

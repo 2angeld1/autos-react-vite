@@ -16,13 +16,24 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware básico
+// Configure CORS to allow local dev and the deployed frontend(s).
+const FRONTEND_URL = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
+const allowedOrigins = new Set([
+  'http://localhost:5173',
+  'http://localhost:3001',
+  'http://localhost:3000',
+  FRONTEND_URL,
+  'https://autos-react-dashboard.vercel.app'
+].filter(Boolean));
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'http://localhost:3001',
-    'http://localhost:3000'
-  ],
-  credentials: true
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.has(origin)) return callback(null, true);
+    return callback(new Error('CORS policy: Origin not allowed'));
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
 }));
 
 app.use(express.json({ limit: '10mb' }));
