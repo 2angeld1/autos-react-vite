@@ -1,4 +1,5 @@
 import { api } from './api';
+import { API_BASE_URL } from '@/utils/constants';
 import type {
   FileItem,
   FolderTreeItem,
@@ -160,8 +161,11 @@ class FilesService {
       return file.url;
     }
     
-    // Otherwise, prepend the API base URL
-    const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+    // Otherwise, prepend the API base URL (use configured env var or derived API_BASE_URL)
+    // Prefer VITE_API_URL (explicit), fallback to API_BASE_URL without the trailing '/api'
+    const explicitApi = import.meta.env.VITE_API_URL as string | undefined;
+    const fallback = (API_BASE_URL || 'http://localhost:5000').replace(/\/api\/?$/i, '');
+    const baseUrl = explicitApi || fallback;
     return `${baseUrl}${file.url}`;
   }
 
