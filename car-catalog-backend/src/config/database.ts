@@ -24,17 +24,27 @@ export const getDatabaseConfig = (): DatabaseConfig => {
 export const connectWithRetry = async (retries = 5): Promise<void> => {
   const { uri, options } = getDatabaseConfig();
   
-  for (let i = 0; i < retries; i++) {
-    try {
-      await mongoose.connect(uri, options);
-      logger.info('✅ Connected to MongoDB');
+    // If a Postgres DATABASE_URL is configured we assume Prisma will be used
+    // and skip attempting to connect to MongoDB. This allows the app to start
+    // on Render while the codebase is migrated from Mongoose -> Prisma.
+    if (process.env.DATABASE_URL) {
+      logger.info('Detected DATABASE_URL; skipping MongoDB connection (using Postgres/Prisma).');
       return;
-    } catch (error) {
-      logger.error(`❌ MongoDB connection attempt ${i + 1} failed:`, error);
-      if (i === retries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, 5000));
     }
-  }
+
+    for (let i = 0; i < retries; i++) {
+      try {
+        await mongoose.connect(uri, options);
+        logger.info('✅ Connected to MongoDB');
+        return;
+      } catch (error) {
+        logger.error(`❌ MongoDB connection attempt ${i + 1} failed:`, error);
+        if (i === retries - 1) throw error;
+        await new Promise(resolve => setTimeout(resolve, 5000));
+      }
+    }
+
+    throw new Error('Failed to connect to MongoDB after multiple attempts');
 };
 
 /**
