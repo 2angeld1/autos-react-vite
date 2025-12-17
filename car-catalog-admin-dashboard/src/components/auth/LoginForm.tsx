@@ -70,7 +70,14 @@ const LoginForm: React.FC = () => {
         )}
 
         {/* Login Form */}
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+        <form
+          className="mt-8 space-y-6"
+          onSubmit={(e) => {
+            e.preventDefault();
+            // Explicitly call react-hook-form's handleSubmit to ensure default navigation is prevented
+            handleSubmit(onSubmit)(e as any);
+          }}
+        >
           <div className="space-y-4">
             <Input
               label={t('auth.email')}
