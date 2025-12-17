@@ -1,19 +1,22 @@
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-}
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
   provider = "prisma-client-js"
 }
 
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
 model User {
-  id        String   @id @default(uuid())
+  id        String   @id @default(cuid())
   name      String
   email     String   @unique
   password  String
-  role      String   @default("user")
-  avatar    String?  
+  role      String   @default("user") // 'user' or 'admin'
+  avatar    String?
   isActive  Boolean  @default(true)
   lastLogin DateTime?
   createdAt DateTime @default(now())
@@ -24,61 +27,54 @@ model User {
 }
 
 model Car {
-  id           String   @id @default(uuid())
-  make         String
-  model        String
-  year         Int
-  price        Float
-  fuelType     String?
-  transmission String?
-  image        String?
-  isAvailable  Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  id              String   @id @default(cuid())
+  make            String
+  model           String
+  year            Int
+  price           Float
+  image           String
+  description     String?
+  fuel_type       String   // 'gas', 'diesel', 'electricity', 'hybrid'
+  transmission    String   // 'a' (automatic) or 'm' (manual)
+  cylinders       Int?
+  class           String?  @map("className")
+  displacement    Float?
+  city_mpg        Int?
+  highway_mpg     Int?
+  combination_mpg Int?
+  features        String[]
+  isAvailable     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
-  favorites    Favorite[]
-  reviews      Review[]
+  favorites Favorite[]
+  reviews   Review[]
+
+  @@index([make, model, year])
 }
 
 model Favorite {
-  id        String @id @default(uuid())
-  user      User   @relation(fields: [userId], references: [id])
+  id        String   @id @default(cuid())
   userId    String
-  car       Car    @relation(fields: [carId], references: [id])
   carId     String
   createdAt DateTime @default(now())
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car  Car  @relation(fields: [carId], references: [id], onDelete: Cascade)
+
   @@unique([userId, carId])
-  @@index([userId])
-  @@index([carId])
 }
 
 model Review {
-  id         String   @id @default(uuid())
-  user       User     @relation(fields: [userId], references: [id])
-  userId     String
-  car        Car      @relation(fields: [carId], references: [id])
-  carId      String
-  rating     Int
-  comment    String
-  isApproved Boolean  @default(false)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id        String   @id @default(cuid())
+  userId    String
+  carId     String
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now())
 
-  @@unique([userId, carId])
-  @@index([carId, isApproved])
-}
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  car  Car  @relation(fields: [carId], references: [id], onDelete: Cascade)
 
-model FileItem {
-  id         String   @id @default(uuid())
-  name       String
-  path       String
-  mimeType   String?
-  size       Int?
-  ownerId    String?  
-  parentId   String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-
-  @@index([ownerId])
+  @@index([carId])
 }

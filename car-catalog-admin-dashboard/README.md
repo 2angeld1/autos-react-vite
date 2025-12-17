@@ -136,6 +136,35 @@ Esto iniciará el servidor de desarrollo y podrás acceder a tu dashboard de adm
 
 Para conectar tu frontend con el backend, puedes utilizar Axios para realizar solicitudes a las rutas de tu API. Asegúrate de manejar la autenticación y la autorización según sea necesario.
 
+## 🚀 Despliegue
+
+### Despliegue en Vercel
+
+1. **Crear un repositorio en GitHub**:
+   - Sube el código del dashboard a un repositorio de GitHub
+
+2. **Conectar con Vercel**:
+   - Ve a [vercel.com](https://vercel.com) y crea una cuenta
+   - Haz clic en "New Project"
+   - Conecta tu repositorio de GitHub
+
+3. **Configurar el proyecto**:
+   - **Root Directory**: Deja vacío o especifica la ruta si está en un subdirectorio
+   - **Build Command**: `npm run build`
+   - **Output Directory**: `dist`
+
+4. **Variables de entorno**:
+   Agrega estas variables en la configuración de Vercel:
+   ```
+   VITE_API_BASE_URL=https://tu-backend-en-render.onrender.com/api
+   VITE_API_TIMEOUT=30000
+   VITE_APP_VERSION=1.0.0
+   ```
+
+5. **Desplegar**:
+   - Haz clic en "Deploy"
+   - Vercel construirá y desplegará automáticamente tu aplicación
+
 ### Conclusión
 
 Siguiendo estos pasos, habrás creado un nuevo proyecto para el dashboard de administración del backend utilizando React y Vite. Puedes expandirlo según tus necesidades, añadiendo más componentes, páginas y funcionalidades.

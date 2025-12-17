@@ -7,6 +7,10 @@ export const GOOGLE_API_KEY: string | undefined = import.meta.env.VITE_GOOGLE_AP
 export const GOOGLE_SEARCH_ENGINE_ID: string | undefined = import.meta.env.VITE_GOOGLE_CSE_ID;
 export const GOOGLE_SEARCH_URL: string | undefined = import.meta.env.VITE_GOOGLE_SEARCH_URL;
 
+// ✅ Backend API Configuration
+export const BACKEND_API_BASE_URL = import.meta.env.VITE_BACKEND_API_BASE_URL || 'http://localhost:5000/api';
+export const BACKEND_API_TIMEOUT = parseInt(import.meta.env.VITE_BACKEND_API_TIMEOUT) || 30000;
+
 // Constantes
 export const PLACEHOLDER_IMAGE_BASE: string = 'https://placehold.co/';
 

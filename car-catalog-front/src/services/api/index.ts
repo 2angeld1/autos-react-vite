@@ -15,6 +15,11 @@ import {
   getCacheStats
 } from './carService';
 
+// Import backend API client and services
+export { backendApi } from './backendApi';
+export { authService } from './authService';
+export { backendCarService } from './backendCarService';
+
 // Re-export all car service functions
 export {
   // Main API functions

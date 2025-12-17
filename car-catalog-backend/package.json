@@ -5,7 +5,7 @@
   "main": "dist/server.js",
   "scripts": {
     "dev": "ts-node -r tsconfig-paths/register src/server.ts",
-    "build": "tsc",
+    "build": "npx prisma generate && npx prisma migrate deploy && tsc",
     "start": "node -r module-alias/register dist/server.js",
     "test": "echo \"No tests yet\"",
     "create-admin": "ts-node -r tsconfig-paths/register src/scripts/createAdmin.ts",
