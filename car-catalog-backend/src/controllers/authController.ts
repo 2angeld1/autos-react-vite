@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import User from '@/models/User';
-import { generateToken, sanitizeUser } from '@/utils/helpers';
+import prisma from '@/config/prisma';
+import { generateToken, sanitizeUser, hashPassword, comparePassword } from '@/utils/helpers';
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { AuthRequest } from '@/middleware/auth';
@@ -13,7 +13,7 @@ export class AuthController {
     const { name, email, password } = req.body;
 
     // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
     if (existingUser) {
       res.status(400).json({
         success: false,
@@ -23,28 +23,25 @@ export class AuthController {
     }
 
     // Create new user
-    const user = new User({
-      name,
-      email: email.toLowerCase(),
-      password,
-      role: 'user'
+    const hashed = await hashPassword(password);
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email: email.toLowerCase(),
+        password: hashed,
+        role: 'user'
+      }
     });
-
-    await user.save();
 
     // Generate token - CORREGIDO
-    const token = generateToken({ 
-      id: (user._id as string).toString(), // Cast explícito
-      email: user.email, 
-      role: user.role 
-    });
+    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
 
     logger.info(`New user registered: ${user.email}`);
 
     res.status(201).json({
       success: true,
       token,
-      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>), // Doble cast
+      user: sanitizeUser(user as unknown as Record<string, unknown>),
       message: 'User registered successfully'
     });
   });
@@ -56,12 +53,11 @@ export class AuthController {
     const { email, password } = req.body;
 
     // Find user and include password
-    const user = await User.findOne({ 
-      email: email.toLowerCase(),
-      isActive: true 
-    }).select('+password');
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() }
+    });
 
-    if (!user) {
+    if (!user || user.isActive === false) {
       res.status(401).json({
         success: false,
         message: 'Invalid email or password'
@@ -70,7 +66,7 @@ export class AuthController {
     }
 
     // Check password
-    const isValidPassword = await user.comparePassword(password);
+    const isValidPassword = await comparePassword(password, user.password as string);
     if (!isValidPassword) {
       res.status(401).json({
         success: false,
@@ -80,22 +76,17 @@ export class AuthController {
     }
 
     // Update last login
-    user.lastLogin = new Date();
-    await user.save();
+    await prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } });
 
     // Generate token - CORREGIDO
-    const token = generateToken({ 
-      id: (user._id as string).toString(), // Cast explícito
-      email: user.email, 
-      role: user.role 
-    });
+    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
 
     logger.info(`User logged in: ${user.email}`);
 
     res.status(200).json({
       success: true,
       token,
-      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>), // Doble cast
+      user: sanitizeUser(user as unknown as Record<string, unknown>),
       message: 'Login successful'
     });
   });
@@ -104,7 +95,7 @@ export class AuthController {
    * Get current user profile
    */
   static getProfile = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await User.findById(req.user!.id);
+    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
 
     if (!user) {
       res.status(404).json({
@@ -116,7 +107,7 @@ export class AuthController {
 
     res.status(200).json({
       success: true,
-      data: sanitizeUser(user.toObject() as unknown as Record<string, unknown>) // Doble cast
+      data: sanitizeUser(user as unknown as Record<string, unknown>)
     });
   });
 
@@ -130,10 +121,7 @@ export class AuthController {
     if (name) updateData.name = name;
     if (email) {
       // Check if email is already taken by another user
-      const existingUser = await User.findOne({ 
-        email: email.toLowerCase(),
-        _id: { $ne: req.user!.id }
-      });
+      const existingUser = await prisma.user.findFirst({ where: { email: email.toLowerCase(), NOT: { id: req.user!.id } } });
       
       if (existingUser) {
         res.status(400).json({
@@ -146,11 +134,7 @@ export class AuthController {
       updateData.email = email.toLowerCase();
     }
 
-    const user = await User.findByIdAndUpdate(
-      req.user!.id,
-      updateData,
-      { new: true, runValidators: true }
-    );
+    const user = await prisma.user.update({ where: { id: req.user!.id }, data: updateData });
 
     if (!user) {
       res.status(404).json({
@@ -164,7 +148,7 @@ export class AuthController {
 
     res.status(200).json({
       success: true,
-      data: sanitizeUser(user.toObject() as unknown as Record<string, unknown>), // Doble cast
+      data: sanitizeUser(user as unknown as Record<string, unknown>),
       message: 'Profile updated successfully'
     });
   });
@@ -176,7 +160,7 @@ export class AuthController {
     const { currentPassword, newPassword } = req.body;
 
     // Find user with password
-    const user = await User.findById(req.user!.id).select('+password');
+    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
 
     if (!user) {
       res.status(404).json({
@@ -187,7 +171,7 @@ export class AuthController {
     }
 
     // Verify current password
-    const isValidPassword = await user.comparePassword(currentPassword);
+    const isValidPassword = await comparePassword(currentPassword, user.password as string);
     if (!isValidPassword) {
       res.status(400).json({
         success: false,
@@ -197,8 +181,8 @@ export class AuthController {
     }
 
     // Update password
-    user.password = newPassword;
-    await user.save();
+    const hashed = await hashPassword(newPassword);
+    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } });
 
     logger.info(`Password changed for user: ${user.email}`);
 
@@ -212,11 +196,7 @@ export class AuthController {
    * Delete account
    */
   static deleteAccount = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await User.findByIdAndUpdate(
-      req.user!.id,
-      { isActive: false },
-      { new: true }
-    );
+    const user = await prisma.user.update({ where: { id: req.user!.id }, data: { isActive: false } });
 
     if (!user) {
       res.status(404).json({
@@ -238,9 +218,9 @@ export class AuthController {
    * Refresh token
    */
   static refreshToken = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const user = await User.findById(req.user!.id);
+    const user = await prisma.user.findUnique({ where: { id: req.user!.id } });
 
-    if (!user || !user.isActive) {
+    if (!user || user.isActive === false) {
       res.status(401).json({
         success: false,
         message: 'User not found or inactive'
@@ -249,16 +229,12 @@ export class AuthController {
     }
 
     // Generate new token - CORREGIDO
-    const token = generateToken({ 
-      id: (user._id as string).toString(), // Cast explícito
-      email: user.email, 
-      role: user.role 
-    });
+    const token = generateToken({ id: user.id.toString(), email: user.email, role: user.role });
 
     res.status(200).json({
       success: true,
       token,
-      user: sanitizeUser(user.toObject() as unknown as Record<string, unknown>) // Doble cast
+      user: sanitizeUser(user as unknown as Record<string, unknown>)
     });
   });
 }

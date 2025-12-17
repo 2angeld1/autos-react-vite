@@ -1,7 +1,6 @@
 import { connectWithRetry, checkDatabaseHealth } from '@/config/database';
 import { logger } from '@/utils/logger';
-import Car from '@/models/Car';
-import User from '@/models/User';
+import prisma from '@/config/prisma';
 
 interface MakeStats {
   _id: string;
@@ -19,14 +18,14 @@ async function checkStatus(): Promise<void> {
     
     const health = await checkDatabaseHealth();
     
-    // Get collection counts
+    // Get collection counts (Prisma)
     const [carCount, userCount] = await Promise.all([
-      Car.countDocuments(),
-      User.countDocuments()
+      prisma.car.count(),
+      prisma.user.count()
     ]);
 
-    const activeCarCount = await Car.countDocuments({ isAvailable: true });
-    const activeUserCount = await User.countDocuments({ isActive: true });
+    const activeCarCount = await prisma.car.count({ where: { isAvailable: true } });
+    const activeUserCount = await prisma.user.count({ where: { isActive: true } });
 
     logger.info('='.repeat(50));
     logger.info('📈 DATABASE STATUS');
@@ -52,19 +51,20 @@ async function checkStatus(): Promise<void> {
     logger.info(`Cars: ${carCount} total, ${activeCarCount} available`);
     logger.info(`Users: ${userCount} total, ${activeUserCount} active`);
 
-    // Get top makes
-    const topMakes = await Car.aggregate([
-      { $match: { isAvailable: true } },
-      { $group: { _id: '$make', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 5 }
-    ]) as MakeStats[];
+    // Get top makes (Prisma groupBy)
+    const topMakes = await prisma.car.groupBy(({
+      by: ['make'],
+      where: { isAvailable: true },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 5
+    } as unknown) as any) as { make: string; _count?: { id?: number } }[];
 
     logger.info('='.repeat(50));
     logger.info('🚗 TOP CAR MAKES');
     logger.info('='.repeat(50));
-    topMakes.forEach((make, index) => {
-      logger.info(`${index + 1}. ${make._id}: ${make.count} cars`);
+    topMakes.forEach((m, index) => {
+      logger.info(`${index + 1}. ${m.make}: ${m._count?.id ?? 0} cars`);
     });
 
     process.exit(0);

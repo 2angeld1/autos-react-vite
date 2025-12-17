@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '@/models/User';
+import prisma from '@/config/prisma';
 import { logger } from '@/utils/logger';
 
 // Extend Request interface to include user
@@ -50,10 +50,10 @@ export const authenticateToken = async (
       role: string;
     };
 
-    // Find user
-    const user = await User.findById(decoded.id).select('-password');
-    
-    if (!user || !user.isActive) {
+    // Find user with Prisma
+    const user = await prisma.user.findUnique({ where: { id: decoded.id as string } });
+
+    if (!user || user.isActive === false) {
       res.status(401).json({
         success: false,
         message: 'Invalid or expired token'
@@ -63,7 +63,7 @@ export const authenticateToken = async (
 
     // Add user to request
     req.user = {
-      id: user._id.toString(),
+      id: user.id.toString(),
       email: user.email,
       role: user.role,
       name: user.name
@@ -179,11 +179,11 @@ export const optionalAuth = async (
       role: string;
     };
 
-    const user = await User.findById(decoded.id).select('-password');
-    
+    const user = await prisma.user.findUnique({ where: { id: decoded.id as string } });
+
     if (user && user.isActive) {
       req.user = {
-        id: user._id.toString(),
+        id: user.id.toString(),
         email: user.email,
         role: user.role,
         name: user.name

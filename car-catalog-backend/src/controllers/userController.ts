@@ -1,49 +1,50 @@
 import { Request, Response } from 'express';
-import User from '@/models/User';
+import prisma from '@/config/prisma';
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { AuthRequest } from '@/middleware/auth';
+import { hashPassword } from '@/utils/helpers';
 
 export class UserController {
   /**
    * Get all users (Admin only)
    */
   static getAllUsers = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { 
-      page = 1, 
-      limit = 20, 
-      search, 
-      role, 
-      isActive 
-    } = req.query;
+    const { page = 1, limit = 20, search, role, isActive } = req.query;
 
-    // Build filter
-    const filter: Record<string, unknown> = {};
-    
-    if (search) {
-      filter.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
-      ];
-    }
-    
-    if (role) filter.role = role;
-    if (isActive !== undefined) filter.isActive = isActive === 'true';
-
-    // Calculate pagination
     const pageNum = Math.max(1, parseInt(page as string));
     const limitNum = Math.max(1, Math.min(50, parseInt(limit as string)));
     const skip = (pageNum - 1) * limitNum;
 
-    // Execute query
+    const where: any = {};
+    if (search && typeof search === 'string') {
+      where.OR = [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } }
+      ];
+    }
+    if (role && typeof role === 'string') where.role = role;
+    if (isActive !== undefined) where.isActive = isActive === 'true';
+
     const [users, total] = await Promise.all([
-      User.find(filter)
-        .select('-password')
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-      User.countDocuments(filter)
+      prisma.user.findMany({
+        where,
+        skip,
+        take: limitNum,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          avatar: true,
+          isActive: true,
+          lastLogin: true,
+          createdAt: true,
+          updatedAt: true
+        }
+      }),
+      prisma.user.count({ where })
     ]);
 
     const totalPages = Math.ceil(total / limitNum);
@@ -51,12 +52,7 @@ export class UserController {
     res.status(200).json({
       success: true,
       data: users,
-      pagination: {
-        page: pageNum,
-        limit: limitNum,
-        total,
-        totalPages
-      }
+      pagination: { page: pageNum, limit: limitNum, total, totalPages }
     });
   });
 
@@ -66,56 +62,65 @@ export class UserController {
   static getUserById = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await User.findById(id).select('-password');
+    const user = await prisma.user.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true,
+        isActive: true,
+        lastLogin: true,
+        createdAt: true,
+        updatedAt: true
+      }
+    });
 
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    res.status(200).json({
-      success: true,
-      data: user
-    });
+    res.status(200).json({ success: true, data: user });
   });
 
   /**
    * Create new user (Admin only)
    */
   static createUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const { name, email, password, role = 'user', isActive = true } = req.body;
+    const { name, email, password = 'password123', role = 'user', isActive = true } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      res.status(400).json({
-        success: false,
-        message: 'User already exists with this email'
-      });
+    const existing = await prisma.user.findUnique({ where: { email: (email || '').toLowerCase() } });
+    if (existing) {
+      res.status(400).json({ success: false, message: 'User already exists with this email' });
       return;
     }
 
-    // Create new user
-    const user = new User({
-      name,
-      email: email.toLowerCase(),
-      password,
-      role,
-      isActive
+    const hashed = await hashPassword(password);
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email: (email || '').toLowerCase(),
+        password: hashed,
+        role,
+        isActive
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true,
+        isActive: true,
+        createdAt: true
+      }
     });
 
-    await user.save();
+    logger.info(`User created by admin ${req.user?.email}: ${user.email}`);
 
-    logger.info(`User created by admin ${req.user?.email}:`, user.email);
-
-    res.status(201).json({
-      success: true,
-      data: user,
-      message: 'User created successfully'
-    });
+    res.status(201).json({ success: true, data: user, message: 'User created successfully' });
   });
 
   /**
@@ -123,86 +128,76 @@ export class UserController {
    */
   static updateUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData: any = { ...req.body };
 
-    const user = await User.findByIdAndUpdate(id, updateData, { new: true });
-    
+    if (updateData.email) updateData.email = (updateData.email as string).toLowerCase();
+    if (updateData.password) {
+      updateData.password = await hashPassword(updateData.password);
+    }
+
+    const user = await prisma.user.update({
+      where: { id },
+      data: updateData,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        avatar: true,
+        isActive: true,
+        updatedAt: true
+      }
+    }).catch(() => null);
+
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    logger.info(`User updated by admin ${req.user?.email}:`, user.email);
+    logger.info(`User updated by admin ${req.user?.email}: ${user.email}`);
 
-    res.status(200).json({
-      success: true,
-      data: user,
-      message: 'User updated successfully'
-    });
+    res.status(200).json({ success: true, data: user, message: 'User updated successfully' });
   });
 
   /**
-   * Delete user (Admin only)
+   * Delete user (Admin only) - soft deactivate
    */
   static deleteUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await User.findByIdAndDelete(id);
-    
+    const user = await prisma.user.update({ where: { id }, data: { isActive: false } }).catch(() => null);
+
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    logger.info(`User deleted by admin ${req.user?.email}:`, user.email);
+    logger.info(`User deactivated by admin ${req.user?.email}: ${user.email}`);
 
-    res.status(200).json({
-      success: true,
-      message: 'User deleted successfully'
-    });
+    res.status(200).json({ success: true, message: 'User deactivated successfully' });
   });
 
   /**
    * Get user statistics (Admin only)
    */
   static getUserStats = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const stats = await User.aggregate([
-      {
-        $group: {
-          _id: null,
-          totalUsers: { $sum: 1 },
-          activeUsers: { 
-            $sum: { $cond: [{ $eq: ['$isActive', true] }, 1, 0] } 
-          },
-          inactiveUsers: { 
-            $sum: { $cond: [{ $eq: ['$isActive', false] }, 1, 0] } 
-          },
-          adminUsers: { 
-            $sum: { $cond: [{ $eq: ['$role', 'admin'] }, 1, 0] } 
-          },
-          regularUsers: { 
-            $sum: { $cond: [{ $eq: ['$role', 'user'] }, 1, 0] } 
-          }
-        }
-      }
-    ]);
+    const total = await prisma.user.count();
+    const active = await prisma.user.count({ where: { isActive: true } });
+    const inactive = await prisma.user.count({ where: { isActive: false } });
+    const admins = await prisma.user.count({ where: { role: 'admin' } });
+    const users = await prisma.user.count({ where: { role: 'user' } });
 
-    // Recent registrations
-    const recentUsers = await User.find({ isActive: true })
-      .select('name email createdAt')
-      .sort({ createdAt: -1 })
-      .limit(5);
+    const recentUsers = await prisma.user.findMany({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' },
+      take: 5,
+      select: { id: true, name: true, email: true, createdAt: true }
+    });
 
     res.status(200).json({
       success: true,
       data: {
-        overview: stats[0] || {},
+        overview: { total, active, inactive, admins, users },
         recentUsers
       }
     });
@@ -214,27 +209,20 @@ export class UserController {
   static activateUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      { isActive: true },
-      { new: true }
-    ).select('-password');
+    const user = await prisma.user.update({
+      where: { id },
+      data: { isActive: true },
+      select: { id: true, name: true, email: true, isActive: true }
+    }).catch(() => null);
 
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    logger.info(`User activated by admin ${req.user?.email}:`, user.email);
+    logger.info(`User activated by admin ${req.user?.email}: ${user.email}`);
 
-    res.status(200).json({
-      success: true,
-      data: user,
-      message: 'User activated successfully'
-    });
+    res.status(200).json({ success: true, data: user, message: 'User activated successfully' });
   });
 
   /**
@@ -243,26 +231,19 @@ export class UserController {
   static makeAdmin = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      { role: 'admin' },
-      { new: true }
-    ).select('-password');
+    const user = await prisma.user.update({
+      where: { id },
+      data: { role: 'admin' },
+      select: { id: true, name: true, email: true, role: true }
+    }).catch(() => null);
 
     if (!user) {
-      res.status(404).json({
-        success: false,
-        message: 'User not found'
-      });
+      res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    logger.info(`User promoted to admin by ${req.user?.email}:`, user.email);
+    logger.info(`User promoted to admin by ${req.user?.email}: ${user.email}`);
 
-    res.status(200).json({
-      success: true,
-      data: user,
-      message: 'User promoted to admin successfully'
-    });
+    res.status(200).json({ success: true, data: user, message: 'User promoted to admin successfully' });
   });
 }

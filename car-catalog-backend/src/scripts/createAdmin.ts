@@ -1,87 +1,28 @@
 import dotenv from 'dotenv';
-import mongoose from 'mongoose';
-import bcryptjs from 'bcryptjs';
+import prisma from '@/config/prisma';
+import { hashPassword } from '@/utils/helpers';
 
 // Load environment variables
 dotenv.config();
 
-// Import functions directly without aliases
-import { connectWithRetry } from '../config/database';
-
-// Define User interface and schema directly in this file
-interface IUser {
-  name: string;
-  email: string;
-  password: string;
-  role: 'user' | 'admin';
-  isActive: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-const UserSchema = new mongoose.Schema<IUser>({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-    maxlength: 100
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6
-  },
-  role: {
-    type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
-  },
-  isActive: {
-    type: Boolean,
-    default: true
-  }
-}, {
-  timestamps: true
-});
-
-const User = mongoose.model<IUser>('User', UserSchema);
-
 async function createAdmin(): Promise<void> {
   try {
-    console.log('🔧 Starting admin creation...');
-    
-    // Connect to database
-    await connectWithRetry();
-    console.log('✅ Connected to database');
+    console.log('🔧 Starting admin creation (Prisma)...');
+
+    const email = 'admin@carcatalog.com';
 
     // Check if admin already exists
-    const existingAdmin = await User.findOne({ 
-      email: 'admin@carcatalog.com' 
-    });
+    const existingAdmin = await prisma.user.findUnique({ where: { email } });
 
     if (existingAdmin) {
-      console.log('⚠️  Admin user already exists with email: admin@carcatalog.com');
-      console.log('📧 Email:', existingAdmin.email);
-      console.log('👤 Name:', existingAdmin.name);
-      console.log('🔑 Role:', existingAdmin.role);
-      
+      console.log('⚠️  Admin user already exists with email:', email);
+
       // Update password anyway
       const newPassword = 'admin123';
-      const hashedPassword = await bcryptjs.hash(newPassword, 12);
-      
-      await User.findByIdAndUpdate(existingAdmin._id, {
-        password: hashedPassword,
-        isActive: true,
-        role: 'admin'
-      });
-      
+      const hashedPassword = await hashPassword(newPassword);
+
+      await prisma.user.update({ where: { id: existingAdmin.id }, data: { password: hashedPassword, isActive: true, role: 'admin' } });
+
       console.log('🔄 Admin password updated to: admin123');
       process.exit(0);
     }
@@ -89,37 +30,28 @@ async function createAdmin(): Promise<void> {
     // Create new admin user
     const adminData = {
       name: 'Administrator',
-      email: 'admin@carcatalog.com',
+      email,
       password: 'admin123',
       role: 'admin' as const,
       isActive: true
     };
 
     // Hash password
-    const hashedPassword = await bcryptjs.hash(adminData.password, 12);
+    const hashedPassword = await hashPassword(adminData.password);
 
     // Create admin user
-    const adminUser = new User({
-      ...adminData,
-      password: hashedPassword
-    });
-
-    await adminUser.save();
+    await prisma.user.create({ data: { name: adminData.name, email: adminData.email, password: hashedPassword, role: adminData.role, isActive: true } });
 
     console.log('✅ Admin user created successfully!');
-    console.log('📧 Email: admin@carcatalog.com');
+    console.log('📧 Email:', email);
     console.log('🔑 Password: admin123');
     console.log('👤 Role: admin');
-    console.log('');
     console.log('🚀 You can now login to the admin dashboard');
 
+    process.exit(0);
   } catch (error) {
     console.error('❌ Error creating admin user:', error);
     process.exit(1);
-  } finally {
-    await mongoose.disconnect();
-    console.log('🔌 Disconnected from database');
-    process.exit(0);
   }
 }
 

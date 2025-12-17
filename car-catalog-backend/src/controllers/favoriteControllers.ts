@@ -1,9 +1,9 @@
 import { Response } from 'express';
-import Favorite from '@/models/Favorite';
-import Car from '@/models/Car';
+import prisma from '@/config/prisma';
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { AuthRequest } from '@/middleware/auth';
+import type { Prisma } from '@prisma/client';
 
 export class FavoriteController {
   /**
@@ -16,22 +16,19 @@ export class FavoriteController {
     const limitNum = Math.max(1, Math.min(50, parseInt(limit as string)));
     const skip = (pageNum - 1) * limitNum;
 
-    const [favorites, total] = await Promise.all([
-      Favorite.find({ userId: req.user!.id })
-        .populate({
-          path: 'carId',
-          select: 'id make model year price image fuel_type transmission isAvailable',
-          match: { isAvailable: true }
-        })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limitNum)
-        .lean(),
-      Favorite.countDocuments({ userId: req.user!.id })
-    ]);
+    type FavoriteWithCar = Prisma.FavoriteGetPayload<{ include: { car: true } }>;
+    const favorites = await prisma.favorite.findMany({
+      where: { userId: req.user!.id },
+      include: { car: true },
+      orderBy: { createdAt: 'desc' },
+      skip,
+      take: limitNum
+    }) as FavoriteWithCar[];
 
-    // Filter out favorites where car is no longer available
-    const validFavorites = favorites.filter(fav => fav.carId);
+    const total = await prisma.favorite.count({ where: { userId: req.user!.id } });
+
+    // Only keep favorites with an existing available car
+    const validFavorites = favorites.filter((fav: FavoriteWithCar) => fav.car !== null && fav.car.isAvailable);
 
     const totalPages = Math.ceil(total / limitNum);
 
@@ -54,8 +51,8 @@ export class FavoriteController {
     const { carId } = req.body;
 
     // Check if car exists and is available
-    const car = await Car.findById(carId);
-    if (!car || !car.isAvailable) {
+    const car = await prisma.car.findUnique({ where: { id: carId } });
+    if (!car || car.isAvailable === false) {
       res.status(404).json({
         success: false,
         message: 'Car not found or not available'
@@ -64,10 +61,7 @@ export class FavoriteController {
     }
 
     // Check if already in favorites
-    const existingFavorite = await Favorite.findOne({
-      userId: req.user!.id,
-      carId
-    });
+    const existingFavorite = await prisma.favorite.findFirst({ where: { userId: req.user!.id, carId } });
 
     if (existingFavorite) {
       res.status(400).json({
@@ -78,15 +72,10 @@ export class FavoriteController {
     }
 
     // Create favorite
-    const favorite = new Favorite({
-      userId: req.user!.id,
-      carId
+    const favorite = await prisma.favorite.create({
+      data: { userId: req.user!.id, carId },
+      include: { car: true }
     });
-
-    await favorite.save();
-
-    // Populate car details
-    await favorite.populate('carId', 'id make model year price image fuel_type transmission');
 
     logger.info(`User ${req.user?.email} added car ${carId} to favorites`);
 
@@ -102,13 +91,9 @@ export class FavoriteController {
    */
   static removeFavorite = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { carId } = req.params;
+    const result = await prisma.favorite.deleteMany({ where: { userId: req.user!.id, carId } });
 
-    const favorite = await Favorite.findOneAndDelete({
-      userId: req.user!.id,
-      carId
-    });
-
-    if (!favorite) {
+    if (result.count === 0) {
       res.status(404).json({
         success: false,
         message: 'Favorite not found'
@@ -129,11 +114,7 @@ export class FavoriteController {
    */
   static checkFavorite = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { carId } = req.params;
-
-    const favorite = await Favorite.findOne({
-      userId: req.user!.id,
-      carId
-    });
+    const favorite = await prisma.favorite.findFirst({ where: { userId: req.user!.id, carId } });
 
     res.status(200).json({
       success: true,
@@ -147,45 +128,29 @@ export class FavoriteController {
    * Get favorite statistics for user
    */
   static getFavoriteStats = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const stats = await Favorite.aggregate([
-      { $match: { userId: req.user!.id } },
-      {
-        $lookup: {
-          from: 'cars',
-          localField: 'carId',
-          foreignField: '_id',
-          as: 'car'
-        }
-      },
-      { $unwind: '$car' },
-      { $match: { 'car.isAvailable': true } },
-      {
-        $group: {
-          _id: null,
-          totalFavorites: { $sum: 1 },
-          avgPrice: { $avg: '$car.price' },
-          makes: { $addToSet: '$car.make' },
-          fuelTypes: { $addToSet: '$car.fuel_type' }
-        }
-      },
-      {
-        $project: {
-          _id: 0,
-          totalFavorites: 1,
-          avgPrice: { $round: ['$avgPrice', 2] },
-          uniqueMakes: { $size: '$makes' },
-          uniqueFuelTypes: { $size: '$fuelTypes' }
-        }
-      }
-    ]);
+    type FavoriteWithCar = Prisma.FavoriteGetPayload<{ include: { car: true } }>;
+    const favorites = await prisma.favorite.findMany({ where: { userId: req.user!.id }, include: { car: true } }) as FavoriteWithCar[];
+
+    const available = favorites.filter((f: FavoriteWithCar) => f.car !== null && f.car.isAvailable);
+    const totalFavorites = available.length;
+    const prices: number[] = available.map((f: FavoriteWithCar) => (f.car?.price as number) || 0);
+    const avgPrice = prices.length > 0 ? +(prices.reduce((a: number, b: number) => a + b, 0) / prices.length).toFixed(2) : 0;
+    const makes = new Set<string>();
+    const fuelTypes = new Set<string>();
+    available.forEach((f: FavoriteWithCar) => {
+      const car = f.car;
+      if (!car) return;
+      if (car.make) makes.add(car.make);
+      if (car.fuelType) fuelTypes.add(car.fuelType);
+    });
 
     res.status(200).json({
       success: true,
-      data: stats[0] || {
-        totalFavorites: 0,
-        avgPrice: 0,
-        uniqueMakes: 0,
-        uniqueFuelTypes: 0
+      data: {
+        totalFavorites,
+        avgPrice,
+        uniqueMakes: makes.size,
+        uniqueFuelTypes: fuelTypes.size
       }
     });
   });
@@ -194,15 +159,15 @@ export class FavoriteController {
    * Clear all favorites
    */
   static clearFavorites = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const result = await Favorite.deleteMany({ userId: req.user!.id });
+    const result = await prisma.favorite.deleteMany({ where: { userId: req.user!.id } });
 
-    logger.info(`User ${req.user?.email} cleared all favorites (${result.deletedCount} items)`);
+    logger.info(`User ${req.user?.email} cleared all favorites (${result.count} items)`);
 
     res.status(200).json({
       success: true,
-      message: `Removed ${result.deletedCount} favorites`,
+      message: `Removed ${result.count} favorites`,
       data: {
-        deletedCount: result.deletedCount
+        deletedCount: result.count
       }
     });
   });
