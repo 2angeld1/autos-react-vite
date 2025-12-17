@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '@/services/auth';
-import { AuthUser, LoginCredentials, TwoFactorData } from '@/types';
+import { AuthUser } from '@/services/auth';
+import { LoginCredentials, TwoFactorData } from '@/types';
 import toast from 'react-hot-toast';
 
 interface UseAuthReturn {
@@ -61,18 +62,13 @@ export const useAuth = (): UseAuthReturn => {
     try {
       const response = await authService.login(credentials);
       
-      if (response.success && response.data) {
-        if (response.data.requires2FA) {
-          setRequires2FA(true);
-          return false; // Need 2FA verification
-        } else {
-          setUser(response.data.user);
-          setRequires2FA(false);
-          toast.success('Login successful!');
-          return true;
-        }
+      if (response.user) {
+        setUser(response.user);
+        setRequires2FA(false);
+        toast.success('Login successful!');
+        return true;
       } else {
-        toast.error(response.message || 'Login failed');
+        toast.error('Login failed');
         return false;
       }
     } catch (error: any) {
@@ -90,15 +86,15 @@ export const useAuth = (): UseAuthReturn => {
     setIsLoading(true);
     
     try {
-      const response = await authService.verify2FA(data);
+      const response = await authService.verifyTwoFactor(data);
       
-      if (response.success && response.data) {
-        setUser(response.data.user);
+      if (response.user) {
+        setUser(response.user);
         setRequires2FA(false);
         toast.success('2FA verification successful!');
         return true;
       } else {
-        toast.error(response.message || '2FA verification failed');
+        toast.error('2FA verification failed');
         return false;
       }
     } catch (error: any) {
@@ -139,8 +135,8 @@ export const useAuth = (): UseAuthReturn => {
     try {
       const response = await authService.getProfile();
       
-      if (response.success && response.data) {
-        setUser(response.data);
+      if (response) {
+        setUser(response);
       }
     } catch (error: any) {
       console.error('Failed to refresh user:', error);

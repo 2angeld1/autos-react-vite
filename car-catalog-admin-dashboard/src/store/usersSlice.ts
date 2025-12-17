@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import { User, UserFilters, PaginatedResponse } from '@/types';
+import { User, UserFilters } from '@/types';
 import { usersService } from '@/services/users';
 
 interface UsersState {
@@ -43,9 +43,8 @@ interface UsersState {
 
 const initialFilters: UserFilters = {
   search: '',
-  role: '',
-  isActive: '',
-  lastLoginDays: '',
+  role: undefined,
+  isActive: undefined,
 };
 
 export const useUsersStore = create<UsersState>()(

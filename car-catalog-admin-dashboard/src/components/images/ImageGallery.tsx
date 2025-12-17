@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Search, 
   Grid, 
@@ -7,12 +7,10 @@ import {
   Trash2, 
   Eye, 
   Edit, 
-  MoreVertical,
   X,
   ZoomIn,
   ZoomOut,
-  RotateCw,
-  Move
+  RotateCw
 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';

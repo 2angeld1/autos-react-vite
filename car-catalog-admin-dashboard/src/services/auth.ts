@@ -21,6 +21,11 @@ export interface LoginResponse {
   token: string;
 }
 
+export interface TwoFactorSetupResponse {
+  secret: string;
+  qrCode: string;
+}
+
 class AuthService {
   /**
    * Login with email and password
@@ -59,6 +64,34 @@ class AuthService {
                      'Login failed. Please try again.';
       
       throw new Error(message);
+    }
+  }
+
+  /**
+   * Verify two-factor authentication code
+   */
+  async verifyTwoFactor(data: { email: string; code: string }): Promise<{ user: AuthUser; token: string }> {
+    try {
+      const response = await api.post('/auth/verify-2fa', data);
+      if (response.data.success) {
+        const { user, token } = response.data.data;
+        this.setAuthData(token, user);
+        return { user, token };
+      }
+      throw new Error(response.data.message || 'Invalid 2FA code');
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || '2FA verification failed');
+    }
+  }
+
+  /**
+   * Resend two-factor authentication code
+   */
+  async resendTwoFactorCode(email: string): Promise<void> {
+    try {
+      await api.post('/auth/resend-2fa', { email });
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to resend 2FA code');
     }
   }
 
@@ -163,6 +196,11 @@ class AuthService {
       this.logout();
       return false;
     }
+  }
+
+  async verify2FA(_data: { code: string }): Promise<{ user: AuthUser; token: string }> {
+    // Placeholder for 2FA verification
+    throw new Error('2FA not implemented');
   }
 }
 

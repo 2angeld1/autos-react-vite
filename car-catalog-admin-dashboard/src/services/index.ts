@@ -58,4 +58,4 @@ export interface DashboardStats {
 
 export { apiClient } from './api';
 export { authService } from './auth';
-export type { LoginResponse, TwoFactorSetupResponse } from './auth';
+export type { LoginResponse } from './auth';

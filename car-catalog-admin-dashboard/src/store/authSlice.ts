@@ -12,6 +12,8 @@ interface AuthState {
   
   // Actions
   login: (email: string, password: string) => Promise<void>;
+  verify2FA: (data: { email: string; code: string }) => Promise<void>;
+  resend2FA: (email: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
   initializeAuth: () => Promise<void>;
@@ -60,6 +62,31 @@ export const useAuthStore = create<AuthState>()(
             });
             
             throw error;
+          }
+        },
+
+        verify2FA: async (data: { email: string; code: string }) => {
+          set({ loading: true, error: null });
+          try {
+            const { user } = await authService.verifyTwoFactor(data);
+            set({ user, isAuthenticated: true, loading: false, requires2FA: false });
+            toast.success('Login successful!');
+          } catch (error: any) {
+            set({ loading: false, error: error.message });
+            toast.error(error.message || 'Invalid 2FA code');
+            throw error;
+          }
+        },
+
+        resend2FA: async (email: string) => {
+          set({ loading: true, error: null });
+          try {
+            await authService.resendTwoFactorCode(email);
+            toast.success('A new 2FA code has been sent.');
+          } catch (error: any) {
+            toast.error(error.message || 'Failed to resend code');
+          } finally {
+            set({ loading: false });
           }
         },
 

@@ -12,27 +12,10 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface Car {
-  _id: string;
-  id: string;
-  make: string;
-  model: string;
-  year: number;
-  price: number;
-  image: string;
-  description: string;
-  fuel_type: 'gas' | 'diesel' | 'electricity' | 'hybrid';
-  transmission: 'a' | 'm';
-  cylinders: number;
-  class: string;
-  displacement: number;
-  city_mpg: number;
-  highway_mpg: number;
-  combination_mpg: number;
-  features?: string[];
-  isAvailable: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
+export interface UserFilters {
+  search?: string;
+  role?: 'admin' | 'user';
+  isActive?: boolean;
 }
 
 export interface LoginCredentials {
@@ -54,5 +37,4 @@ export interface AuthUser {
 }
 
 // Re-export services
-export { AuthService } from './auth';
-export { apiClient } from './api';
+export { apiClient } from '../services/api';

@@ -1,7 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { Shield, ArrowLeft, RefreshCw } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import { useAuthStore } from '@/store/authSlice';
 import toast from 'react-hot-toast';
@@ -47,7 +46,7 @@ const TwoFactorAuth: React.FC<TwoFactorAuthProps> = ({ email, onBack }) => {
 
   const onSubmit = async (data: TwoFactorFormData) => {
     try {
-      await verify2FA(email, data.code);
+      await verify2FA({ email, code: data.code });
       toast.success('Successfully authenticated!');
     } catch (error: any) {
       toast.error(error.message || '2FA verification failed');

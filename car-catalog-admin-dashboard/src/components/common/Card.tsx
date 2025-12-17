@@ -10,7 +10,13 @@ export interface CardProps {
   border?: boolean;
 }
 
-const Card: React.FC<CardProps> = ({
+interface CardComponent extends React.FC<CardProps> {
+  Header: typeof CardHeader;
+  Body: typeof CardBody;
+  Footer: typeof CardFooter;
+}
+
+const Card: CardComponent = ({
   children,
   className,
   padding = 'md',
