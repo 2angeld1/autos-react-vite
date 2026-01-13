@@ -39,31 +39,31 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
     );
 
     const inputClasses = clsx(
-      'flex h-10 w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm',
-      'placeholder:text-gray-400',
+      'flex h-10 w-full rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 px-3 py-2 text-sm text-gray-900 dark:text-white',
+      'placeholder:text-gray-400 dark:placeholder:text-gray-500',
       'focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent',
-      'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50',
+      'disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-800',
       {
         'border-red-500 focus:ring-red-500': error,
         'pl-10': startIcon,
         'pr-10': endIcon || isPassword,
-        'bg-gray-50': variant === 'filled',
+        'bg-gray-50 dark:bg-gray-800': variant === 'filled',
       },
       className
     );
 
     const labelClasses = clsx(
-      'block text-sm font-medium text-gray-700 mb-1',
+      'block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1',
       {
-        'text-red-600': error,
+        'text-red-600 dark:text-red-400': error,
       }
     );
 
     const helperTextClasses = clsx(
       'mt-1 text-sm',
       {
-        'text-red-600': error,
-        'text-gray-500': !error,
+        'text-red-600 dark:text-red-400': error,
+        'text-gray-500 dark:text-gray-400': !error,
       }
     );
 

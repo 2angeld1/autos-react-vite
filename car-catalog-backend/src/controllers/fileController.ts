@@ -4,6 +4,7 @@ import fs from 'fs';
 import FileItem, { IFileItemDocument } from '@/models/FileItem';
 import { logger } from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth';
+import { CloudinaryService } from '@/services/cloudinaryService';
 
 // Base upload directory
 const BASE_UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'files');
@@ -270,9 +271,21 @@ export class FileController {
           logger.info(`File moved from ${currentPath} to ${targetPath}`);
         }
 
+        // --- CLOUDINARY UPLOAD ---
+        // Construir la carpeta en Cloudinary basada en el path virtual
+        // El usuario pidió que todo esté dentro de "autos"
+        const cloudinaryFolder = basePath
+          ? `autos${basePath}`
+          : 'autos';
+
+        const cloudinaryResult = await CloudinaryService.uploadImage(targetPath, cloudinaryFolder);
+        // --- END CLOUDINARY UPLOAD ---
+
         // Build the virtual path and URL
         const filePath = basePath ? `${basePath}/${file.filename}` : `/${file.filename}`;
-        const fileUrl = `/uploads/files${filePath}`;
+
+        // Usar la URL de Cloudinary si está disponible, de lo contrario local
+        const fileUrl = cloudinaryResult.secure_url || `/uploads/files${filePath}`;
 
         // Generate thumbnail URL for images
         let thumbnailUrl = undefined;
@@ -290,13 +303,21 @@ export class FileController {
           url: fileUrl,
           thumbnail: thumbnailUrl,
           createdBy: req.user?.id,
-          isPublic: true
+          isPublic: true,
+          cloudinaryId: cloudinaryResult.public_id,
+          cloudinaryUrl: cloudinaryResult.secure_url
         });
 
         await fileItem.save();
         uploadedFiles.push(fileItem);
 
-        logger.info(`File uploaded: ${file.originalname} -> ${fileUrl}`);
+        // Delete local file after successful upload to Cloudinary
+        if (fs.existsSync(targetPath)) {
+          fs.unlinkSync(targetPath);
+          logger.info(`Local file deleted after Cloudinary upload: ${targetPath}`);
+        }
+
+        logger.info(`File uploaded to Cloudinary: ${file.originalname} -> ${fileUrl}`);
       } catch (error) {
         logger.error(`Error processing file ${file.originalname}:`, error);
         // Clean up the file if it exists
@@ -392,13 +413,18 @@ export class FileController {
     if (file.type === 'folder') {
       await FileController.deleteFolderContents(file._id.toString());
       
-      // Delete physical folder
+      // Delete physical folder if it exists
       const physicalPath = path.join(BASE_UPLOAD_DIR, ...file.path.split('/').filter(Boolean));
       if (fs.existsSync(physicalPath)) {
         fs.rmSync(physicalPath, { recursive: true, force: true });
       }
     } else {
-      // Delete physical file
+      // Delete from Cloudinary if info exists
+      if (file.cloudinaryId) {
+        await CloudinaryService.deleteImage(file.cloudinaryId);
+      }
+
+      // Delete physical file if it exists locally
       const physicalPath = path.join(BASE_UPLOAD_DIR, ...file.path.split('/').filter(Boolean));
       if (fs.existsSync(physicalPath)) {
         fs.unlinkSync(physicalPath);

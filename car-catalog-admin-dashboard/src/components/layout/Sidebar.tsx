@@ -12,7 +12,8 @@ import {
   Tag,
   CalendarCheck,
   Percent,
-  Building2
+  Building2,
+  Zap
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
@@ -128,8 +129,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           clsx(
             'flex items-center gap-3 py-2.5 px-3 mx-3 rounded-lg text-sm font-medium transition-all duration-200',
             isActive
-              ? 'bg-primary-100 text-primary-900 shadow-sm'
-              : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+              ? 'bg-primary-100 dark:bg-primary-900/50 text-primary-900 dark:text-primary-200 shadow-sm'
+              : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'
           )
         }
         onClick={onClose}
@@ -158,18 +159,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       {/* Sidebar */}
       <div
         className={clsx(
-          'fixed top-0 left-0 z-50 h-full bg-white shadow-lg transform transition-transform duration-300 ease-in-out',
+          'fixed top-0 left-0 z-50 h-full bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out',
           'w-64 flex flex-col',
           isOpen ? 'translate-x-0' : '-translate-x-full'
         )}
       >
         {/* Logo section */}
-        <div className="flex items-center justify-between p-5 border-b border-gray-200">
+        <div className="flex items-center justify-between p-5 border-b border-gray-200 dark:border-gray-700">
           <div className="flex items-center">
-            <div className="h-10 w-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">CA</span>
+            <div className="h-10 w-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+              <Zap className="h-6 w-6 text-white fill-current" />
             </div>
-            <span className="ml-3 font-semibold text-gray-900">Car Admin</span>
+            <span className="ml-3 font-bold text-xl tracking-tight text-gray-900 dark:text-white">Velo<span className="text-orange-600">Drive</span></span>
           </div>
 
           <Button
@@ -186,7 +187,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           {navigationSections.map((section, index) => (
             <div key={index} className="mb-4">
               {section.titleKey && (
-                <h3 className="px-6 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <h3 className="px-6 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
                   {t(section.titleKey)}
                 </h3>
               )}
@@ -200,13 +201,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="bg-gradient-to-r from-primary-50 to-primary-100 rounded-lg p-4">
-            <p className="text-xs text-primary-800 font-medium">
-              Car Catalog Admin v1.0.0
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <div className="bg-gradient-to-r from-orange-50 to-orange-100 dark:from-orange-900/30 dark:to-orange-800/30 rounded-lg p-4">
+            <p className="text-xs text-orange-800 dark:text-orange-300 font-medium">
+              VeloDrive Admin v1.1.0
             </p>
-            <p className="text-xs text-primary-600 mt-1">
-              Dashboard for car management
+            <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">
+              Premium Vehicle Management
             </p>
           </div>
         </div>

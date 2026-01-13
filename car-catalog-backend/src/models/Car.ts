@@ -40,8 +40,12 @@ export interface ICarDocument extends Document {
   combination_mpg: number;
   features?: string[];
   isAvailable: boolean;
+  cloudinaryId?: string;
+  cloudinaryUrl?: string;
   fullName: string;
   avgMpg: number;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const CarSchema = new Schema<ICarDocument>({
@@ -79,6 +83,13 @@ const CarSchema = new Schema<ICarDocument>({
   image: {
     type: String,
     required: true
+  },
+  cloudinaryId: {
+    type: String,
+    index: true
+  },
+  cloudinaryUrl: {
+    type: String
   },
   description: {
     type: String,

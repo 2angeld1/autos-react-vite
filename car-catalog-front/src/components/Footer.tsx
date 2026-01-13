@@ -73,7 +73,7 @@ const Footer: React.FC = () => {
                                 <span className="icon has-text-accent">
                                     <i className="fas fa-envelope"></i>
                                 </span>
-                                <span>info@autoshowcase.com</span>
+                                <span>info@velodrive.com</span>
                             </li>
                             <li>
                                 <span className="icon has-text-accent">
@@ -91,7 +91,7 @@ const Footer: React.FC = () => {
                     <div className="level-left">
                         <div className="level-item">
                             <p className="has-text-grey">
-                                © {new Date().getFullYear()} AutoShowcase. Todos los derechos reservados.
+                                © {new Date().getFullYear()} VeloDrive. Todos los derechos reservados.
                             </p>
                         </div>
                     </div>

@@ -1,6 +1,6 @@
 // API Configuration
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-export const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000;
+export const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT) || 120000;
 export const ACCESS_TOKEN_KEY = import.meta.env.VITE_ACCESS_TOKEN_KEY || 'car_admin_access_token';
 
 // Authentication

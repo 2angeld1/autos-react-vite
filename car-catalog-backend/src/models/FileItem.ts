@@ -14,6 +14,8 @@ export interface IFileItem {
   description?: string;
   createdBy?: mongoose.Types.ObjectId;
   isPublic: boolean;
+  cloudinaryId?: string;
+  cloudinaryUrl?: string;
 }
 
 // Interface para el documento de MongoDB
@@ -85,6 +87,13 @@ const FileItemSchema = new Schema<IFileItemDocument>({
     type: Boolean,
     default: true,
     index: true
+  },
+  cloudinaryId: {
+    type: String,
+    index: true
+  },
+  cloudinaryUrl: {
+    type: String
   }
 }, {
   timestamps: true,

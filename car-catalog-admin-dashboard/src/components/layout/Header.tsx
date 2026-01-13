@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell, User, Search, X, Clock, Check, Globe } from 'lucide-react';
+import { Menu, Bell, User, Search, X, Clock, Check, Globe, Zap } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { useAuthStore } from '@/store/authSlice';
@@ -47,7 +47,6 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setLangOpen(false);
     setUserOpen(false);
     if (!next) {
-      // closed -> clear unread (as requested)
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
     }
   };
@@ -81,7 +80,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="bg-gray-100 shadow-sm border-b border-gray-200">
+    <header className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 transition-colors duration-200">
       <div className="flex items-center justify-between px-6 py-4">
         {/* Left side - Menu button and logo */}
         <div className="flex items-center space-x-4">
@@ -89,15 +88,17 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             variant="ghost"
             size="sm"
             onClick={onToggleSidebar}
-            icon={<Menu className="h-6 w-6 text-gray-700" />}
+            icon={<Menu className="h-6 w-6 text-gray-700 dark:text-gray-200" />}
             aria-label="Toggle sidebar"
-            className="hover:bg-gray-200 transition-colors"
+            className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           />
           <div className="flex items-center">
-            <div className="h-8 w-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">CA</span>
+            <div className="h-8 w-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
+              <Zap className="h-5 w-5 text-white fill-current" />
             </div>
-            <span className="ml-2 text-gray-900 font-semibold text-lg hidden sm:block">Car Admin</span>
+            <span className="ml-2 font-semibold text-lg hidden sm:block text-gray-900 dark:text-white">
+              Velo<span className="text-orange-600">Drive</span>
+            </span>
           </div>
         </div>
 
@@ -106,9 +107,9 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           <div className="relative">
             <Input
               placeholder={t('common.search') + '...'}
-              className="pl-10 bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:bg-white focus:text-gray-900"
+              className="pl-10 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:bg-white dark:focus:bg-gray-700"
             />
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 dark:text-gray-500" />
           </div>
         </div>
 
@@ -120,22 +121,22 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               variant="ghost"
               size="sm"
               onClick={toggleLang}
-              icon={<Globe className="h-5 w-5 text-gray-700" />}
+              icon={<Globe className="h-5 w-5 text-gray-700 dark:text-gray-200" />}
               aria-label={t('header.language')}
-              className="hover:bg-gray-200 transition-colors relative"
+              className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
             />
 
             {langOpen && (
-              <div className="absolute right-0 mt-2 w-40 bg-white border border-gray-100 rounded-lg shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg z-50">
                 <div className="p-2">
                   <button
-                    className={`w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2 ${i18n.language === 'en' ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                    className={`w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2 ${i18n.language === 'en' ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     onClick={() => changeLanguage('en')}
                   >
                     🇺🇸 {t('header.english')}
                   </button>
                   <button
-                    className={`w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2 ${i18n.language === 'es' ? 'bg-primary-50 text-primary-700' : 'text-gray-700 hover:bg-gray-50'}`}
+                    className={`w-full text-left px-3 py-2 text-sm rounded flex items-center gap-2 ${i18n.language === 'es' ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300' : 'text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
                     onClick={() => changeLanguage('es')}
                   >
                     🇪🇸 {t('header.spanish')}
@@ -151,51 +152,51 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               variant="ghost"
               size="sm"
               onClick={toggleNotif}
-              icon={<Bell className="h-5 w-5 text-gray-700" />}
+              icon={<Bell className="h-5 w-5 text-gray-700 dark:text-gray-200" />}
               aria-label={t('header.notifications')}
-              className="hover:bg-gray-200 transition-colors relative"
+              className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
             />
             {unreadCount > 0 && !notifOpen && (
               <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full" />
             )}
 
             {notifOpen && (
-              <div className="absolute right-0 mt-2 w-80 bg-white border border-gray-100 rounded-lg shadow-lg z-50">
-                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100">
-                  <h4 className="font-semibold">{t('header.notifications')}</h4>
+              <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="flex items-center justify-between px-4 py-2 border-b border-gray-100 dark:border-gray-700">
+                  <h4 className="font-semibold text-gray-900 dark:text-white">{t('header.notifications')}</h4>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={clearAll}
-                      className="text-sm text-gray-500 hover:text-gray-700"
+                      className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
                       title={t('header.markAllRead')}
                     >
                       {t('header.markAllRead')}
                     </button>
-                    <button onClick={() => { setNotifOpen(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} className="p-1 hover:bg-gray-100 rounded">
-                      <X className="h-4 w-4 text-gray-500" />
+                    <button onClick={() => { setNotifOpen(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                      <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     </button>
                   </div>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.length === 0 && (
-                    <div className="p-4 text-center text-sm text-gray-500">{t('header.noNotifications')}</div>
+                    <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">{t('header.noNotifications')}</div>
                   )}
                   {notifications.map(n => (
-                    <div key={n.id} className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 ${n.read ? '' : 'bg-gray-50'}`}>
-                      <div className="p-2 bg-gray-100 rounded-full">
-                        <Clock className="h-4 w-4 text-gray-500" />
+                    <div key={n.id} className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${n.read ? '' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
+                      <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full">
+                        <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       </div>
                       <div className="flex-1">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-gray-900 text-sm">{n.title}</p>
-                            <p className="text-xs text-gray-500">{n.message}</p>
+                            <p className="font-medium text-gray-900 dark:text-white text-sm">{n.title}</p>
+                            <p className="text-xs text-gray-500 dark:text-gray-400">{n.message}</p>
                           </div>
-                          <div className="text-xs text-gray-400">{n.time}</div>
+                          <div className="text-xs text-gray-400 dark:text-gray-500">{n.time}</div>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
                           {!n.read && (
-                            <button onClick={() => markAsRead(n.id)} className="text-xs text-primary-600 hover:underline flex items-center gap-1">
+                            <button onClick={() => markAsRead(n.id)} className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
                               <Check className="h-3 w-3" /> Mark read
                             </button>
                           )}
@@ -212,33 +213,33 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               variant="ghost"
               size="sm"
               onClick={toggleUser}
-              icon={<User className="h-5 w-5 text-gray-700" />}
+              icon={<User className="h-5 w-5 text-gray-700 dark:text-gray-200" />}
               aria-label="User menu"
-              className="hover:bg-gray-200 transition-colors relative"
+              className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
             />
 
             {userOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white border border-gray-100 rounded-lg shadow-lg z-50">
-                <div className="p-4 border-b border-gray-100">
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg z-50">
+                <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 flex items-center justify-center">
-                      <span className="text-sm text-gray-600">{authUser?.name ? authUser.name.charAt(0).toUpperCase() : 'U'}</span>
+                    <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                      <span className="text-sm text-gray-600 dark:text-gray-300">{authUser?.name ? authUser.name.charAt(0).toUpperCase() : 'U'}</span>
                     </div>
                     <div>
-                      <p className="font-medium text-gray-900 text-sm">{authUser?.name || 'User'}</p>
-                      <p className="text-xs text-gray-500">{authUser?.email || ''}</p>
+                      <p className="font-medium text-gray-900 dark:text-white text-sm">{authUser?.name || 'User'}</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">{authUser?.email || ''}</p>
                     </div>
                   </div>
                 </div>
                 <div className="p-2">
                   <button
-                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
                     onClick={() => { setUserOpen(false); navigate('/profile'); }}
                   >
                     {t('nav.profile')}
                   </button>
                   <button
-                    className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 rounded"
+                    className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
                     onClick={() => { logout(); navigate('/login'); }}
                   >
                     {t('nav.logout')}

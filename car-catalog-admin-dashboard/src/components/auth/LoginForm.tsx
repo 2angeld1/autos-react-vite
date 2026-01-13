@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, AlertCircle, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
@@ -43,9 +43,12 @@ const LoginForm: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         {/* Header */}
         <div className="text-center">
-          <div className="mx-auto h-16 w-16 bg-primary-600 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-xl">CA</span>
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl">
+            <Zap className="h-10 w-10 text-white fill-current" />
           </div>
+          <h1 className="mt-6 text-4xl font-extrabold text-gray-900 tracking-tight">
+            Velo<span className="text-orange-600">Drive</span>
+          </h1>
           <h2 className="mt-6 text-3xl font-bold text-gray-900">
             {t('auth.signIn')}
           </h2>

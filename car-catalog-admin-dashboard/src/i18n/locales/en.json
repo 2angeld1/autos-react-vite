@@ -69,7 +69,7 @@
   },
   "auth": {
     "signIn": "Sign in to your account",
-    "accessDashboard": "Access the Car Catalog Admin Dashboard",
+    "accessDashboard": "Access the VeloDrive Admin Dashboard",
     "email": "Email Address",
     "password": "Password",
     "rememberMe": "Remember me",
@@ -87,7 +87,7 @@
   "dashboard": {
     "title": "Dashboard",
     "welcome": "Welcome back",
-    "overview": "Here's what's happening with your car catalog today.",
+    "overview": "Here's what's happening with your VeloDrive inventory today.",
     "totalCars": "Total Cars",
     "totalUsers": "Total Users",
     "totalImages": "Total Images",

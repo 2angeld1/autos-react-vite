@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   TrendingUp,
   Car,
@@ -8,418 +8,346 @@ import {
   Activity,
   Download,
   RefreshCw,
-  ArrowUpRight,
-  ArrowDownRight,
-  Eye,
-  ShoppingCart,
-  Clock
+  Users,
+  Tag,
+  Package,
+  Percent,
+  Loader2
 } from 'lucide-react';
 import Card from '@/components/common/Card';
 import Button from '@/components/common/Button';
 import { Breadcrumb } from '@/components/layout';
 import { formatNumber, formatCurrency } from '@/utils/formatters';
-
-interface AnalyticsData {
-  overview: {
-    totalRevenue: number;
-    totalSales: number;
-    totalViews: number;
-    conversionRate: number;
-    revenueChange: number;
-    salesChange: number;
-    viewsChange: number;
-    conversionChange: number;
-  };
-  salesByMonth: { month: string; sales: number; revenue: number }[];
-  topMakes: { make: string; count: number; percentage: number }[];
-  fuelTypeDistribution: { type: string; count: number; percentage: number }[];
-  priceRanges: { range: string; count: number }[];
-  recentActivity: { action: string; item: string; time: string; user: string }[];
-}
+import { analyticsService, AnalyticsData } from '@/services/analytics';
+import toast from 'react-hot-toast';
 
 // Stat Card Component
-const StatCard: React.FC<{
+const StatCard = ({
+  title,
+  value,
+  icon,
+  color
+}: {
   title: string;
-  value: string | number;
-  change?: number;
-  icon: React.ReactNode;
-  trend?: 'up' | 'down' | 'neutral';
-  color: 'blue' | 'green' | 'purple' | 'orange';
-}> = ({ title, value, change, icon, trend, color }) => {
-  const colorClasses = {
-    blue: 'bg-blue-100 text-blue-600',
-    green: 'bg-green-100 text-green-600',
-    purple: 'bg-purple-100 text-purple-600',
-    orange: 'bg-orange-100 text-orange-600',
-  };
+    value: string | number; 
+    icon: React.ReactNode; 
+  color: string;
+}) => (
+  <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+    <div className="flex items-center justify-between">
+      <div>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{title}</p>
+        <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</p>
+      </div>
+      <div className={`p-3 rounded-lg ${color}`}>
+        {icon}
+      </div>
+    </div>
+  </div>
+);
+
+// Chart Bar Component (Simple visual representation)
+const ChartBar = ({ data, color }: { data: Array<{ name: string; count: number }>; color: string }) => {
+  const maxValue = Math.max(...data.map(d => d.count), 1);
 
   return (
-    <Card className="relative overflow-hidden">
-      <div className="p-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
-            <p className="text-sm font-medium text-gray-500">{title}</p>
-            <p className="text-3xl font-bold text-gray-900">{value}</p>
-            {change !== undefined && (
-              <div className="flex items-center gap-1">
-                {trend === 'up' ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                ) : trend === 'down' ? (
-                  <ArrowDownRight className="h-4 w-4 text-red-500" />
-                ) : null}
-                <span className={`text-sm font-medium ${
-                  trend === 'up' ? 'text-green-600' : 
-                  trend === 'down' ? 'text-red-600' : 'text-gray-600'
-                }`}>
-                  {change > 0 ? '+' : ''}{change}%
-                </span>
-                <span className="text-sm text-gray-500">vs last month</span>
-              </div>
-            )}
+    <div className="space-y-3">
+      {data.map((item, index) => (
+        <div key={index} className="flex items-center gap-3">
+          <div className="w-24 text-sm text-gray-600 dark:text-gray-400 truncate" title={item.name}>
+            {item.name}
           </div>
-          <div className={`p-4 rounded-2xl ${colorClasses[color]}`}>
-            {icon}
+          <div className="flex-1 bg-gray-100 dark:bg-gray-700 rounded-full h-6 overflow-hidden">
+            <div
+              className={`h-full ${color} rounded-full transition-all duration-500 flex items-center justify-end pr-2`}
+              style={{ width: `${(item.count / maxValue) * 100}%`, minWidth: '40px' }}
+            >
+              <span className="text-xs text-white font-medium">{item.count}</span>
+            </div>
           </div>
         </div>
-      </div>
-      <div className={`absolute bottom-0 left-0 right-0 h-1 ${
-        color === 'blue' ? 'bg-blue-500' :
-        color === 'green' ? 'bg-green-500' :
-        color === 'purple' ? 'bg-purple-500' :
-        'bg-orange-500'
-      }`} />
-    </Card>
+      ))}
+    </div>
   );
 };
 
-// Chart Bar Component (Simple visual representation)
-const ChartBar: React.FC<{
-  data: { label: string; value: number; percentage: number }[];
-  color: string;
-}> = ({ data, color }) => (
-  <div className="space-y-3">
-    {data.map((item, index) => (
-      <div key={index} className="space-y-1">
-        <div className="flex items-center justify-between text-sm">
-          <span className="font-medium text-gray-700">{item.label}</span>
-          <span className="text-gray-500">{item.value} ({item.percentage}%)</span>
-        </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            className={`h-full ${color} rounded-full transition-all duration-500`}
-            style={{ width: `${item.percentage}%` }}
-          />
-        </div>
-      </div>
-    ))}
-  </div>
-);
-
 // Activity Item Component
-const ActivityItem: React.FC<{
-  action: string;
-  item: string;
-  time: string;
-  user: string;
-}> = ({ action, item, time, user }) => (
-  <div className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors">
-    <div className="p-2 bg-gray-100 rounded-full">
-      <Activity className="h-4 w-4 text-gray-600" />
+const ActivityItem = ({ action, item, time, user }: { action: string; item: string; time: string; user: string }) => {
+  const formatTime = (timeStr: string) => {
+    const date = new Date(timeStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 60) return `${diffMins}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    return `${diffDays}d ago`;
+  };
+
+  return (
+    <div className="flex items-center gap-3 py-3 border-b border-gray-100 dark:border-gray-700 last:border-0">
+      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+        <Activity className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-medium text-gray-900 dark:text-white">{action}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{item}</p>
+      </div>
+      <div className="text-right">
+        <p className="text-xs text-gray-400 dark:text-gray-500">{formatTime(time)}</p>
+        <p className="text-xs text-gray-500 dark:text-gray-400">{user}</p>
+      </div>
     </div>
-    <div className="flex-1 min-w-0">
-      <p className="text-sm text-gray-900">
-        <span className="font-medium">{user}</span> {action}{' '}
-        <span className="font-medium text-primary-600">{item}</span>
-      </p>
-      <p className="text-xs text-gray-500 flex items-center gap-1 mt-1">
-        <Clock className="h-3 w-3" />
-        {time}
-      </p>
-    </div>
-  </div>
-);
+  );
+};
 
 const Analytics: React.FC = () => {
-  const [dateRange, setDateRange] = useState('30d');
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Simulated data - In production, this would come from the API
-  const [analyticsData] = useState<AnalyticsData>({
-    overview: {
-      totalRevenue: 2450000,
-      totalSales: 127,
-      totalViews: 45230,
-      conversionRate: 3.2,
-      revenueChange: 12.5,
-      salesChange: 8.3,
-      viewsChange: 23.1,
-      conversionChange: -2.1,
-    },
-    salesByMonth: [
-      { month: 'Ene', sales: 12, revenue: 180000 },
-      { month: 'Feb', sales: 15, revenue: 225000 },
-      { month: 'Mar', sales: 18, revenue: 320000 },
-      { month: 'Abr', sales: 14, revenue: 210000 },
-      { month: 'May', sales: 22, revenue: 385000 },
-      { month: 'Jun', sales: 25, revenue: 450000 },
-    ],
-    topMakes: [
-      { make: 'Toyota', count: 45, percentage: 35 },
-      { make: 'Honda', count: 32, percentage: 25 },
-      { make: 'Ford', count: 26, percentage: 20 },
-      { make: 'Chevrolet', count: 15, percentage: 12 },
-      { make: 'BMW', count: 9, percentage: 8 },
-    ],
-    fuelTypeDistribution: [
-      { type: 'Gasolina', count: 78, percentage: 62 },
-      { type: 'Híbrido', count: 28, percentage: 22 },
-      { type: 'Eléctrico', count: 12, percentage: 9 },
-      { type: 'Diésel', count: 9, percentage: 7 },
-    ],
-    priceRanges: [
-      { range: '$0 - $15,000', count: 23 },
-      { range: '$15,000 - $30,000', count: 45 },
-      { range: '$30,000 - $50,000', count: 38 },
-      { range: '$50,000+', count: 21 },
-    ],
-    recentActivity: [
-      { action: 'added a new car', item: '2024 Toyota Camry', time: '2 minutes ago', user: 'Admin' },
-      { action: 'updated price for', item: '2023 Honda Civic', time: '15 minutes ago', user: 'Admin' },
-      { action: 'marked as sold', item: '2022 Ford Mustang', time: '1 hour ago', user: 'Admin' },
-      { action: 'uploaded images for', item: '2024 BMW X5', time: '2 hours ago', user: 'Admin' },
-      { action: 'created new category', item: 'Electric Vehicles', time: '3 hours ago', user: 'Admin' },
-    ],
-  });
+  const fetchAnalytics = async (isRefresh = false) => {
+    try {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
 
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setRefreshing(false);
+      const response = await analyticsService.getAnalytics();
+      if (response.success) {
+        setAnalyticsData(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      toast.error('Failed to load analytics data');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, []);
+
+  const handleRefresh = () => {
+    fetchAnalytics(true);
+    toast.success('Analytics data refreshed!');
   };
 
   const handleExport = () => {
-    // Export analytics data
-    console.log('Exporting analytics data...');
+    // TODO: Implement export functionality
+    toast.success('Export feature coming soon!');
   };
 
-  const breadcrumbItems = [
-    { label: 'Analytics', current: true },
-  ];
+  if (loading) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
+
+  const overview = analyticsData?.overview;
+  const charts = analyticsData?.charts;
+  const recentActivity = analyticsData?.recentActivity || [];
 
   return (
-    <div className="space-y-6">
-      <Breadcrumb items={breadcrumbItems} />
-
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-6 transition-colors duration-200">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div className="mb-6">
+        <Breadcrumb
+          items={[
+            { label: 'Dashboard', href: '/' },
+            { label: 'Analytics' },
+          ]}
+        />
+      </div>
+
+      <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Analytics Dashboard</h1>
-          <p className="text-gray-600">Monitor your business performance and insights</p>
+          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
+              <BarChart3 className="h-7 w-7" />
+            </div>
+            Analytics
+          </h1>
+          <p className="text-gray-500 mt-1">Overview of your VeloDrive platform</p>
         </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Date Range Selector */}
-          <select
-            value={dateRange}
-            onChange={(e) => setDateRange(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500"
-          >
-            <option value="7d">Last 7 days</option>
-            <option value="30d">Last 30 days</option>
-            <option value="90d">Last 90 days</option>
-            <option value="1y">Last year</option>
-          </select>
-          
+        <div className="flex gap-3">
           <Button
             variant="outline"
-            onClick={handleRefresh}
             icon={<RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />}
+            onClick={handleRefresh}
             disabled={refreshing}
           >
             Refresh
           </Button>
-          
           <Button
-            variant="outline"
-            onClick={handleExport}
+            variant="primary"
             icon={<Download className="h-4 w-4" />}
+            onClick={handleExport}
           >
-            Export
+            Export Report
           </Button>
         </div>
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mb-6">
         <StatCard
-          title="Total Revenue"
-          value={formatCurrency(analyticsData.overview.totalRevenue)}
-          change={analyticsData.overview.revenueChange}
-          trend="up"
-          icon={<DollarSign className="h-6 w-6" />}
-          color="green"
+          title="Total Cars"
+          value={formatNumber(overview?.totalCars || 0)}
+          icon={<Car className="h-6 w-6 text-blue-600" />}
+          color="bg-blue-100"
         />
         <StatCard
-          title="Total Sales"
-          value={formatNumber(analyticsData.overview.totalSales)}
-          change={analyticsData.overview.salesChange}
-          trend="up"
-          icon={<ShoppingCart className="h-6 w-6" />}
-          color="blue"
+          title="Total Users"
+          value={formatNumber(overview?.totalUsers || 0)}
+          icon={<Users className="h-6 w-6 text-green-600" />}
+          color="bg-green-100"
         />
         <StatCard
-          title="Total Views"
-          value={formatNumber(analyticsData.overview.totalViews)}
-          change={analyticsData.overview.viewsChange}
-          trend="up"
-          icon={<Eye className="h-6 w-6" />}
-          color="purple"
+          title="Brands"
+          value={formatNumber(overview?.totalBrands || 0)}
+          icon={<Tag className="h-6 w-6 text-purple-600" />}
+          color="bg-purple-100"
         />
         <StatCard
-          title="Conversion Rate"
-          value={`${analyticsData.overview.conversionRate}%`}
-          change={analyticsData.overview.conversionChange}
-          trend="down"
-          icon={<TrendingUp className="h-6 w-6" />}
-          color="orange"
+          title="Categories"
+          value={formatNumber(overview?.totalCategories || 0)}
+          icon={<PieChart className="h-6 w-6 text-pink-600" />}
+          color="bg-pink-100"
+        />
+        <StatCard
+          title="Accessories"
+          value={formatNumber(overview?.totalAccessories || 0)}
+          icon={<Package className="h-6 w-6 text-amber-600" />}
+          color="bg-amber-100"
+        />
+        <StatCard
+          title="Active Promos"
+          value={formatNumber(overview?.activePromotions || 0)}
+          icon={<Percent className="h-6 w-6 text-orange-600" />}
+          color="bg-orange-100"
         />
       </div>
 
-      {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Sales by Month */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-primary-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Monthly Sales</h3>
-              </div>
-              <Button variant="ghost" size="sm">
-                View Details
-              </Button>
+      {/* Inventory Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div className="bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl p-5 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-green-100 text-sm">Inventory Value</p>
+              <p className="text-3xl font-bold mt-1">
+                {formatCurrency(overview?.inventoryValue || 0)}
+              </p>
             </div>
-            <div className="h-64 flex items-end justify-between gap-2">
-              {analyticsData.salesByMonth.map((item, index) => {
-                const maxSales = Math.max(...analyticsData.salesByMonth.map(d => d.sales));
-                const heightPercent = (item.sales / maxSales) * 100;
-                return (
-                  <div key={index} className="flex-1 flex flex-col items-center gap-2">
-                    <div className="w-full flex flex-col items-center">
-                      <span className="text-xs font-medium text-gray-600 mb-1">{item.sales}</span>
-                      <div 
-                        className="w-full bg-primary-500 rounded-t-lg transition-all duration-500 hover:bg-primary-600"
-                        style={{ height: `${heightPercent * 2}px` }}
-                      />
-                    </div>
-                    <span className="text-xs text-gray-500">{item.month}</span>
-                  </div>
-                );
-              })}
-            </div>
+            <DollarSign className="h-10 w-10 text-green-200" />
           </div>
-        </Card>
+        </div>
 
-        {/* Top Makes */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2">
-                <Car className="h-5 w-5 text-primary-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Top Makes</h3>
-              </div>
-            </div>
-            <ChartBar
-              data={analyticsData.topMakes.map(m => ({
-                label: m.make,
-                value: m.count,
-                percentage: m.percentage,
-              }))}
-              color="bg-primary-500"
-            />
-          </div>
-        </Card>
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Total Stock</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(overview?.totalStock || 0)} units</p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Low Stock Items</p>
+          <p className="text-2xl font-bold text-amber-600 dark:text-amber-500">{overview?.lowStockItems || 0}</p>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 transition-colors duration-200">
+          <p className="text-sm text-gray-500 dark:text-gray-400">Promo Redemptions</p>
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">{formatNumber(overview?.promotionRedemptions || 0)}</p>
+        </div>
       </div>
 
-      {/* Second Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Fuel Type Distribution */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <PieChart className="h-5 w-5 text-primary-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Fuel Types</h3>
-            </div>
-            <ChartBar
-              data={analyticsData.fuelTypeDistribution.map(f => ({
-                label: f.type,
-                value: f.count,
-                percentage: f.percentage,
-              }))}
-              color="bg-green-500"
-            />
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        {/* Cars by Fuel Type */}
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <PieChart className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900">Cars by Fuel Type</h3>
           </div>
+          {charts?.carsByFuelType && charts.carsByFuelType.length > 0 ? (
+            <ChartBar data={charts.carsByFuelType} color="bg-blue-500" />
+          ) : (
+            <p className="text-gray-500 text-center py-8">No data available</p>
+          )}
+        </Card>
+
+        {/* Cars by Make */}
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900">Top 10 Makes</h3>
+          </div>
+          {charts?.carsByMake && charts.carsByMake.length > 0 ? (
+            <ChartBar data={charts.carsByMake} color="bg-indigo-500" />
+          ) : (
+            <p className="text-gray-500 text-center py-8">No data available</p>
+          )}
         </Card>
 
         {/* Price Distribution */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center gap-2 mb-6">
-              <DollarSign className="h-5 w-5 text-primary-600" />
-              <h3 className="text-lg font-semibold text-gray-900">Price Ranges</h3>
-            </div>
-            <div className="space-y-4">
-              {analyticsData.priceRanges.map((range, index) => (
-                <div key={index} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-600">{range.range}</span>
-                  <div className="flex items-center gap-2">
-                    <div className="w-24 h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-purple-500 rounded-full"
-                        style={{ width: `${(range.count / Math.max(...analyticsData.priceRanges.map(p => p.count))) * 100}%` }}
-                      />
-                    </div>
-                    <span className="text-sm font-medium text-gray-900 w-8 text-right">{range.count}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <DollarSign className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900">Price Distribution</h3>
           </div>
+          {charts?.priceRanges && charts.priceRanges.length > 0 ? (
+            <ChartBar 
+              data={charts.priceRanges.map(p => ({ name: p.range, count: p.count }))}
+              color="bg-green-500" 
+            />
+          ) : (
+            <p className="text-gray-500 text-center py-8">No data available</p>
+          )}
         </Card>
 
-        {/* Recent Activity */}
-        <Card>
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-primary-600" />
-                <h3 className="text-lg font-semibold text-gray-900">Recent Activity</h3>
-              </div>
-            </div>
-            <div className="space-y-1 max-h-[280px] overflow-y-auto">
-              {analyticsData.recentActivity.map((activity, index) => (
-                <ActivityItem key={index} {...activity} />
-              ))}
-            </div>
+        {/* Cars by Year */}
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900">Cars by Year</h3>
           </div>
+          {charts?.carsByYear && charts.carsByYear.length > 0 ? (
+            <ChartBar
+              data={charts.carsByYear.map(y => ({ name: y.year.toString(), count: y.count }))}
+              color="bg-purple-500"
+            />
+          ) : (
+            <p className="text-gray-500 text-center py-8">No data available</p>
+          )}
         </Card>
       </div>
 
-      {/* Quick Insights */}
-      <Card className="bg-gradient-to-r from-primary-500 to-primary-700">
-        <div className="p-6 text-white">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-lg font-semibold">Quick Insights</h3>
-              <p className="text-primary-100 mt-1">
-                Your best-selling car this month is the <strong>2024 Toyota Camry</strong> with 12 sales.
-                Consider stocking more Japanese vehicles to meet demand.
-              </p>
-            </div>
-            <TrendingUp className="h-12 w-12 text-primary-200" />
+      {/* Recent Activity */}
+      <Card className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Activity className="h-5 w-5 text-gray-500" />
+            <h3 className="font-semibold text-gray-900">Recent Activity</h3>
           </div>
         </div>
+
+        {recentActivity.length > 0 ? (
+          <div className="divide-y divide-gray-100">
+            {recentActivity.map((activity, index) => (
+              <ActivityItem
+                key={index}
+                action={activity.action}
+                item={activity.item}
+                time={activity.time}
+                user={activity.user}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-500 text-center py-8">No recent activity</p>
+        )}
       </Card>
     </div>
   );

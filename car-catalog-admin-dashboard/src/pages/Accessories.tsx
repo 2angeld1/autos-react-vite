@@ -1,98 +1,114 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Wrench,
+  Package,
   Plus,
   Search,
-  Filter,
   Edit2,
   Trash2,
-  Package,
+  Filter,
   DollarSign,
-  Tag,
-  MoreVertical,
-  Eye
+  CheckCircle2,
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 import Button from '@/components/common/Button';
-
-// Mock data for accessories
-const mockAccessories = [
-  {
-    id: '1',
-    name: 'Premium Floor Mats Set',
-    category: 'Interior',
-    price: 89.99,
-    stock: 45,
-    compatible: ['Sedan', 'SUV', 'Coupe'],
-    image: '/api/placeholder/100/100',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Roof Cargo Box 500L',
-    category: 'Exterior',
-    price: 349.99,
-    stock: 12,
-    compatible: ['SUV', 'Wagon'],
-    image: '/api/placeholder/100/100',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'LED Headlight Upgrade Kit',
-    category: 'Lighting',
-    price: 199.99,
-    stock: 28,
-    compatible: ['Sedan', 'SUV', 'Coupe', 'Truck'],
-    image: '/api/placeholder/100/100',
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Wireless Phone Charger Mount',
-    category: 'Electronics',
-    price: 45.99,
-    stock: 67,
-    compatible: ['All'],
-    image: '/api/placeholder/100/100',
-    status: 'active'
-  },
-  {
-    id: '5',
-    name: 'All-Weather Trunk Liner',
-    category: 'Interior',
-    price: 75.00,
-    stock: 0,
-    compatible: ['Sedan', 'Coupe'],
-    image: '/api/placeholder/100/100',
-    status: 'out_of_stock'
-  },
-  {
-    id: '6',
-    name: 'Performance Air Filter',
-    category: 'Performance',
-    price: 54.99,
-    stock: 89,
-    compatible: ['All'],
-    image: '/api/placeholder/100/100',
-    status: 'active'
-  },
-];
-
-const categories = ['All', 'Interior', 'Exterior', 'Lighting', 'Electronics', 'Performance'];
+import Modal from '@/components/common/Modal';
+import AccessoryForm from '@/components/accessories/AccessoryForm';
+import { inventoryService, Accessory } from '@/services/inventory';
+import toast from 'react-hot-toast';
 
 const Accessories: React.FC = () => {
+  const [accessories, setAccessories] = useState<Accessory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
 
-  const filteredAccessories = mockAccessories.filter(acc => {
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAccessory, setEditingAccessory] = useState<Accessory | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchAccessories = async () => {
+    try {
+      setLoading(true);
+      const response = await inventoryService.getAccessories();
+      if (response.success) {
+        setAccessories(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching accessories:', error);
+      toast.error('Failed to load accessories');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAccessories();
+  }, []);
+
+  const handleAddAccessory = () => {
+    setEditingAccessory(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditAccessory = (accessory: Accessory) => {
+    setEditingAccessory(accessory);
+    setIsModalOpen(true);
+  };
+
+  const handleDeleteAccessory = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this accessory?')) return;
+    try {
+      const response = await inventoryService.deleteAccessory(id);
+      if (response.success) {
+        toast.success('Accessory deleted successfully');
+        fetchAccessories();
+      }
+    } catch (error) {
+      toast.error('Failed to delete accessory');
+    }
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      setIsSubmitting(true);
+      if (editingAccessory) {
+        await inventoryService.updateAccessory(editingAccessory._id, formData);
+        toast.success('Accessory updated successfully');
+      } else {
+        await inventoryService.createAccessory(formData);
+        toast.success('Accessory created successfully');
+      }
+      setIsModalOpen(false);
+      fetchAccessories();
+    } catch (error) {
+      console.error('Error saving accessory:', error);
+      toast.error('Failed to save accessory');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const categories = ['All', ...new Set(accessories.map(a => a.category))];
+
+  const filteredAccessories = accessories.filter(acc => {
     const matchesSearch = acc.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || acc.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
-  const totalValue = mockAccessories.reduce((sum, acc) => sum + (acc.price * acc.stock), 0);
-  const totalItems = mockAccessories.reduce((sum, acc) => sum + acc.stock, 0);
-  const outOfStock = mockAccessories.filter(acc => acc.stock === 0).length;
+  const totalValue = filteredAccessories.reduce((sum, acc) => sum + (acc.price * acc.stock), 0);
+  const lowStockCount = filteredAccessories.filter(acc => acc.stock > 0 && acc.stock < 10).length;
+  const outOfStockCount = filteredAccessories.filter(acc => acc.stock === 0).length;
+
+  if (loading && accessories.length === 0) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -101,16 +117,17 @@ const Accessories: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-violet-500 to-purple-600 rounded-xl text-white">
-                <Wrench className="h-7 w-7" />
+              <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl text-white">
+                <Package className="h-7 w-7" />
               </div>
               Accessories
             </h1>
-            <p className="text-gray-500 mt-1">Manage car accessories and parts inventory</p>
+            <p className="text-gray-500 mt-1">Manage car parts, add-ons and accessories</p>
           </div>
           <Button
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
+            onClick={handleAddAccessory}
           >
             Add Accessory
           </Button>
@@ -122,35 +139,11 @@ const Accessories: React.FC = () => {
         <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-500">Total Products</p>
-              <p className="text-2xl font-bold text-gray-900">{mockAccessories.length}</p>
+              <p className="text-sm text-gray-500">Total Accessories</p>
+              <p className="text-2xl font-bold text-gray-900">{accessories.length}</p>
             </div>
-            <div className="p-3 bg-violet-100 rounded-lg">
-              <Package className="h-6 w-6 text-violet-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Total Stock</p>
-              <p className="text-2xl font-bold text-gray-900">{totalItems}</p>
-            </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Tag className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Inventory Value</p>
-              <p className="text-2xl font-bold text-gray-900">${totalValue.toLocaleString()}</p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-lg">
-              <DollarSign className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
@@ -159,10 +152,34 @@ const Accessories: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">{outOfStock}</p>
+              <p className="text-2xl font-bold text-red-600">{outOfStockCount}</p>
             </div>
-            <div className="p-3 bg-red-100 rounded-lg">
-              <Package className="h-6 w-6 text-red-600" />
+            <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
+              <Package className="h-6 w-6 text-red-600 dark:text-red-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Inventory Value</p>
+              <p className="text-2xl font-bold text-gray-900">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+            </div>
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-gray-500">Low Stock</p>
+              <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
+            </div>
+            <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+              <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
         </div>
@@ -170,7 +187,7 @@ const Accessories: React.FC = () => {
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
             <input
@@ -178,102 +195,136 @@ const Accessories: React.FC = () => {
               placeholder="Search accessories..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-2 items-center flex-wrap">
             <Filter className="h-5 w-5 text-gray-400" />
-            {categories.map(cat => (
+            {categories.map(category => (
               <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
+                key={category}
+                onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedCategory === cat
-                    ? 'bg-violet-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  selectedCategory === category
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
-                {cat}
+                {category}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Accessories Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAccessories.map(accessory => (
-          <div
-            key={accessory.id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
-          >
-            <div className="p-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                    <Package className="h-8 w-8 text-gray-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">{accessory.name}</h3>
-                    <span className="text-xs px-2 py-1 bg-violet-100 text-violet-700 rounded-full">
+      {/* Accessories Table-like Grid */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead className="bg-gray-50 border-b border-gray-100">
+              <tr>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Product</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Category</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Price</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Stock</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase tracking-wider text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filteredAccessories.map(accessory => (
+                <tr key={accessory._id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden border">
+                        {accessory.image ? (
+                          <img src={accessory.image} alt={accessory.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <Package className="h-6 w-6 text-gray-400" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-gray-900">{accessory.name}</p>
+                        <p className="text-xs text-gray-500 truncate max-w-[200px]">
+                          {accessory.compatible?.join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full text-xs font-medium border dark:border-gray-600">
                       {accessory.category}
                     </span>
-                  </div>
-                </div>
-                <button className="p-1 hover:bg-gray-100 rounded">
-                  <MoreVertical className="h-5 w-5 text-gray-400" />
-                </button>
-              </div>
-
-              <div className="flex items-center justify-between py-3 border-t border-gray-100">
-                <div>
-                  <p className="text-sm text-gray-500">Price</p>
-                  <p className="text-lg font-bold text-gray-900">${accessory.price}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm text-gray-500">Stock</p>
-                  <p className={`text-lg font-bold ${accessory.stock === 0 ? 'text-red-600' : 'text-gray-900'}`}>
-                    {accessory.stock} units
-                  </p>
-                </div>
-              </div>
-
-              <div className="py-3 border-t border-gray-100">
-                <p className="text-xs text-gray-500 mb-2">Compatible with:</p>
-                <div className="flex flex-wrap gap-1">
-                  {accessory.compatible.map(type => (
-                    <span
-                      key={type}
-                      className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded"
-                    >
-                      {type}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
-                <Button variant="ghost" size="sm" className="flex-1" icon={<Eye className="h-4 w-4" />}>
-                  View
-                </Button>
-                <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />}>
-                  Edit
-                </Button>
-                <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50" icon={<Trash2 className="h-4 w-4" />}>
-                </Button>
-              </div>
-            </div>
-          </div>
-        ))}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="font-semibold text-gray-900">${accessory.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center gap-2">
+                      <span className={`font-semibold ${accessory.stock === 0 ? 'text-red-600' :
+                        accessory.stock < 10 ? 'text-amber-600' :
+                          'text-gray-900'
+                        }`}>
+                        {accessory.stock}
+                      </span>
+                      <span className="text-gray-400 text-xs">units</span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {accessory.stock === 0 ? (
+                      <span className="flex items-center gap-1.5 text-red-600 text-sm font-medium">
+                        <Package className="h-4 w-4" /> Out of stock
+                      </span>
+                    ) : accessory.stock < 10 ? (
+                      <span className="flex items-center gap-1.5 text-amber-600 text-sm font-medium">
+                        <AlertTriangle className="h-4 w-4" /> Low stock
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1.5 text-green-600 text-sm font-medium">
+                        <CheckCircle2 className="h-4 w-4" /> In stock
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditAccessory(accessory)} />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                        icon={<Trash2 className="h-4 w-4" />}
+                        onClick={() => handleDeleteAccessory(accessory._id)}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      {filteredAccessories.length === 0 && (
+      {filteredAccessories.length === 0 && !loading && (
         <div className="text-center py-12">
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No accessories found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
         </div>
       )}
+
+      {/* Modal for Add/Edit */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="md"
+      >
+        <AccessoryForm
+          accessory={editingAccessory}
+          onSubmit={handleSubmit}
+          onClose={() => setIsModalOpen(false)}
+          loading={isSubmitting}
+        />
+      </Modal>
     </div>
   );
 };

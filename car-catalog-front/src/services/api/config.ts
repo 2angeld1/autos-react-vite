@@ -58,7 +58,8 @@ export const RELIABLE_DOMAINS = [
   'cdn.motor1.com',
   'www.motortrend.com',
   'hips.hearstapps.com',
-  'www.automobilemag.com'
+  'www.automobilemag.com',
+  'res.cloudinary.com'
 ];
 
 // ✅ REDUCIDO: Solo dominios realmente problemáticos

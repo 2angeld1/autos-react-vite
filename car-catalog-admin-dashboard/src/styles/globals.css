@@ -81,6 +81,89 @@ select:focus {
    body {
       @apply bg-gray-50 text-gray-900;
    }
+/* Dark mode base styles */
+.dark body {
+   @apply bg-gray-900 text-gray-100;
+}
+
+.dark {
+   color-scheme: dark;
+}
+
+/* Dark mode automatic text color overrides */
+.dark h1,
+.dark h2,
+.dark h3,
+.dark h4,
+.dark h5,
+.dark h6 {
+   @apply text-white !important;
+}
+
+.dark .text-gray-900 {
+   @apply text-white !important;
+}
+
+.dark .text-gray-800 {
+   @apply text-gray-100 !important;
+}
+
+.dark .text-gray-700 {
+   @apply text-gray-200 !important;
+}
+
+.dark .text-gray-600 {
+   @apply text-gray-300 !important;
+}
+
+.dark .text-gray-500 {
+   @apply text-gray-400 !important;
+}
+
+/* Global Background Overrides for Dark Mode */
+.dark .bg-white {
+   @apply bg-gray-800 !important;
+}
+
+.dark .bg-gray-50 {
+   @apply bg-gray-900 !important;
+}
+
+.dark .border-gray-100,
+.dark .border-gray-200,
+.dark .border-gray-300 {
+   @apply border-gray-700 !important;
+}
+
+/* SweetAlert2 Dark Mode */
+.dark .swal2-popup {
+   @apply bg-gray-800 text-white border border-gray-700 !important;
+}
+
+.dark .swal2-title,
+.dark .swal2-html-container,
+.dark .swal2-content {
+   @apply text-white !important;
+}
+
+.dark .swal2-success-circular-line-left,
+.dark .swal2-success-circular-line-right,
+.dark .swal2-success-fix {
+   @apply bg-gray-800 !important;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-track {
+   background: #111827;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+   background: #374151;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+   background: #4b5563;
+}
 }
 
 @layer components {
@@ -137,4 +220,12 @@ select:focus {
    .text-balance {
       text-wrap: balance;
    }
+.scrollbar-hide::-webkit-scrollbar {
+   display: none;
+}
+
+.scrollbar-hide {
+   -ms-overflow-style: none;
+   scrollbar-width: none;
+}
 }

@@ -30,7 +30,7 @@ const Header: React.FC = () => {
                         <span className="icon has-text-accent mr-2">
                             <FontAwesomeIcon icon={faCarSide} />
                         </span>
-                        <span className="brand-name">AutoShowcase</span>
+                        <span className="brand-name">VeloDrive</span>
                     </Link>
 
                     <a

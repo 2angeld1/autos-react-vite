@@ -47,7 +47,7 @@ app.use('/uploads/files', express.static(path.join(UPLOADS_DIR, 'files')));
 // Health check for root
 app.get('/', (req, res) => {
   res.json({ 
-    message: 'Car Catalog API is running', 
+    message: 'VeloDrive API is running', 
     status: 'OK',
     timestamp: new Date().toISOString()
   });

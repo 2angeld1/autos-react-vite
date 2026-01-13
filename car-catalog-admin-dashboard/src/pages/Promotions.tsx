@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Percent,
   Plus,
@@ -12,111 +12,15 @@ import {
   ToggleRight,
   Clock,
   Car,
-  Eye,
   Copy,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
 import Button from '@/components/common/Button';
-
-// Mock data for promotions
-const mockPromotions = [
-  {
-    id: '1',
-    name: 'Summer Sale 2024',
-    code: 'SUMMER24',
-    type: 'percentage',
-    value: 15,
-    minPurchase: 25000,
-    maxDiscount: 5000,
-    startDate: '2024-06-01',
-    endDate: '2024-08-31',
-    usageLimit: 100,
-    usedCount: 45,
-    status: 'active',
-    applicableTo: 'All Cars',
-    description: 'Summer special discount on all vehicles'
-  },
-  {
-    id: '2',
-    name: 'New Customer Bonus',
-    code: 'NEWCAR500',
-    type: 'fixed',
-    value: 500,
-    minPurchase: 15000,
-    maxDiscount: 500,
-    startDate: '2024-01-01',
-    endDate: '2024-12-31',
-    usageLimit: 500,
-    usedCount: 234,
-    status: 'active',
-    applicableTo: 'New Customers',
-    description: 'Welcome bonus for first-time buyers'
-  },
-  {
-    id: '3',
-    name: 'Electric Vehicle Incentive',
-    code: 'GOGREEN',
-    type: 'percentage',
-    value: 10,
-    minPurchase: 30000,
-    maxDiscount: 4000,
-    startDate: '2024-01-01',
-    endDate: '2024-06-30',
-    usageLimit: 200,
-    usedCount: 89,
-    status: 'active',
-    applicableTo: 'Electric Vehicles',
-    description: 'Special discount for eco-friendly choices'
-  },
-  {
-    id: '4',
-    name: 'Black Friday Special',
-    code: 'BLACKFRI',
-    type: 'percentage',
-    value: 20,
-    minPurchase: 20000,
-    maxDiscount: 8000,
-    startDate: '2024-11-25',
-    endDate: '2024-11-30',
-    usageLimit: 50,
-    usedCount: 50,
-    status: 'expired',
-    applicableTo: 'All Cars',
-    description: 'Limited time Black Friday offer'
-  },
-  {
-    id: '5',
-    name: 'Holiday Season Bundle',
-    code: 'HOLIDAY23',
-    type: 'fixed',
-    value: 1000,
-    minPurchase: 35000,
-    maxDiscount: 1000,
-    startDate: '2023-12-01',
-    endDate: '2023-12-31',
-    usageLimit: 75,
-    usedCount: 68,
-    status: 'expired',
-    applicableTo: 'Premium Cars',
-    description: 'Holiday special with accessories bundle'
-  },
-  {
-    id: '6',
-    name: 'Trade-In Bonus',
-    code: 'TRADEIN',
-    type: 'percentage',
-    value: 5,
-    minPurchase: 0,
-    maxDiscount: 2000,
-    startDate: '2024-02-01',
-    endDate: '2024-04-30',
-    usageLimit: 0,
-    usedCount: 156,
-    status: 'scheduled',
-    applicableTo: 'Trade-In Customers',
-    description: 'Extra discount when trading in your old car'
-  },
-];
+import Modal from '@/components/common/Modal';
+import PromotionForm from '@/components/promotions/PromotionForm';
+import { promotionService, Promotion } from '@/services/promotions';
+import toast from 'react-hot-toast';
 
 const statusConfig = {
   active: { color: 'bg-green-100 text-green-700', label: 'Active' },
@@ -126,10 +30,96 @@ const statusConfig = {
 };
 
 const Promotions: React.FC = () => {
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  const filteredPromotions = mockPromotions.filter(promo => {
+  // Modal states
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | undefined>(undefined);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const fetchPromotions = async () => {
+    try {
+      setLoading(true);
+      const response = await promotionService.getPromotions();
+      if (response.success) {
+        setPromotions(response.data);
+      }
+    } catch (error) {
+      console.error('Error fetching promotions:', error);
+      toast.error('Failed to load promotions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPromotions();
+  }, []);
+
+  const handleAddPromotion = () => {
+    setEditingPromotion(undefined);
+    setIsModalOpen(true);
+  };
+
+  const handleEditPromotion = (promotion: Promotion) => {
+    setEditingPromotion(promotion);
+    setIsModalOpen(true);
+  };
+
+  const handleDeletePromotion = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this promotion?')) return;
+    try {
+      const response = await promotionService.deletePromotion(id);
+      if (response.success) {
+        toast.success('Promotion deleted successfully');
+        fetchPromotions();
+      }
+    } catch (error) {
+      toast.error('Failed to delete promotion');
+    }
+  };
+
+  const handleToggleStatus = async (id: string) => {
+    try {
+      const response = await promotionService.toggleStatus(id);
+      if (response.success) {
+        toast.success('Status updated');
+        fetchPromotions();
+      }
+    } catch (error) {
+      toast.error('Failed to update status');
+    }
+  };
+
+  const handleSubmit = async (formData: FormData) => {
+    try {
+      setIsSubmitting(true);
+      if (editingPromotion) {
+        await promotionService.updatePromotion(editingPromotion._id, formData);
+        toast.success('Promotion updated successfully');
+      } else {
+        await promotionService.createPromotion(formData);
+        toast.success('Promotion created successfully');
+      }
+      setIsModalOpen(false);
+      fetchPromotions();
+    } catch (error) {
+      console.error('Error saving promotion:', error);
+      toast.error('Failed to save promotion');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const copyCode = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast.success('Code copied to clipboard!');
+  };
+
+  const filteredPromotions = promotions.filter(promo => {
     const matchesSearch = 
       promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       promo.code.toLowerCase().includes(searchTerm.toLowerCase());
@@ -137,16 +127,24 @@ const Promotions: React.FC = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const activeCount = mockPromotions.filter(p => p.status === 'active').length;
-  const totalUsed = mockPromotions.reduce((sum, p) => sum + p.usedCount, 0);
-  const totalSavings = mockPromotions.reduce((sum, p) => {
-    const avgDiscount = p.type === 'percentage' ? (p.maxDiscount / 2) : p.value;
+  const activeCount = promotions.filter(p => p.status === 'active').length;
+  const totalUsed = promotions.reduce((sum, p) => sum + p.usedCount, 0);
+  const totalSavings = promotions.reduce((sum, p) => {
+    const avgDiscount = p.type === 'percentage' ? ((p.maxDiscount || 0) / 2) : p.value;
     return sum + (avgDiscount * p.usedCount);
   }, 0);
 
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
+  const formatDate = (dateStr: string) => {
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   };
+
+  if (loading && promotions.length === 0) {
+    return (
+      <div className="flex h-[80vh] items-center justify-center">
+        <Loader2 className="h-10 w-10 text-orange-600 animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
@@ -165,6 +163,8 @@ const Promotions: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
+            className="bg-orange-600 hover:bg-orange-700 border-orange-600"
+            onClick={handleAddPromotion}
           >
             Create Promotion
           </Button>
@@ -189,7 +189,7 @@ const Promotions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Promotions</p>
-              <p className="text-2xl font-bold text-gray-900">{mockPromotions.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{promotions.length}</p>
             </div>
             <div className="p-3 bg-orange-100 rounded-lg">
               <Tag className="h-6 w-6 text-orange-600" />
@@ -236,7 +236,7 @@ const Promotions: React.FC = () => {
             />
           </div>
           <div className="flex gap-2">
-            {['all', 'active', 'scheduled', 'expired'].map(status => (
+            {['all', 'active', 'scheduled', 'paused', 'expired'].map(status => (
               <button
                 key={status}
                 onClick={() => setStatusFilter(status)}
@@ -261,7 +261,7 @@ const Promotions: React.FC = () => {
 
           return (
             <div
-              key={promo.id}
+              key={promo._id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
             >
               {/* Header */}
@@ -280,11 +280,11 @@ const Promotions: React.FC = () => {
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-900">{promo.name}</h3>
-                      <p className="text-sm text-gray-500">{promo.description}</p>
+                      <p className="text-sm text-gray-500">{promo.description || 'No description'}</p>
                     </div>
                   </div>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyle.color}`}>
-                    {statusStyle.label}
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusStyle?.color || 'bg-gray-100 text-gray-600'}`}>
+                    {statusStyle?.label || promo.status}
                   </span>
                 </div>
               </div>
@@ -321,19 +321,19 @@ const Promotions: React.FC = () => {
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div className="flex items-center gap-2 text-gray-600">
                     <Calendar className="h-4 w-4" />
-                    <span>{promo.startDate} - {promo.endDate}</span>
+                    <span>{formatDate(promo.startDate)} - {formatDate(promo.endDate)}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Car className="h-4 w-4" />
-                    <span>{promo.applicableTo}</span>
+                    <span>{promo.applicableTo || 'All Cars'}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <DollarSign className="h-4 w-4" />
-                    <span>Min: ${promo.minPurchase.toLocaleString()}</span>
+                    <span>Min: ${(promo.minPurchase || 0).toLocaleString()}</span>
                   </div>
                   <div className="flex items-center gap-2 text-gray-600">
                     <Tag className="h-4 w-4" />
-                    <span>Max: ${promo.maxDiscount.toLocaleString()}</span>
+                    <span>Max: ${(promo.maxDiscount || 0).toLocaleString()}</span>
                   </div>
                 </div>
 
@@ -368,36 +368,68 @@ const Promotions: React.FC = () => {
 
               {/* Actions */}
               <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 flex gap-2">
-                <Button variant="ghost" size="sm" className="flex-1" icon={<Eye className="h-4 w-4" />}>
-                  View
-                </Button>
-                <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />}>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="flex-1"
+                  icon={<Edit2 className="h-4 w-4" />}
+                  onClick={() => handleEditPromotion(promo)}
+                >
                   Edit
                 </Button>
                 {promo.status === 'active' ? (
-                  <Button variant="ghost" size="sm" icon={<ToggleRight className="h-4 w-4 text-green-600" />}>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon={<ToggleRight className="h-4 w-4 text-green-600" />}
+                    onClick={() => handleToggleStatus(promo._id)}
+                  >
                     Pause
                   </Button>
                 ) : promo.status !== 'expired' && (
-                  <Button variant="ghost" size="sm" icon={<ToggleLeft className="h-4 w-4 text-gray-400" />}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      icon={<ToggleLeft className="h-4 w-4 text-gray-400" />}
+                      onClick={() => handleToggleStatus(promo._id)}
+                    >
                     Enable
                   </Button>
                 )}
-                <Button variant="ghost" size="sm" className="text-red-600 hover:bg-red-50" icon={<Trash2 className="h-4 w-4" />}>
-                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-600 hover:bg-red-50"
+                  icon={<Trash2 className="h-4 w-4" />}
+                  onClick={() => handleDeletePromotion(promo._id)}
+                />
               </div>
             </div>
           );
         })}
       </div>
 
-      {filteredPromotions.length === 0 && (
+      {filteredPromotions.length === 0 && !loading && (
         <div className="text-center py-12">
           <Percent className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No promotions found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
         </div>
       )}
+
+      {/* Modal for Add/Edit */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        size="lg"
+      >
+        <PromotionForm
+          promotion={editingPromotion}
+          onSubmit={handleSubmit}
+          onClose={() => setIsModalOpen(false)}
+          loading={isSubmitting}
+        />
+      </Modal>
     </div>
   );
 };

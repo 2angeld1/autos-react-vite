@@ -61,7 +61,7 @@ function Table<T extends Record<string, any>>({
   };
 
   const tableClasses = clsx(
-    'min-w-full divide-y divide-gray-200 bg-white',
+    'min-w-full divide-y divide-gray-200 dark:divide-gray-700 bg-white dark:bg-gray-800',
     className
   );
 
@@ -79,13 +79,13 @@ function Table<T extends Record<string, any>>({
 
   if (loading) {
     return (
-      <div className="bg-white shadow rounded-lg">
+      <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
         <div className="animate-pulse">
-          <div className="h-12 bg-gray-200 rounded-t-lg"></div>
+          <div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-t-lg"></div>
           {[...Array(5)].map((_, i) => (
             <div
               key={i}
-              className="h-16 bg-gray-100 border-t border-gray-200"
+              className="h-16 bg-gray-100 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700"
             ></div>
           ))}
         </div>
@@ -94,21 +94,21 @@ function Table<T extends Record<string, any>>({
   }
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-white dark:bg-gray-800 shadow rounded-lg transition-all duration-200 overflow-visible">
+      <div className="overflow-x-auto md:overflow-visible scrollbar-hide">
         <table className={tableClasses}>
           {/* Header */}
-          <thead className="bg-gray-50">
+          <thead className="bg-gray-50 dark:bg-gray-900/50">
             <tr>
               {columns.map((column) => (
                 <th
                   key={column.key as string}
                   className={clsx(
                     cellPaddingClasses[size],
-                    'text-left text-xs font-medium text-gray-500 uppercase tracking-wider',
+                    'text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider',
                     column.align === 'center' && 'text-center',
                     column.align === 'right' && 'text-right',
-                    column.sortable && 'cursor-pointer hover:bg-gray-100',
+                    column.sortable && 'cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700',
                     column.className
                   )}
                   style={{ width: column.width }}
@@ -140,7 +140,7 @@ function Table<T extends Record<string, any>>({
                 </th>
               ))}
               {rowActions && (
-                <th className={clsx(cellPaddingClasses[size], 'text-right text-xs font-medium text-gray-500 uppercase tracking-wider')}>
+                <th className={clsx(cellPaddingClasses[size], 'text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider')}>
                   Actions
                 </th>
               )}
@@ -148,14 +148,14 @@ function Table<T extends Record<string, any>>({
           </thead>
 
           {/* Body */}
-          <tbody className="bg-white divide-y divide-gray-200">
+          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length + (rowActions ? 1 : 0)}
                   className={clsx(
                     cellPaddingClasses[size],
-                    'text-center text-gray-500',
+                    'text-center text-gray-500 dark:text-gray-400',
                     sizeClasses[size]
                   )}
                 >
@@ -166,7 +166,7 @@ function Table<T extends Record<string, any>>({
               data.map((record, index) => (
                 <tr
                   key={getRowKey(record, index)}
-                  className={clsx('hover:bg-gray-50', {
+                  className={clsx('hover:bg-gray-50 dark:hover:bg-gray-700', {
                     'cursor-pointer': onRowClick,
                   })}
                   onClick={() => onRowClick?.(record, index)}

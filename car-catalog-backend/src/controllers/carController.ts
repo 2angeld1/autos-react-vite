@@ -3,6 +3,9 @@ import Car from '@/models/Car';
 import { logger } from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth';
 import { asyncHandler } from '@/middleware/errorHandler';
+import { CloudinaryService } from '@/services/cloudinaryService';
+import fs from 'fs';
+import path from 'path';
 
 export class CarController {
   /**
@@ -178,8 +181,19 @@ export class CarController {
 
     // Procesar imagen subida
     if (req.file) {
-      carData.image = `/uploads/cars/${req.file.filename}`;
-      logger.info(`Image processed from file: ${carData.image}`);
+      // --- CLOUDINARY UPLOAD ---
+      const cloudinaryResult = await CloudinaryService.uploadImage(req.file.path, 'autos');
+      carData.image = cloudinaryResult.secure_url;
+      carData.cloudinaryId = cloudinaryResult.public_id;
+      carData.cloudinaryUrl = cloudinaryResult.secure_url;
+
+      // Delete local temp file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      // --- END CLOUDINARY UPLOAD ---
+
+      logger.info(`Image processed from file and uploaded to Cloudinary: ${carData.image}`);
     } else if (carData.imageUrl) {
       // Si se seleccionó una imagen del gestor de archivos
       carData.image = carData.imageUrl;
@@ -237,8 +251,19 @@ export class CarController {
 
     // Procesar imagen subida
     if (req.file) {
-      updateData.image = `/uploads/cars/${req.file.filename}`;
-      logger.info(`Image processed from file upload: ${updateData.image}`);
+      // --- CLOUDINARY UPLOAD ---
+      const cloudinaryResult = await CloudinaryService.uploadImage(req.file.path, 'autos');
+      updateData.image = cloudinaryResult.secure_url;
+      updateData.cloudinaryId = cloudinaryResult.public_id;
+      updateData.cloudinaryUrl = cloudinaryResult.secure_url;
+
+      // Delete local temp file
+      if (fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      // --- END CLOUDINARY UPLOAD ---
+
+      logger.info(`Image processed from file upload and Cloudinary: ${updateData.image}`);
     } else if (updateData.imageUrl) {
       // Si se seleccionó una imagen del gestor de archivos
       updateData.image = updateData.imageUrl;

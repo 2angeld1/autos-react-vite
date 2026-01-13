@@ -4,6 +4,7 @@ import Table, { Column } from '@/components/common/Table';
 import Button from '@/components/common/Button';
 import { User } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
+import { clsx } from 'clsx';
 
 interface UserTableProps {
   users: User[];
@@ -129,29 +130,45 @@ const UserTable: React.FC<UserTableProps> = ({
     },
   ];
 
-  const rowActions = (user: User) => (
-    <div className="relative">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={(e) => {
-          e.stopPropagation();
-          setShowActionsMenu(showActionsMenu === user.id ? null : user.id);
-        }}
-        icon={<MoreHorizontal className="h-4 w-4" />}
-        aria-label="More actions"
-      />
-      
-      {showActionsMenu === user.id && (
-        <div className="absolute right-0 top-8 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-10 min-w-[160px]">
-          <div className="py-1">
+  const rowActions = (user: User) => {
+    const userId = user.id || user._id;
+    if (!userId) return null;
+
+    // Detectar si está cerca del final para abrir hacia arriba (últimas 2 filas)
+    const index = users.findIndex(u => (u.id || u._id) === userId);
+    const isNearBottom = index >= users.length - 2 && users.length > 2;
+
+    return (
+      <div className="relative">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={(e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            setShowActionsMenu(prev => prev === userId ? null : userId);
+          }}
+          icon={<MoreHorizontal className="h-4 w-4" />}
+          aria-label="More actions"
+          className="dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700"
+        />
+
+        {showActionsMenu === userId && (
+          <div
+            className={clsx(
+              "absolute right-0 bg-white dark:bg-gray-800 rounded-lg shadow-2xl ring-1 ring-black ring-opacity-5 dark:ring-white/10 z-[100] min-w-[200px] py-2 transition-all duration-200 border dark:border-gray-700",
+              isNearBottom ? "bottom-full mb-2" : "top-full mt-2"
+            )}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onView(user);
+                e.preventDefault();
                 setShowActionsMenu(null);
+                onView(user);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <Eye className="h-4 w-4" />
               View Details
@@ -159,10 +176,11 @@ const UserTable: React.FC<UserTableProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onEdit(user);
+                e.preventDefault();
                 setShowActionsMenu(null);
+                onEdit(user);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               <Edit className="h-4 w-4" />
               Edit User
@@ -170,10 +188,11 @@ const UserTable: React.FC<UserTableProps> = ({
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onToggleStatus(user);
+                e.preventDefault();
                 setShowActionsMenu(null);
+                onToggleStatus(user);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
             >
               {user.isActive ? (
                 <>
@@ -187,23 +206,24 @@ const UserTable: React.FC<UserTableProps> = ({
                 </>
               )}
             </button>
-            <div className="border-t border-gray-100"></div>
+            <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete(user);
+                e.preventDefault();
                 setShowActionsMenu(null);
+                onDelete(user);
               }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
             >
               <Trash2 className="h-4 w-4" />
               Delete User
             </button>
           </div>
-        </div>
-      )}
-    </div>
-  );
+        )}
+      </div>
+    );
+  };
 
   // Close actions menu when clicking outside
   React.useEffect(() => {

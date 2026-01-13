@@ -109,10 +109,10 @@ const mockBookings = [
 ];
 
 const statusConfig = {
-  confirmed: { color: 'bg-green-100 text-green-700', icon: CheckCircle },
-  pending: { color: 'bg-amber-100 text-amber-700', icon: AlertCircle },
-  completed: { color: 'bg-blue-100 text-blue-700', icon: CheckCircle },
-  cancelled: { color: 'bg-red-100 text-red-700', icon: XCircle },
+  confirmed: { color: 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300', icon: CheckCircle },
+  pending: { color: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300', icon: AlertCircle },
+  completed: { color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300', icon: CheckCircle },
+  cancelled: { color: 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300', icon: XCircle },
 };
 
 const bookingTypes = ['All', 'Test Drive', 'Consultation', 'Service'];
@@ -167,8 +167,8 @@ const Bookings: React.FC = () => {
               <p className="text-sm text-gray-500">Today's Bookings</p>
               <p className="text-2xl font-bold text-gray-900">{todayCount}</p>
             </div>
-            <div className="p-3 bg-emerald-100 rounded-lg">
-              <Calendar className="h-6 w-6 text-emerald-600" />
+            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+              <Calendar className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
         </div>
@@ -179,8 +179,8 @@ const Bookings: React.FC = () => {
               <p className="text-sm text-gray-500">Pending</p>
               <p className="text-2xl font-bold text-amber-600">{pendingCount}</p>
             </div>
-            <div className="p-3 bg-amber-100 rounded-lg">
-              <AlertCircle className="h-6 w-6 text-amber-600" />
+            <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+              <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
         </div>
@@ -191,8 +191,8 @@ const Bookings: React.FC = () => {
               <p className="text-sm text-gray-500">Confirmed</p>
               <p className="text-2xl font-bold text-green-600">{confirmedCount}</p>
             </div>
-            <div className="p-3 bg-green-100 rounded-lg">
-              <CheckCircle className="h-6 w-6 text-green-600" />
+            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
+              <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
         </div>
@@ -203,8 +203,8 @@ const Bookings: React.FC = () => {
               <p className="text-sm text-gray-500">Total Bookings</p>
               <p className="text-2xl font-bold text-gray-900">{mockBookings.length}</p>
             </div>
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <CalendarCheck className="h-6 w-6 text-blue-600" />
+            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+              <CalendarCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
         </div>
@@ -234,7 +234,7 @@ const Bookings: React.FC = () => {
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     selectedType === type
                       ? 'bg-emerald-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                   }`}
                 >
                   {type}
@@ -299,7 +299,7 @@ const Bookings: React.FC = () => {
                     </div>
                     <div>
                       <p className="font-medium text-gray-900">{booking.car.name}</p>
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full">
+                      <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
                         {booking.type}
                       </span>
                     </div>

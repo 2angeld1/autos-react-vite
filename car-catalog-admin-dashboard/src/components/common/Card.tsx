@@ -46,11 +46,11 @@ const Card: CardComponent = ({
   };
 
   const cardClasses = clsx(
-    'bg-white',
+    'bg-white dark:bg-gray-800',
     paddingClasses[padding],
     shadowClasses[shadow],
     roundedClasses[rounded],
-    border && 'border border-gray-200',
+    border && 'border border-gray-200 dark:border-gray-700',
     className
   );
 
@@ -62,7 +62,7 @@ export const CardHeader: React.FC<{ children: React.ReactNode; className?: strin
   children,
   className,
 }) => (
-  <div className={clsx('border-b border-gray-200 pb-4 mb-4', className)}>
+  <div className={clsx('border-b border-gray-200 dark:border-gray-700 pb-4 mb-4', className)}>
     {children}
   </div>
 );
@@ -76,7 +76,7 @@ export const CardFooter: React.FC<{ children: React.ReactNode; className?: strin
   children,
   className,
 }) => (
-  <div className={clsx('border-t border-gray-200 pt-4 mt-4', className)}>
+  <div className={clsx('border-t border-gray-200 dark:border-gray-700 pt-4 mt-4', className)}>
     {children}
   </div>
 );

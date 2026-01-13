@@ -5,6 +5,8 @@ import userRoutes from './users';
 import favoriteRoutes from './favorites';
 import adminRoutes from './admin';
 import fileRoutes from './files';
+import inventoryRoutes from './inventory';
+import promotionRoutes from './promotions';
 
 const router = Router();
 
@@ -15,6 +17,8 @@ router.use('/users', userRoutes);
 router.use('/favorites', favoriteRoutes);
 router.use('/admin', adminRoutes);
 router.use('/files', fileRoutes);
+router.use('/inventory', inventoryRoutes);
+router.use('/promotions', promotionRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

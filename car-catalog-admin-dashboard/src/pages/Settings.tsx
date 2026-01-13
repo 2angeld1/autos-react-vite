@@ -13,6 +13,7 @@ import {
   Smartphone
 } from 'lucide-react';
 import { useAuthStore } from '@/store/authSlice';
+import { useTheme } from '@/context/ThemeContext';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Card from '@/components/common/Card';
@@ -463,20 +464,25 @@ const SecuritySettings: React.FC = () => {
 
 // Appearance Settings Component
 const AppearanceSettings: React.FC = () => {
-  const [theme, setTheme] = React.useState<'light' | 'dark' | 'system'>('system');
+  const { theme, setTheme } = useTheme();
   const [sidebarCollapsed, setSidebarCollapsed] = React.useState(false);
+
+  const handleThemeChange = (newTheme: 'light' | 'dark' | 'system') => {
+    setTheme(newTheme);
+    toast.success(`Theme changed to ${newTheme}`);
+  };
 
   return (
     <Card>
       <div className="flex items-center space-x-3 mb-6">
         <Palette className="h-5 w-5 text-primary-600" />
-        <h3 className="text-lg font-medium text-gray-900">Appearance</h3>
+        <h3 className="text-lg font-medium text-gray-900 dark:text-white">Appearance</h3>
       </div>
 
       <div className="space-y-6">
         {/* Theme Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             Theme
           </label>
           <div className="grid grid-cols-3 gap-3">
@@ -487,15 +493,16 @@ const AppearanceSettings: React.FC = () => {
             ].map((option) => (
               <button
                 key={option.key}
-                onClick={() => setTheme(option.key as any)}
+                type="button"
+                onClick={() => handleThemeChange(option.key as 'light' | 'dark' | 'system')}
                 className={`p-3 border rounded-lg text-center transition-colors ${
                   theme === option.key
-                    ? 'border-primary-500 bg-primary-50'
-                    : 'border-gray-200 hover:border-gray-300'
+                  ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/30'
+                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
                 }`}
               >
                 <div className="text-lg mb-1">{option.icon}</div>
-                <div className="text-sm font-medium">{option.label}</div>
+                <div className="text-sm font-medium dark:text-gray-200">{option.label}</div>
               </button>
             ))}
           </div>
@@ -504,8 +511,8 @@ const AppearanceSettings: React.FC = () => {
         {/* Sidebar Settings */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-medium text-gray-900">Collapsed Sidebar</p>
-            <p className="text-sm text-gray-500">Keep sidebar minimized by default</p>
+            <p className="text-sm font-medium text-gray-900 dark:text-white">Collapsed Sidebar</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Keep sidebar minimized by default</p>
           </div>
           <button
             type="button"
@@ -521,12 +528,6 @@ const AppearanceSettings: React.FC = () => {
             />
           </button>
         </div>
-      </div>
-
-      <div className="mt-6 flex justify-end">
-        <Button icon={<Save className="h-4 w-4" />}>
-          Save Changes
-        </Button>
       </div>
     </Card>
   );

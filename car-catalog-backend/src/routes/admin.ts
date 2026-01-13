@@ -6,6 +6,10 @@ import { body } from 'express-validator';
 import { sanitizeInput, handleValidationErrors } from '@/middleware/validation';
 import Car from '@/models/Car';
 import User from '@/models/User';
+import Brand from '@/models/Brand';
+import Category from '@/models/Category';
+import Accessory from '@/models/Accessory';
+import Promotion from '@/models/Promotion';
 import { logger } from '@/utils/logger';
 
 const router = Router();
@@ -36,7 +40,7 @@ router.get('/stats', async (req: AuthRequest, res) => {
       Car.find({ isAvailable: true })
         .sort({ createdAt: -1 })
         .limit(5)
-        .select('id make model year price image createdAt')
+        .select('id make carModel year price image createdAt')
         .lean(),
       User.find({ isActive: true })
         .sort({ createdAt: -1 })
@@ -65,6 +69,164 @@ router.get('/stats', async (req: AuthRequest, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to get dashboard stats'
+    });
+  }
+});
+
+/**
+ * @route   GET /api/admin/analytics
+ * @desc    Get comprehensive analytics data
+ * @access  Private (Admin only)
+ */
+router.get('/analytics', async (req: AuthRequest, res) => {
+  try {
+    logger.info('Getting analytics data...');
+
+    // Overview counts
+    const [
+      totalCars, totalUsers, totalBrands, totalCategories,
+      totalAccessories, totalPromotions, activePromotions
+    ] = await Promise.all([
+      Car.countDocuments(),
+      User.countDocuments(),
+      Brand.countDocuments(),
+      Category.countDocuments(),
+      Accessory.countDocuments(),
+      Promotion.countDocuments(),
+      Promotion.countDocuments({ status: 'active' })
+    ]);
+
+    // Cars by fuel type
+    const carsByFuelType = await Car.aggregate([
+      { $group: { _id: '$fuel_type', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Cars by make (top 10)
+    const carsByMake = await Car.aggregate([
+      { $group: { _id: '$make', count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Price distribution
+    const priceRanges = await Car.aggregate([
+      {
+        $bucket: {
+          groupBy: '$price',
+          boundaries: [0, 15000, 30000, 50000, 75000, 100000, 200000, Infinity],
+          default: 'Other',
+          output: { count: { $sum: 1 } }
+        }
+      }
+    ]);
+
+    const priceRangeLabels: Record<string, string> = {
+      '0': '$0 - $15K',
+      '15000': '$15K - $30K',
+      '30000': '$30K - $50K',
+      '50000': '$50K - $75K',
+      '75000': '$75K - $100K',
+      '100000': '$100K - $200K',
+      '200000': '$200K+'
+    };
+
+    const formattedPriceRanges = priceRanges.map(r => ({
+      range: priceRangeLabels[r._id.toString()] || r._id,
+      count: r.count
+    }));
+
+    // Year distribution
+    const carsByYear = await Car.aggregate([
+      { $group: { _id: '$year', count: { $sum: 1 } } },
+      { $sort: { _id: -1 } },
+      { $limit: 10 }
+    ]);
+
+    // Accessory inventory value
+    const accessoryStats = await Accessory.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalValue: { $sum: { $multiply: ['$price', '$stock'] } },
+          totalStock: { $sum: '$stock' },
+          lowStock: { $sum: { $cond: [{ $and: [{ $gt: ['$stock', 0] }, { $lt: ['$stock', 10] }] }, 1, 0] } },
+          outOfStock: { $sum: { $cond: [{ $eq: ['$stock', 0] }, 1, 0] } }
+        }
+      }
+    ]);
+
+    // Promotion usage
+    const promotionStats = await Promotion.aggregate([
+      {
+        $group: {
+          _id: null,
+          totalUsed: { $sum: '$usedCount' }
+        }
+      }
+    ]);
+
+    // Recent activity (simulated from recent data)
+    const recentCars = await Car.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('make carModel createdAt')
+      .lean();
+
+    const recentUsers = await User.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .select('name createdAt')
+      .lean();
+
+    const recentActivity = [
+      ...recentCars.map(c => ({
+        action: 'New car added',
+        item: `${c.make} ${(c as any).carModel}`,
+        time: (c as any).createdAt,
+        user: 'Admin'
+      })),
+      ...recentUsers.map(u => ({
+        action: 'New user registered',
+        item: u.name,
+        time: (u as any).createdAt,
+        user: 'System'
+      }))
+    ].sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()).slice(0, 10);
+
+    const analytics = {
+      overview: {
+        totalCars,
+        totalUsers,
+        totalBrands,
+        totalCategories,
+        totalAccessories,
+        totalPromotions,
+        activePromotions,
+        inventoryValue: accessoryStats[0]?.totalValue || 0,
+        totalStock: accessoryStats[0]?.totalStock || 0,
+        lowStockItems: accessoryStats[0]?.lowStock || 0,
+        outOfStockItems: accessoryStats[0]?.outOfStock || 0,
+        promotionRedemptions: promotionStats[0]?.totalUsed || 0
+      },
+      charts: {
+        carsByFuelType: carsByFuelType.map(c => ({ name: c._id || 'Unknown', count: c.count })),
+        carsByMake: carsByMake.map(c => ({ name: c._id || 'Unknown', count: c.count })),
+        carsByYear: carsByYear.map(c => ({ year: c._id, count: c.count })),
+        priceRanges: formattedPriceRanges
+      },
+      recentActivity
+    };
+
+    res.status(200).json({
+      success: true,
+      data: analytics
+    });
+  } catch (error) {
+    logger.error('Error getting analytics:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to get analytics data'
     });
   }
 });

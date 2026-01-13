@@ -37,7 +37,7 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
   );
 
   return (
-    <div className="bg-white rounded-lg shadow p-6 space-y-4">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 space-y-4 transition-colors duration-200">
       {/* Search and main controls */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1">
@@ -72,17 +72,17 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
 
       {/* Advanced filters */}
       {showAdvanced && (
-        <div className="border-t pt-4 space-y-4">
+        <div className="border-t dark:border-gray-700 pt-4 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Role */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Role
               </label>
               <select
                 value={filters.role}
                 onChange={(e) => updateFilter('role', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-gray-900 dark:text-white"
                 disabled={loading}
               >
                 <option value="">All Roles</option>
@@ -93,13 +93,13 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
 
             {/* Status */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Status
               </label>
               <select
                 value={filters.isActive}
                 onChange={(e) => updateFilter('isActive', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-gray-900 dark:text-white"
                 disabled={loading}
               >
                 <option value="">All Status</option>
@@ -110,13 +110,13 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
 
             {/* Last Login */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1">
                 Last Login
               </label>
               <select
                 value={filters.lastLoginDays}
                 onChange={(e) => updateFilter('lastLoginDays', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+                className="w-full px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-gray-900 dark:text-white"
                 disabled={loading}
               >
                 <option value="">Any Time</option>
@@ -131,8 +131,8 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
 
           {/* Active filters summary */}
           {hasActiveFilters && (
-            <div className="flex flex-wrap gap-2 pt-2 border-t">
-              <span className="text-sm text-gray-500">Active filters:</span>
+            <div className="flex flex-wrap gap-2 pt-2 border-t dark:border-gray-700">
+              <span className="text-sm text-gray-500 dark:text-gray-400">Active filters:</span>
               {Object.entries(filters).map(([key, value]) => {
                 if (key === 'search' || !value) return null;
                 
@@ -162,12 +162,12 @@ const UserFiltersComponent: React.FC<UserFiltersProps> = ({
                 return (
                   <span
                     key={key}
-                    className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-800 text-xs rounded-full"
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 dark:bg-primary-900/40 text-primary-800 dark:text-primary-200 text-xs rounded-full"
                   >
                     {label}: {displayValue}
                     <button
                       onClick={() => updateFilter(key as keyof UserFilters, '')}
-                      className="hover:text-primary-900"
+                      className="hover:text-primary-900 dark:hover:text-white"
                     >
                       <X className="h-3 w-3" />
                     </button>

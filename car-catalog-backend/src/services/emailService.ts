@@ -66,25 +66,30 @@ export class EmailService {
    */
   static async sendWelcomeEmail(email: string, name: string): Promise<boolean> {
     const html = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #333;">Welcome to Car Catalog! 🚗</h2>
-        <p>Hi ${name},</p>
-        <p>Welcome to our premium car catalog platform! We're excited to have you on board.</p>
-        <p>You can now:</p>
-        <ul>
-          <li>Browse our extensive collection of cars</li>
-          <li>Save your favorite vehicles</li>
-          <li>Get personalized recommendations</li>
-          <li>Access detailed car information</li>
-        </ul>
-        <p>Start exploring now and find your dream car!</p>
-        <p>Best regards,<br>The Car Catalog Team</p>
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <div style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); padding: 30px; border-radius: 12px 12px 0 0; text-align: center;">
+          <h1 style="color: white; margin: 0; font-size: 28px;">Welcome to VeloDrive! 🏎️</h1>
+        </div>
+        <div style="padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 12px 12px;">
+          <p style="font-size: 16px; line-height: 1.6;">Hi ${name},</p>
+          <p style="font-size: 16px; line-height: 1.6;">Welcome to our premium vehicle showcase platform! We're excited to have you on board.</p>
+          <p style="font-size: 16px; line-height: 1.6;">You can now:</p>
+          <ul style="font-size: 16px; line-height: 1.6; color: #4b5563;">
+            <li>Browse our curated collection of luxury cars</li>
+            <li>Save your favorite vehicles to your profile</li>
+            <li>Get direct alerts for new arrivals</li>
+            <li>Access exclusive technical specifications</li>
+          </ul>
+          <p style="font-size: 16px; line-height: 1.6;">Start your journey now and find your dream ride!</p>
+          <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 30px 0;" />
+          <p style="font-size: 14px; color: #6b7280; text-align: center;">Best regards,<br><strong>The VeloDrive Team</strong></p>
+        </div>
       </div>
     `;
 
     return this.sendEmail({
       to: email,
-      subject: 'Welcome to Car Catalog!',
+      subject: 'Welcome to VeloDrive!',
       html
     });
   }
@@ -98,10 +103,10 @@ export class EmailService {
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <h2 style="color: #333;">Password Reset Request</h2>
-        <p>You requested a password reset for your Car Catalog account.</p>
+        <p>You requested a password reset for your VeloDrive account.</p>
         <p>Click the button below to reset your password:</p>
         <p style="text-align: center; margin: 30px 0;">
-          <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; display: inline-block;">
+          <a href="${resetUrl}" style="background-color: #ea580c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
             Reset Password
           </a>
         </p>
@@ -109,7 +114,7 @@ export class EmailService {
         <p style="word-break: break-all; color: #666;">${resetUrl}</p>
         <p><strong>This link will expire in 1 hour.</strong></p>
         <p>If you didn't request this password reset, please ignore this email.</p>
-        <p>Best regards,<br>The Car Catalog Team</p>
+        <p>Best regards,<br>The VeloDrive Team</p>
       </div>
     `;
 
@@ -144,7 +149,7 @@ export class EmailService {
 
     return this.sendEmail({
       to: adminEmail,
-      subject: `[Car Catalog Admin] ${subject}`,
+      subject: `[VeloDrive Admin] ${subject}`,
       html
     });
   }

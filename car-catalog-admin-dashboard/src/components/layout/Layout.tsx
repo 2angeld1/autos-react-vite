@@ -15,7 +15,7 @@ const Layout: React.FC = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={closeSidebar} />
 
@@ -25,7 +25,7 @@ const Layout: React.FC = () => {
         <Header onToggleSidebar={toggleSidebar} sidebarOpen={sidebarOpen} />
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
           <div className="mx-auto">
             <Outlet />
           </div>
