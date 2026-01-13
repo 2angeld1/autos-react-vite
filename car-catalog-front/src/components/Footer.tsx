@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logoImg from '../assets/images/logo.png'; // Importamos el logo
 
 const Footer: React.FC = () => {
     return (
@@ -10,9 +9,10 @@ const Footer: React.FC = () => {
                     <div className="column is-4">
                         <div className="footer-logo-container">
                             <img 
-                                src={logoImg} 
-                                alt="Logo" 
+                                src="/logo-transparent.png"
+                                alt="VeloDrive" 
                                 className="footer-logo" 
+                                style={{ height: 'auto', width: '220px', maxWidth: '100%' }}
                             />
                         </div>
                         <p className="mt-4 has-text-grey-light">

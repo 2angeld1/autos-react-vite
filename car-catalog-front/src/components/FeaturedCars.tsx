@@ -131,7 +131,7 @@ const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
     const isChineseBrand = ['byd', 'nio', 'geely', 'xpeng', 'li auto', 'chery', 'great wall', 'mg'].includes(car.make.toLowerCase());
     
     return (
-        <div className="featured-car-card animate-fadeIn">
+        <div className="featured-car-card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             <div className="card-image-container">
                 <img 
                     src={carImageHook.imageSrc}
@@ -175,7 +175,7 @@ const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
                 )}
             </div>
             
-            <div className="card-content">
+            <div className="card-content" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="car-info">
                     <h3 className="car-title">{car.make} {car.model}</h3>
                     <p className="car-specs">
@@ -185,7 +185,7 @@ const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
                     </p>
                 </div>
                 
-                <div className="car-features">
+                <div className="car-features" style={{ flexGrow: 1 }}>
                     <div className="feature-chip">
                         <span className="icon">
                             <i className="fas fa-gas-pump"></i>
@@ -208,8 +208,23 @@ const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
                     )}
                 </div>
                 
-                <div className="card-actions">
-                    <Link to={`/car/${car.id}`} className="view-details-btn">
+                <div className="card-actions" style={{ marginTop: 'auto' }}>
+                    <Link
+                        to={`/car/${car.id}`}
+                        className="view-details-btn"
+                        style={{
+                            backgroundColor: '#ff3860',
+                            color: '#1a1a1a',
+                            fontWeight: 'normal',
+                            border: 'none',
+                            width: '100%',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            padding: '0.75rem',
+                            borderRadius: '8px'
+                        }}
+                    >
                         <span>Ver detalles</span>
                         <span className="icon">
                             <i className="fas fa-arrow-right"></i>

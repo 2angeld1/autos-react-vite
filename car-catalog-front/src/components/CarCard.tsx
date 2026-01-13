@@ -39,8 +39,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     };
 
     return (
-        <div className="is-6-tablet">
-            <div className="card car-card">
+        <div className="is-6-tablet" style={{ display: 'flex' }}>
+            <div className="card car-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%' }}>
                 <div className="card-image">
                     {imgError ? (
                         <div
@@ -67,9 +67,9 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         </figure>
                     )}
                 </div>
-                <div className="card-content">
+                <div className="card-content" style={{ flexGrow: 1 }}>
                     <div className="media">
-                        <div className="media-content">
+                        <div className="media-content" style={{ minHeight: '4.5rem' }}>
                             <p className="title is-4">{car.make} <br /> {car.model}</p>
                             <p className="subtitle is-6">{car.year}</p>
                         </div>
@@ -101,8 +101,17 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         )}
                     </div>
                 </div>
-                <footer className="card-footer">
-                    <Link to={`/car/${car.id}`} className="card-footer-item button is-primary">
+                <footer className="card-footer" style={{ borderTop: 'none', padding: '1rem' }}>
+                    <Link
+                        to={`/car/${car.id}`}
+                        className="button is-fullwidth"
+                        style={{
+                            backgroundColor: '#ff3860', // Rojo vibrante/Bulma danger 
+                            color: '#1a1a1a', // Negro/Gris muy oscuro para contraste
+                            borderColor: 'transparent',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
                         <span className="icon">
                             <FontAwesomeIcon icon={faInfoCircle} />
                         </span>

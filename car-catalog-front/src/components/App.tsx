@@ -5,6 +5,7 @@ import Footer from './Footer';
 import Home from '../pages/Home';
 import CarDetails from '../pages/CarDetails';
 import Favorites from '../pages/Favorites';
+import About from '../pages/About';
 import NotFound from '../pages/NotFound';
 
 const App: React.FC = () => {
@@ -17,6 +18,7 @@ const App: React.FC = () => {
             <Route path="/" element={<Home />} />
             <Route path="/car/:id" element={<CarDetails />} />
             <Route path="/favorites" element={<Favorites />} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

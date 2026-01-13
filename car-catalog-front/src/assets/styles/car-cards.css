@@ -12,9 +12,40 @@
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   height: 100%;
+  min-height: 480px;
+    /* Altura mínima fija para uniformidad */
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+/* Forzar altura uniforme en todas las tarjetas del carrusel */
+.auto-carousel-item .car-card,
+.auto-carousel-item .card {
+  min-height: 500px !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.auto-carousel-item {
+  display: flex !important;
+  align-items: stretch !important;
+}
+
+.auto-carousel-item>div {
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+}
+
+.auto-carousel-item .card-content {
+  flex-grow: 1 !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.auto-carousel-item .card-footer {
+  margin-top: auto !important;
+}
 .animated-card:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);

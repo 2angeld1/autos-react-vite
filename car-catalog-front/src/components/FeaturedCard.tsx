@@ -49,7 +49,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
     };
 
     return (
-        <div className="card has-background-dark-surface animated-card">
+        <div className="card has-background-dark-surface animated-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
             {/* Cabecera de la tarjeta con imagen */}
             <div className="card-image">
                 {imgError ? (
@@ -86,7 +86,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
             </div>
             
             {/* Contenido de la tarjeta */}
-            <div className="card-content">
+            <div className="card-content" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
                 <div className="media mb-3">
                     <div className="media-content">
                         <h3 className="title is-5 has-text-white mb-1">{car.make} {car.model}</h3>
@@ -102,7 +102,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
                 </div>
                 
                 {/* Características principales sin rendimiento */}
-                <div className="car-features mb-4">
+                <div className="car-features mb-4" style={{ flexGrow: 1 }}>
                     <div className="columns is-mobile is-multiline">
                         <div className="column is-6">
                             <div className="feature-item">
@@ -142,7 +142,17 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
                 </div>
                 
                 {/* Botón de acción */}
-                <Link to={`/car/${car.id}`} className="button is-accent is-outlined is-fullwidth">
+                <Link
+                    to={`/car/${car.id}`}
+                    className="button is-fullwidth"
+                    style={{
+                        backgroundColor: '#ff3860',
+                        color: '#1a1a1a',
+                        fontWeight: 'normal',
+                        border: 'none',
+                        transition: 'all 0.3s ease'
+                    }}
+                >
                     <span>Ver detalles</span>
                     <span className="icon">
                         <i className="fas fa-arrow-right"></i>

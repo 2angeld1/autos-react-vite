@@ -29,6 +29,8 @@
   flex: 0 0 auto;
   width: 25%; /* Para 4 slides */
   padding: 0 0.5rem;
+  display: flex;
+    align-items: stretch;
 }
 
 /* Controles del carousel */
