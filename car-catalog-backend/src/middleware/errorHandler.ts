@@ -17,6 +17,7 @@ export const errorHandler = (
   error: AppError,
   req: Request,
   res: Response,
+  next: NextFunction
 ): void => {
   logger.error(`Error ${error.statusCode || 500}: ${error.message}`, {
     url: req.url,

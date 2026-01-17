@@ -15,13 +15,13 @@ const AddCar: React.FC = () => {
     const { execute: createCar, loading } = usePost();
 
     const handleCarSubmit = async (formData: FormData) => {
-        try {
-            await createCar('/cars', formData);
-            toast.success('Car created successfully');
+        const result = await createCar('/cars', formData);
+
+        if (result) {
+            toast.success(t('messages.carCreated') || 'Car created successfully');
             navigate('/cars');
-        } catch (error: any) {
-            toast.error(error.message || 'Something went wrong');
         }
+        // If result is null, the error was handled by useApi/api interceptor
     };
 
     const breadcrumbItems = [

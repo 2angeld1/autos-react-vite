@@ -8,7 +8,7 @@ console.log('🔧 API Base URL:', API_BASE_URL);
 // Create axios instance
 export const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: API_TIMEOUT,
+  timeout: Math.max(API_TIMEOUT, 120000), // Ensure at least 2 minutes
   headers: {
     'Content-Type': 'application/json',
   },
@@ -56,9 +56,14 @@ api.interceptors.response.use(
       url: error.config?.url,
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
+      code: error.code
     });
 
-    if (error.response?.status === 401) {
+    if (error.code === 'ECONNABORTED') {
+      toast.error('The request timed out. Please check your connection or try a smaller file.');
+    } else if (!error.response) {
+      toast.error('Network error. Please check your internet connection.');
+    } else if (error.response?.status === 401) {
         // Avoid redirecting to login for authentication endpoints (login/register/2fa)
         const requestUrl = error.config?.url || '';
         const isAuthEndpoint = /auth\/(login|register|verify-2fa|resend-2fa)/i.test(requestUrl);
