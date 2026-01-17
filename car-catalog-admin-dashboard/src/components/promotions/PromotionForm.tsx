@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Percent, X, Plus, Check, Calendar, Tag, DollarSign, Clock, Image as ImageIcon } from 'lucide-react';
+import { Percent, Plus, Check, Calendar, Tag, DollarSign, Clock, Image as ImageIcon } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { Promotion } from '@/services/promotions';
@@ -84,14 +84,7 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onCl
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900">
-          {promotion ? 'Edit Promotion' : 'Create New Promotion'}
-        </h2>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-          <X className="h-5 w-5 text-gray-400" />
-        </button>
-      </div>
+
 
       <form id="promotion-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
         {/* Banner Image */}

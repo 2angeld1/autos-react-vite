@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faHeart, faInfoCircle, faHome } from '@fortawesome/free-solid-svg-icons';
+import { faUser, faHeart, faInfoCircle, faHome, faTags, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
     const [isActive, setIsActive] = useState<boolean>(false);
@@ -31,7 +31,7 @@ const Header: React.FC = () => {
                             src="/logo-transparent.png"
                             alt="VeloDrive"
                             style={{
-                                height: '55px',
+                                height: '40px',
                                 width: 'auto',
                                 maxHeight: 'none',
                                 objectFit: 'contain'
@@ -66,10 +66,18 @@ const Header: React.FC = () => {
                             <FontAwesomeIcon icon={faInfoCircle} className="mr-2" style={{ fontSize: '0.85rem' }} />
                             Nosotros
                         </NavLink>
+                        <NavLink className="navbar-item nav-link-hover" to="/promotions">
+                            <FontAwesomeIcon icon={faTags} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            Promociones
+                        </NavLink>
+                        <NavLink className="navbar-item nav-link-hover" to="/maintenance">
+                            <FontAwesomeIcon icon={faWrench} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            Mantenimiento
+                        </NavLink>
                         <div className="navbar-item">
                             <div className="buttons">
                                 <a
-                                    href="http://localhost:3001"
+                                    href={import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:3001'}
                                     className="button is-accent"
                                     target="_blank"
                                     rel="noopener noreferrer"

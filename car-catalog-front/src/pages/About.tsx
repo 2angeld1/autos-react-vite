@@ -10,7 +10,8 @@ import {
     faGlobe,
     faEnvelope,
     faPhone,
-    faMapMarkerAlt
+    faMapMarkerAlt,
+    faInfoCircle
 } from '@fortawesome/free-solid-svg-icons';
 import {
     faTwitter,
@@ -79,20 +80,11 @@ const About: React.FC = () => {
             <section className="hero is-large has-bg-gradient">
                 <div className="hero-body">
                     <div className="container has-text-centered">
-                        <div className="mb-5">
-                            <img 
-                                src="/logo-transparent.png" 
-                                alt="VeloDrive" 
-                                style={{ height: '120px', marginBottom: '1.5rem' }}
-                            />
-                        </div>
-                        <h1 className="title is-1 has-text-white mb-4" style={{
-                            fontFamily: "'Orbitron', sans-serif",
-                            fontSize: '3.5rem',
-                            letterSpacing: '0.1em',
-                            textShadow: '0 4px 30px rgba(0,0,0,0.3)'
+                        <h1 className="title is-1 has-text-white mb-6" style={{
+                            fontSize: '6rem',
+                            textShadow: '0 4px 60px rgba(249, 115, 22, 0.4)'
                         }}>
-                            VELODRIVE
+                            <FontAwesomeIcon icon={faInfoCircle} style={{ color: '#f97316' }} />
                         </h1>
                         <p className="subtitle is-4 has-text-white-bis" style={{ maxWidth: '700px', margin: '0 auto' }}>
                             Tu destino premium para encontrar el vehículo perfecto. 

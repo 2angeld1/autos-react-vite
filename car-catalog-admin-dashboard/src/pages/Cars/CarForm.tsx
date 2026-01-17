@@ -26,6 +26,8 @@ interface CarFormData {
   combination_mpg: number;
   features: string;
   isAvailable: boolean;
+  accessories: string[];
+  promotion: string;
 }
 
 interface CarFormProps {
@@ -49,24 +51,20 @@ const CarForm: React.FC<CarFormProps> = ({
   const [showImagePicker, setShowImagePicker] = React.useState(false);
   const [removeCurrentImage, setRemoveCurrentImage] = React.useState(false);
 
-  // Fetch Brands and Categories
+  // Fetch Inventory Data
   const { data: brandsResponse } = useGet<any>('/inventory/brands', { immediate: true });
   const { data: categoriesResponse } = useGet<any>('/inventory/categories', { immediate: true });
+  const { data: accessoriesResponse } = useGet<any>('/inventory/accessories', { immediate: true });
+  const { data: promotionsResponse } = useGet<any>('/promotions', { immediate: true });
 
-  const brands = React.useMemo(() => {
-    if (brandsResponse?.success) return brandsResponse.data || [];
-    return [];
-  }, [brandsResponse]);
-
-  const categories = React.useMemo(() => {
-    if (categoriesResponse?.success) return categoriesResponse.data || [];
-    return [];
-  }, [categoriesResponse]);
+  const brands = React.useMemo(() => brandsResponse?.data || [], [brandsResponse]);
+  const categories = React.useMemo(() => categoriesResponse?.data || [], [categoriesResponse]);
+  const accessories = React.useMemo(() => accessoriesResponse?.data || [], [accessoriesResponse]);
+  const promotions = React.useMemo(() => promotionsResponse?.data || [], [promotionsResponse]);
 
   // Initialize image preview from car data
   React.useEffect(() => {
     if (car?.image) {
-      // Check if it's a relative URL and prepend base URL
       const imageUrl = car.image.startsWith('http') 
         ? car.image 
         : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${car.image}`;
@@ -85,28 +83,44 @@ const CarForm: React.FC<CarFormProps> = ({
     reset,
     formState: { errors },
   } = useForm<CarFormData>({
-    defaultValues: car ? {
-      make: car.make,
-      model: (car as any).model ?? (car as any).carModel ?? '',
-      year: car.year,
-      price: car.price,
-      description: car.description,
-      fuel_type: car.fuel_type,
-      transmission: car.transmission,
-      cylinders: car.cylinders,
-      class: car.class,
-      displacement: car.displacement,
-      city_mpg: car.city_mpg,
-      highway_mpg: car.highway_mpg,
-      combination_mpg: car.combination_mpg,
-      features: car.features?.join(', ') || '',
-      isAvailable: car.isAvailable,
-    } : undefined,
+    defaultValues: {
+      make: '',
+      model: '',
+      year: new Date().getFullYear(),
+      price: 0,
+      description: '',
+      fuel_type: 'gas',
+      transmission: 'a',
+      cylinders: 4,
+      class: 'SUV',
+      displacement: 2.0,
+      city_mpg: 0,
+      highway_mpg: 0,
+      combination_mpg: 0,
+      features: '',
+      isAvailable: true,
+      accessories: [],
+      promotion: '',
+    }
   });
 
   // When the `car` prop changes (e.g. loaded from API), populate the form
   React.useEffect(() => {
     if (car) {
+      // Safely handle accessories array (could be populated objects or IDs)
+      let currentAccessories: string[] = [];
+      if (Array.isArray((car as any).accessories)) {
+        currentAccessories = (car as any).accessories.map((a: any) => typeof a === 'object' ? a._id || a.id : a);
+      }
+
+      // Safely handle promotion (could be object or ID)
+      let currentPromotion = '';
+      if ((car as any).promotion) {
+        currentPromotion = typeof (car as any).promotion === 'object'
+          ? (car as any).promotion._id || (car as any).promotion.id
+          : (car as any).promotion;
+      }
+
       reset({
         make: car.make,
         model: (car as any).model ?? (car as any).carModel ?? '',
@@ -123,6 +137,8 @@ const CarForm: React.FC<CarFormProps> = ({
         combination_mpg: car.combination_mpg,
         features: car.features?.join(', ') || '',
         isAvailable: car.isAvailable,
+        accessories: currentAccessories,
+        promotion: currentPromotion,
       });
     }
   }, [car, reset]);
@@ -167,9 +183,17 @@ const CarForm: React.FC<CarFormProps> = ({
     // Add form fields
     Object.entries(data).forEach(([key, value]) => {
       if (key === 'features') {
-        // Convert comma-separated string to array
-        const featuresArray = value.split(',').map((f: string) => f.trim()).filter((f: string) => f);
+        const featuresArray = typeof value === 'string'
+          ? value.split(',').map((f: string) => f.trim()).filter((f: string) => f)
+          : value;
         formData.append(key, JSON.stringify(featuresArray));
+      } else if (key === 'accessories') {
+        // value is string[]
+        formData.append(key, JSON.stringify(value));
+      } else if (key === 'promotion') {
+        // value is string (ID) or empty
+        if (value) formData.append(key, value.toString());
+        else formData.append(key, ''); // explicitly send empty if cleared
       } else {
         formData.append(key, value.toString());
       }
@@ -177,33 +201,15 @@ const CarForm: React.FC<CarFormProps> = ({
 
     // Handle image
     if (selectedImage && selectedImage.size > 0) {
-      // New file upload
       formData.append('image', selectedImage);
-      console.log('Image added to FormData:', selectedImage.name, 'size:', selectedImage.size);
     } else if (selectedFileItem) {
-      // Image selected from file manager
       formData.append('imageUrl', filesService.getFileUrl(selectedFileItem));
-      console.log('Image URL added to FormData:', filesService.getFileUrl(selectedFileItem));
     } else if (removeCurrentImage) {
-      // User wants to remove the image
       formData.append('removeImage', 'true');
-      console.log('Remove image flag added');
     }
-    // If none of the above, don't send image field (keep existing)
 
-    // Add car ID if editing
     if (car) {
       formData.append('id', car.id);
-    }
-
-    // Log all FormData contents
-    console.log('FormData contents:');
-    for (const [key, value] of formData.entries()) {
-      if (value instanceof File) {
-        console.log(`${key}: File(${value.name}, ${value.size} bytes)`);
-      } else {
-        console.log(`${key}: ${value}`);
-      }
     }
 
     await onSubmit(formData);
@@ -233,7 +239,6 @@ const CarForm: React.FC<CarFormProps> = ({
               alt="Vista previa del auto"
               className="h-32 w-48 object-cover rounded-lg border"
               onError={(e) => {
-                // If image fails to load, show placeholder
                 (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="128" viewBox="0 0 192 128"><rect fill="%23f3f4f6" width="192" height="128"/><text x="96" y="64" text-anchor="middle" fill="%239ca3af" font-size="12">Image not found</text></svg>';
               }}
             />
@@ -274,8 +279,7 @@ const CarForm: React.FC<CarFormProps> = ({
             <p className="text-xs text-gray-500 mt-2">PNG, JPG, WEBP hasta 5MB</p>
           </div>
         )}
-        
-        {/* Show option to change image when one is selected */}
+
         {imagePreview && (
           <div className="mt-2 flex gap-2">
             <Button
@@ -432,7 +436,7 @@ const CarForm: React.FC<CarFormProps> = ({
               <option key={c._id || c.id} value={c.name}>{c.name}</option>
             ))}
             {categories.length === 0 && (
-              <option value="SUV">SUV</option> // Fallback
+              <option value="SUV">SUV</option>
             )}
           </select>
           {errors.class && (
@@ -484,6 +488,45 @@ const CarForm: React.FC<CarFormProps> = ({
           error={errors.combination_mpg?.message}
           placeholder="28"
         />
+      </div>
+
+      {/* Extras: Accessories & Promotions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Accesorios
+          </label>
+          <select
+            multiple
+            {...register('accessories')}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            style={{ minHeight: '100px' }}
+          >
+            {accessories.map((acc: any) => (
+              <option key={acc._id || acc.id} value={acc._id || acc.id}>
+                {acc.name} ({acc.price ? `$${acc.price}` : 'Free'})
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 mt-1">Mantén presionado Ctrl (o Cmd) para seleccionar múltiples.</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Promoción
+          </label>
+          <select
+            {...register('promotion')}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">Sin promoción</option>
+            {promotions.map((p: any) => (
+              <option key={p._id || p.id} value={p._id || p.id}>
+                {p.name} ({p.code})
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Features */}

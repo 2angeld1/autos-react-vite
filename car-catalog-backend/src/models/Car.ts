@@ -18,6 +18,8 @@ export interface ICarBase {
   highway_mpg: number;
   combination_mpg: number;
   features?: string[];
+  accessories?: any[];
+  promotion?: any;
   isAvailable: boolean;
 }
 
@@ -39,6 +41,8 @@ export interface ICarDocument extends Document {
   highway_mpg: number;
   combination_mpg: number;
   features?: string[];
+  accessories?: any[];
+  promotion?: any;
   isAvailable: boolean;
   cloudinaryId?: string;
   cloudinaryUrl?: string;
@@ -156,6 +160,15 @@ const CarSchema = new Schema<ICarDocument>({
       }
       return value;
     }
+  },
+  accessories: [{
+    type: Schema.Types.ObjectId,
+    ref: 'Accessory'
+  }],
+  promotion: {
+    type: Schema.Types.ObjectId,
+    ref: 'Promotion',
+    default: null
   },
   isAvailable: {
     type: Boolean,

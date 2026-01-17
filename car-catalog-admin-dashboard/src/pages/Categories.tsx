@@ -338,6 +338,7 @@ const Categories: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         size="lg"
+        title={editingCategory ? 'Edit Category' : 'Add New Category'}
       >
         <CategoryForm
           category={editingCategory}

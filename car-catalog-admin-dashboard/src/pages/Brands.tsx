@@ -301,6 +301,7 @@ const Brands: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         size="md"
+        title={editingBrand ? 'Edit Brand' : 'Add New Brand'}
       >
         <BrandForm
           brand={editingBrand}

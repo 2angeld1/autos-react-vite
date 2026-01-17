@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Tag, X, Plus, Check, FolderTree, AlignLeft } from 'lucide-react';
+import { Tag, Plus, Check, FolderTree, AlignLeft } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { Category } from '@/services/inventory';
@@ -85,14 +85,7 @@ const CategoryForm: React.FC<CategoryFormProps> = ({ category, categories, onSub
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900">
-          {category ? 'Edit Category' : 'Add New Category'}
-        </h2>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-          <X className="h-5 w-5 text-gray-400" />
-        </button>
-      </div>
+
 
       <form id="category-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
         <div className="flex items-center gap-6">

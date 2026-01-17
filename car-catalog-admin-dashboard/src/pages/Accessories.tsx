@@ -317,6 +317,7 @@ const Accessories: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         size="md"
+        title={editingAccessory ? 'Edit Accessory' : 'Add New Accessory'}
       >
         <AccessoryForm
           accessory={editingAccessory}

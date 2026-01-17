@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Building2, X, Plus, Globe, Calendar, Check } from 'lucide-react';
+import { Building2, Plus, Globe, Calendar, Check } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { Brand } from '@/services/inventory';
@@ -64,14 +64,7 @@ const BrandForm: React.FC<BrandFormProps> = ({ brand, onSubmit, onClose, loading
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center pb-4 border-b border-gray-100">
-        <h2 className="text-xl font-bold text-gray-900">
-          {brand ? 'Edit Brand' : 'Add New Brand'}
-        </h2>
-        <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
-          <X className="h-5 w-5 text-gray-400" />
-        </button>
-      </div>
+
 
       <form id="brand-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
         <div className="flex items-center gap-6">

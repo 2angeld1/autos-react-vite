@@ -230,6 +230,20 @@ export class CarController {
       }
     }
 
+    // Parse accessories if it's a string
+    if (carData.accessories && typeof carData.accessories === 'string') {
+      try {
+        carData.accessories = JSON.parse(carData.accessories);
+      } catch (error) {
+        carData.accessories = [];
+      }
+    }
+
+    // Handle promotion
+    if (carData.promotion === 'null' || carData.promotion === '') {
+      carData.promotion = null;
+    }
+
     // Generate unique ID if not provided
     if (!carData.id) {
       carData.id = `car-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
@@ -324,6 +338,20 @@ export class CarController {
       } catch (error) {
         updateData.features = [];
       }
+    }
+
+    // Parse accessories if it's a string
+    if (updateData.accessories && typeof updateData.accessories === 'string') {
+      try {
+        updateData.accessories = JSON.parse(updateData.accessories);
+      } catch (error) {
+        updateData.accessories = [];
+      }
+    }
+
+    // Handle promotion
+    if (updateData.promotion === 'null' || updateData.promotion === '') {
+      updateData.promotion = null;
     }
 
     // Cambiar model a carModel antes de actualizar

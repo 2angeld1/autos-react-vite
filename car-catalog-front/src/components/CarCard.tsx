@@ -40,7 +40,7 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
 
     return (
         <div className="is-6-tablet" style={{ display: 'flex' }}>
-            <div className="card car-card" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <div className="card car-card bg-gray-800 border-gray-700 text-white" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
                 <div className="card-image">
                     {imgError ? (
                         <div
@@ -67,15 +67,15 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         </figure>
                     )}
                 </div>
-                <div className="card-content" style={{ flexGrow: 1 }}>
-                    <div className="media">
+                <div className="card-content" style={{ flexGrow: 1, backgroundColor: 'transparent' }}>
+                    <div className="media mb-4">
                         <div className="media-content" style={{ minHeight: '4.5rem' }}>
-                            <p className="title is-4">{car.make} <br /> {car.model}</p>
-                            <p className="subtitle is-6">{car.year}</p>
+                            <p className="title is-4 text-white mb-1">{car.make} <br /> {car.model}</p>
+                            <p className="subtitle is-6 text-gray-400">{car.year}</p>
                         </div>
                         <div className="media-right">
                             <button
-                                className={`button is-rounded ${isCarFavorite ? 'is-danger' : 'is-light'}`}
+                                className={`button is-rounded ${isCarFavorite ? 'is-danger' : 'bg-gray-700 text-white border-transparent hover:bg-gray-600'}`}
                                 onClick={() => toggleFavorite(car.id.toString())}
                                 aria-label={isCarFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
                             >
@@ -86,30 +86,27 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         </div>
                     </div>
                     <div className="content">
-                        <p className="has-text-weight-bold is-size-4 has-text-primary mb-3">
+                        <p className="has-text-weight-bold is-size-4 text-purple-400 mb-3">
                             ${car.price?.toLocaleString()}
                         </p>
                         <div className="tags mb-3">
-                            <span className="tag is-info">{car.fuel_type}</span>
-                            <span className="tag is-success">{car.cylinders} cilindros</span>
-                            <span className="tag is-warning">{car.transmission}</span>
+                            <span className="tag bg-blue-600 text-white border-transparent">{car.fuel_type}</span>
+                            <span className="tag bg-green-600 text-white border-transparent">{car.cylinders} cilindros</span>
+                            <span className="tag bg-yellow-600 text-black border-transparent">{car.transmission}</span>
                         </div>
                         {car.displacement && (
-                            <p className="has-text-grey is-size-7 mb-3">
+                            <p className="text-gray-400 is-size-7 mb-3">
                                 Motor: {car.displacement}L • {car.cylinders} cilindros
                             </p>
                         )}
                     </div>
                 </div>
-                <footer className="card-footer" style={{ borderTop: 'none', padding: '1rem' }}>
+                <footer className="card-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '1rem', backgroundColor: 'transparent' }}>
                     <Link
                         to={`/car/${car.id}`}
-                        className="button is-fullwidth"
+                        className="button is-fullwidth bg-purple-600 hover:bg-purple-700 text-white border-transparent font-bold transition-all"
                         style={{
-                            backgroundColor: '#ff3860', // Rojo vibrante/Bulma danger 
-                            color: '#1a1a1a', // Negro/Gris muy oscuro para contraste
-                            borderColor: 'transparent',
-                            transition: 'all 0.3s ease'
+                            borderRadius: '8px'
                         }}
                     >
                         <span className="icon">

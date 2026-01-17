@@ -7,6 +7,8 @@ import CarDetails from '../pages/CarDetails';
 import Favorites from '../pages/Favorites';
 import About from '../pages/About';
 import NotFound from '../pages/NotFound';
+import Promotions from '../pages/promotions/Promotions';
+import Maintenance from '../pages/maintenance/Maintenance';
 
 const App: React.FC = () => {
   return (
@@ -19,6 +21,8 @@ const App: React.FC = () => {
             <Route path="/car/:id" element={<CarDetails />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/about" element={<About />} />
+            <Route path="/promotions" element={<Promotions />} />
+            <Route path="/maintenance" element={<Maintenance />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

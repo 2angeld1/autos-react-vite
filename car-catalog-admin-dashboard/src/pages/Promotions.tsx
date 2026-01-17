@@ -422,6 +422,7 @@ const Promotions: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         size="lg"
+        title={editingPromotion ? 'Edit Promotion' : 'Create New Promotion'}
       >
         <PromotionForm
           promotion={editingPromotion}
