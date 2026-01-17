@@ -23,7 +23,8 @@ const allowedOrigins = new Set([
   'http://localhost:3001',
   'http://localhost:3000',
   FRONTEND_URL,
-  'https://autos-react-dashboard.vercel.app'
+  'https://autos-react-dashboard.vercel.app',
+  'https://autos-react-front.vercel.app'
 ].filter(Boolean));
 
 app.use(cors({
