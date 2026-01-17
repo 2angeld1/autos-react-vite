@@ -14,6 +14,7 @@
     "import": "Importar",
     "close": "Cerrar",
     "confirm": "Confirmar",
+    "select": "Seleccionar",
     "back": "Volver",
     "next": "Siguiente",
     "previous": "Anterior",
@@ -62,6 +63,7 @@
   "header": {
     "notifications": "Notificaciones",
     "markAllRead": "Marcar todo como leído",
+    "markRead": "Marcar como leído",
     "noNotifications": "Sin notificaciones",
     "language": "Idioma",
     "english": "Inglés",
@@ -100,7 +102,12 @@
     "carAdded": "Nuevo auto agregado",
     "userRegistered": "Nuevo registro de usuario",
     "imageUploaded": "Imágenes subidas",
-    "settingsChanged": "Configuración actualizada"
+    "settingsChanged": "Configuración actualizada",
+    "from": "desde",
+    "lastMonth": "el mes pasado",
+    "lastWeek": "la semana pasada",
+    "noActivity": "Sin actividad reciente",
+    "by": "por"
   },
   "cars": {
     "title": "Autos",

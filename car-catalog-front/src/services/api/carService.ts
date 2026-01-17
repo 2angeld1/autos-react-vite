@@ -5,11 +5,12 @@
  * running at VITE_API_URL (default: http://localhost:5000/api)
  */
 
+import { BACKEND_API_BASE_URL } from './config';
 import type { Car, SearchFilters } from '@/types';
 
 // Base URL for our backend API
 const getApiUrl = (): string => {
-  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  return BACKEND_API_BASE_URL;
 };
 
 /**

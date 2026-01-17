@@ -2,6 +2,8 @@ import React from 'react';
 import { Car, User, Image, Settings } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
+import { useTranslation } from 'react-i18next';
+
 export interface Activity {
   id: string;
   type: 'car_added' | 'user_registered' | 'image_uploaded' | 'settings_changed';
@@ -20,6 +22,8 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
   activities = [],
   loading = false 
 }) => {
+  const { t } = useTranslation();
+
   const getActivityIcon = (type: Activity['type']) => {
     switch (type) {
       case 'car_added':
@@ -54,7 +58,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
     return (
       <div className="bg-white rounded-lg shadow">
         <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+          <h3 className="text-lg font-medium text-gray-900">{t('dashboard.recentActivity')}</h3>
         </div>
         <div className="p-6">
           <div className="space-y-4">
@@ -76,11 +80,11 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
   return (
     <div className="bg-white rounded-lg shadow">
       <div className="p-6 border-b border-gray-200">
-        <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
+        <h3 className="text-lg font-medium text-gray-900">{t('dashboard.recentActivity')}</h3>
       </div>
       <div className="p-6">
         {activities.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">No recent activity</p>
+          <p className="text-gray-500 text-center py-8">{t('dashboard.noActivity')}</p>
         ) : (
           <div className="space-y-4">
             {activities.map((activity) => {
@@ -101,7 +105,7 @@ const RecentActivity: React.FC<RecentActivityProps> = ({
                     </p>
                     <p className="text-xs text-gray-400 mt-1">
                       {formatDistanceToNow(activity.timestamp, { addSuffix: true })}
-                      {activity.user && ` • by ${activity.user}`}
+                      {activity.user && ` • ${t('dashboard.by')} ${activity.user}`}
                     </p>
                   </div>
                 </div>

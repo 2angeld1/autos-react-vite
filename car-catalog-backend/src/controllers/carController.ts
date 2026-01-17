@@ -6,6 +6,7 @@ import { asyncHandler } from '@/middleware/errorHandler';
 import { CloudinaryService } from '@/services/cloudinaryService';
 import fs from 'fs';
 import path from 'path';
+import { NotificationController } from './notificationController';
 
 export class CarController {
   /**
@@ -207,6 +208,19 @@ export class CarController {
 
     logger.info(`carData.image after processing:`, carData.image);
 
+    // Parse numeric fields (FormData sends everything as strings)
+    const numericFields = ['year', 'price', 'cylinders', 'displacement', 'city_mpg', 'highway_mpg', 'combination_mpg'];
+    numericFields.forEach(field => {
+      if (carData[field] !== undefined) {
+        carData[field] = parseFloat(carData[field]);
+      }
+    });
+
+    // Parse boolean fields
+    if (typeof carData.isAvailable === 'string') {
+      carData.isAvailable = carData.isAvailable === 'true';
+    }
+
     // Parse features if it's a string (from form data)
     if (carData.features && typeof carData.features === 'string') {
       try {
@@ -231,6 +245,15 @@ export class CarController {
 
     const car = new Car(carData);
     await car.save();
+
+    // Create notification
+    await NotificationController.create({
+      title: 'Nuevo auto agregado',
+      message: `${car.make} ${car.carModel} (${car.year}) ha sido añadido al catálogo.`,
+      type: 'success',
+      category: 'car',
+      link: `/cars/${car.id || car._id}`
+    });
 
     logger.info(`Car created by admin ${req.user?.email}:`, car.id);
 
@@ -279,6 +302,19 @@ export class CarController {
       delete updateData.image;
       delete updateData.imageUrl;
       delete updateData.removeImage;
+    }
+
+    // Parse numeric fields (FormData sends everything as strings)
+    const numericFields = ['year', 'price', 'cylinders', 'displacement', 'city_mpg', 'highway_mpg', 'combination_mpg'];
+    numericFields.forEach(field => {
+      if (updateData[field] !== undefined) {
+        updateData[field] = parseFloat(updateData[field]);
+      }
+    });
+
+    // Parse boolean fields
+    if (typeof updateData.isAvailable === 'string') {
+      updateData.isAvailable = updateData.isAvailable === 'true';
     }
 
     // Parse features if it's a string (from form data)

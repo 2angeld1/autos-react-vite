@@ -5,6 +5,9 @@ import Input from '@/components/common/Input';
 import { useAuthStore } from '@/store/authSlice';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { useGet, useApi } from '@/hooks/useApi';
+import { formatDistanceToNow } from 'date-fns';
+import { es, enUS } from 'date-fns/locale';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -15,18 +18,37 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { t, i18n } = useTranslation();
   const [notifOpen, setNotifOpen] = React.useState(false);
   const [langOpen, setLangOpen] = React.useState(false);
-  const [notifications, setNotifications] = React.useState(() => [
-    { id: 'n1', title: 'New lead', message: 'You have a new lead for Toyota Camry', time: '2h', read: false },
-    { id: 'n2', title: 'Image uploaded', message: 'Image added to car #234', time: '1d', read: false },
-    { id: 'n3', title: 'Booking confirmed', message: 'Booking BK001 was confirmed', time: '3d', read: true },
-  ] as { id: string; title: string; message: string; time: string; read: boolean }[]);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Real notifications from API
+  const {
+    data: notifResponse,
+    execute: fetchNotifications
+  } = useGet<any>('/notifications', { immediate: true });
+
+  const { execute: markReadApi } = useApi();
+  const { execute: markAllReadApi } = useApi();
+
+  const notifications = React.useMemo(() => {
+    if (notifResponse?.success) {
+      return notifResponse.data || [];
+    }
+    return [];
+  }, [notifResponse]);
+
+  const unreadCount = notifResponse?.unreadCount || 0;
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const [userOpen, setUserOpen] = React.useState(false);
   const navigate = useNavigate();
   const logout = useAuthStore((s) => s.logout);
   const authUser = useAuthStore((s) => s.user);
+
+  // Poll for new notifications every 30 seconds
+  React.useEffect(() => {
+    const interval = setInterval(() => {
+      fetchNotifications();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, [fetchNotifications]);
 
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -46,8 +68,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setNotifOpen(next);
     setLangOpen(false);
     setUserOpen(false);
-    if (!next) {
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+
+    // Auto-fetch when opening
+    if (next) {
+      fetchNotifications();
     }
   };
 
@@ -70,13 +94,26 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
     setLangOpen(false);
   };
 
-  const markAsRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  const markAsRead = async (id: string) => {
+    await markReadApi(`/notifications/${id}/read`, { method: 'PATCH' });
+    fetchNotifications();
   };
 
-  const clearAll = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const clearAll = async () => {
+    await markAllReadApi('/notifications/read-all', { method: 'PATCH' });
+    fetchNotifications();
     setNotifOpen(false);
+  };
+
+  const formatTime = (dateStr: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateStr), {
+        addSuffix: true,
+        locale: i18n.language === 'es' ? es : enUS
+      });
+    } catch (e) {
+      return dateStr;
+    }
   };
 
   return (
@@ -172,7 +209,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     >
                       {t('header.markAllRead')}
                     </button>
-                    <button onClick={() => { setNotifOpen(false); setNotifications(prev => prev.map(n => ({ ...n, read: true }))); }} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                    <button onClick={() => setNotifOpen(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
                       <X className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                     </button>
                   </div>
@@ -181,8 +218,8 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                   {notifications.length === 0 && (
                     <div className="p-4 text-center text-sm text-gray-500 dark:text-gray-400">{t('header.noNotifications')}</div>
                   )}
-                  {notifications.map(n => (
-                    <div key={n.id} className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${n.read ? '' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
+                  {notifications.map((n: any) => (
+                    <div key={n._id || n.id} className={`flex items-start gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700 ${n.read ? '' : 'bg-gray-50 dark:bg-gray-700/50'}`}>
                       <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-full">
                         <Clock className="h-4 w-4 text-gray-500 dark:text-gray-400" />
                       </div>
@@ -192,12 +229,12 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                             <p className="font-medium text-gray-900 dark:text-white text-sm">{n.title}</p>
                             <p className="text-xs text-gray-500 dark:text-gray-400">{n.message}</p>
                           </div>
-                          <div className="text-xs text-gray-400 dark:text-gray-500">{n.time}</div>
+                          <div className="text-xs text-gray-400 dark:text-gray-500">{formatTime(n.createdAt)}</div>
                         </div>
                         <div className="mt-2 flex items-center gap-2">
                           {!n.read && (
-                            <button onClick={() => markAsRead(n.id)} className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
-                              <Check className="h-3 w-3" /> Mark read
+                            <button onClick={() => markAsRead(n._id || n.id)} className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1">
+                              <Check className="h-3 w-3" /> {t('header.markRead')}
                             </button>
                           )}
                         </div>

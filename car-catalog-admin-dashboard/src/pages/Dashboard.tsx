@@ -150,7 +150,7 @@ const Dashboard: React.FC = () => {
           change={{
             value: 12,
             type: 'increase',
-            period: 'last month',
+            period: t('dashboard.lastMonth'),
           }}
         />
         <StatsCard
@@ -162,7 +162,7 @@ const Dashboard: React.FC = () => {
           change={{
             value: 8,
             type: 'increase',
-            period: 'last month',
+            period: t('dashboard.lastMonth'),
           }}
         />
         <StatsCard
@@ -174,7 +174,7 @@ const Dashboard: React.FC = () => {
           change={{
             value: 5,
             type: 'increase',
-            period: 'last week',
+            period: t('dashboard.lastWeek'),
           }}
         />
         <StatsCard
@@ -186,7 +186,7 @@ const Dashboard: React.FC = () => {
           change={{
             value: 3,
             type: 'decrease',
-            period: 'last week',
+            period: t('dashboard.lastWeek'),
           }}
         />
       </div>

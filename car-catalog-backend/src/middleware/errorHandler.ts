@@ -33,7 +33,19 @@ export const errorHandler = (
   // Mongoose validation error
   if (error.name === 'ValidationError') {
     statusCode = 400;
-    message = 'Validation Error';
+    const mongooseError = error as any;
+    const errors: Record<string, string> = {};
+
+    Object.keys(mongooseError.errors).forEach((key) => {
+      errors[key] = mongooseError.errors[key].message;
+    });
+
+    res.status(400).json({
+      success: false,
+      message: 'Validation Error',
+      errors
+    });
+    return;
   }
 
   // Mongoose duplicate key error

@@ -14,6 +14,7 @@
     "import": "Import",
     "close": "Close",
     "confirm": "Confirm",
+    "select": "Select",
     "back": "Back",
     "next": "Next",
     "previous": "Previous",
@@ -62,6 +63,7 @@
   "header": {
     "notifications": "Notifications",
     "markAllRead": "Mark all as read",
+    "markRead": "Mark read",
     "noNotifications": "No notifications",
     "language": "Language",
     "english": "English",
@@ -100,7 +102,12 @@
     "carAdded": "New car added",
     "userRegistered": "New user registration",
     "imageUploaded": "Images uploaded",
-    "settingsChanged": "Settings updated"
+    "settingsChanged": "Settings updated",
+    "from": "from",
+    "lastMonth": "last month",
+    "lastWeek": "last week",
+    "noActivity": "No recent activity",
+    "by": "by"
   },
   "cars": {
     "title": "Cars",

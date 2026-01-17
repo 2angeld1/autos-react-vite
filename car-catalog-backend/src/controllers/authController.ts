@@ -4,6 +4,7 @@ import { generateToken, sanitizeUser, hashPassword, comparePassword } from '@/ut
 import { logger } from '@/utils/logger';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { AuthRequest } from '@/middleware/auth';
+import { NotificationController } from './notificationController';
 
 export class AuthController {
   /**
@@ -35,6 +36,15 @@ export class AuthController {
     const token = generateToken({ id: user._id.toString(), email: user.email, role: user.role });
 
     logger.info(`New user registered: ${user.email}`);
+
+    // Create notification for admin
+    await NotificationController.create({
+      title: 'Nuevo usuario registrado',
+      message: `El usuario ${user.name} (${user.email}) se ha unido a la plataforma.`,
+      type: 'info',
+      category: 'user',
+      link: `/users`
+    });
 
     res.status(201).json({
       success: true,
