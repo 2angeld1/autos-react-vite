@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useCarContext } from '../context/CarContext';
 import Testimonials from '../components/Testimonials';
 import DotPattern from '../components/DotPattern';
@@ -8,8 +9,10 @@ import { searchCars } from '../services/api';
 import type { Car, SearchFilters } from '@/types';
 import { useCarImage } from '../hooks/useCarImage';
 import FeaturedCarsSection from '../components/FeaturedCarsSection';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
 
 const Home: React.FC = () => {
+    // ... previous state ...
     const { cars: contextCars, loading: contextLoading } = useCarContext();
     const [displayedCars, setDisplayedCars] = useState<Car[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -20,6 +23,7 @@ const Home: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState<number>(0);
     const slidesToShow = 4; // Número fijo de tarjetas visibles a la vez
 
+    // ... previous functions ...
     // Cargar vehículos al montar el componente
     useEffect(() => {
         const loadCars = async (): Promise<void> => {
@@ -101,38 +105,43 @@ const Home: React.FC = () => {
                 
                 <div className="hero-body">
                     <div className="container">
-                        <div className="columns is-vcentered">
-                            <div className="column is-6 animate-fadeIn">
-                                <h1 className="title is-1 has-text-white luxury-title">
+                        <motion.div
+                            className="columns is-vcentered"
+                            initial="hidden"
+                            animate="visible"
+                            variants={staggerContainer}
+                        >
+                            <div className="column is-6">
+                                <motion.h1 variants={slideUp} className="title is-1 has-text-white luxury-title">
                                     Descubre la Excelencia<br />en Cada Vehículo
-                                </h1>
-                                <div className="luxury-divider"></div>
-                                <h2 className="subtitle has-text-white-bis is-4 mb-6 luxury-subtitle">
+                                </motion.h1>
+                                <motion.div variants={fadeIn} className="luxury-divider"></motion.div>
+                                <motion.h2 variants={slideUp} className="subtitle has-text-white-bis is-4 mb-6 luxury-subtitle">
                                     Catálogo premium con Toyota, Kia, Hyundai, Tesla y las mejores marcas chinas.
-                                </h2>
+                                </motion.h2>
                                 
-                                <div className="features-list mb-6">
-                                    <div className="feature-item luxury">
+                                <motion.div variants={staggerContainer} className="features-list mb-6">
+                                    <motion.div variants={fadeIn} className="feature-item luxury">
                                         <span className="icon has-text-accent">
                                             <i className="fas fa-check-circle"></i>
                                         </span>
                                         <span className="has-text-white-bis">3 modelos por marca premium</span>
-                                    </div>
-                                    <div className="feature-item luxury">
+                                    </motion.div>
+                                    <motion.div variants={fadeIn} className="feature-item luxury">
                                         <span className="icon has-text-accent">
                                             <i className="fas fa-check-circle"></i>
                                         </span>
                                         <span className="has-text-white-bis">Incluye marcas chinas innovadoras</span>
-                                    </div>
-                                    <div className="feature-item luxury">
+                                    </motion.div>
+                                    <motion.div variants={fadeIn} className="feature-item luxury">
                                         <span className="icon has-text-accent">
                                             <i className="fas fa-check-circle"></i>
                                         </span>
                                         <span className="has-text-white-bis">Servicio de entrega a domicilio</span>
-                                    </div>
-                                </div>
+                                    </motion.div>
+                                </motion.div>
                                 
-                                <div className="buttons are-medium">
+                                <motion.div variants={slideUp} className="buttons are-medium">
                                     <a href="#featured-cars" className="button is-accent luxury-button">
                                         <span className="icon">
                                             <i className="fas fa-car"></i>
@@ -145,16 +154,16 @@ const Home: React.FC = () => {
                                         </span>
                                         <span>Búsqueda Avanzada</span>
                                     </a>
-                                </div>
+                                </motion.div>
                                 
-                                <div className="mt-6 luxury-badge">
+                                <motion.div variants={fadeIn} className="mt-6 luxury-badge">
                                     <span className="icon has-text-accent">
                                         <i className="fas fa-bolt"></i>
                                     </span>
                                     <span className="has-text-white-bis">Nuevos modelos 2025 disponibles</span>
-                                </div>
+                                </motion.div>
                             </div>
-                            <div className="column is-6 is-hidden-mobile">
+                            <motion.div variants={scaleIn} className="column is-6 is-hidden-mobile">
                                 <div className="luxury-car-showcase">
                                     <img 
                                         src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1200&q=80" 
@@ -162,28 +171,33 @@ const Home: React.FC = () => {
                                         className="luxury-car-image"
                                         onError={categoryImageHook.handleImageError}
                                     />
-                                    <div className="luxury-car-details">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 1, duration: 0.8 }}
+                                        className="luxury-car-details"
+                                    >
                                         <h3 className="title is-3 has-text-white has-text-shadow">Chevrolet Corvette</h3>
                                         <p className="has-text-grey-lighter mb-3">Potencia y diseño icónico</p>
                                         <a href="#featured-cars" className="button is-small is-accent is-outlined">Ver detalles</a>
-                                    </div>
-                                    <div className="luxury-car-specs">
-                                        <div className="spec-item">
+                                    </motion.div>
+                                    <motion.div variants={staggerContainer} className="luxury-car-specs">
+                                        <motion.div variants={scaleIn} className="spec-item">
                                             <span className="spec-value">460</span>
                                             <span className="spec-label">HP</span>
-                                        </div>
-                                        <div className="spec-item">
+                                        </motion.div>
+                                        <motion.div variants={scaleIn} className="spec-item">
                                             <span className="spec-value">4.2</span>
                                             <span className="spec-label">0-60</span>
-                                        </div>
-                                        <div className="spec-item">
+                                        </motion.div>
+                                        <motion.div variants={scaleIn} className="spec-item">
                                             <span className="spec-value">V8</span>
                                             <span className="spec-label">Motor</span>
-                                        </div>
-                                    </div>
+                                        </motion.div>
+                                    </motion.div>
                                 </div>
-                            </div>
-                        </div>
+                            </motion.div>
+                        </motion.div>
                     </div>
                 </div>
                 
@@ -245,16 +259,34 @@ const Home: React.FC = () => {
             {/* Nueva sección que reemplaza la búsqueda personalizada */}
             <section className="section has-background-black-ter">
                 <div className="container">
-                    <h2 className="title is-2 has-text-centered animate-fadeIn section-title">
+                    <motion.h2
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={slideUp}
+                        className="title is-2 has-text-centered section-title"
+                    >
                         Servicios Premium
-                    </h2>
-                    <p className="subtitle has-text-centered has-text-grey-light mb-6">
+                    </motion.h2>
+                    <motion.p
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeIn}
+                        className="subtitle has-text-centered has-text-grey-light mb-6"
+                    >
                         Ofrecemos servicios exclusivos para una experiencia de compra superior
-                    </p>
+                    </motion.p>
                     
-                    <div className="columns is-multiline">
-                        <div className="column is-4">
-                            <div className="service-box animate-fadeIn">
+                    <motion.div
+                        className="columns is-multiline"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={slideUp} className="column is-4">
+                            <div className="service-box">
                                 <div className="service-icon">
                                     <i className="fas fa-money-check-alt"></i>
                                 </div>
@@ -264,10 +296,10 @@ const Home: React.FC = () => {
                                 </p>
                                 <a href="#" className="button is-small is-outlined is-accent mt-4">Más información</a>
                             </div>
-                        </div>
+                        </motion.div>
                         
-                        <div className="column is-4">
-                            <div className="service-box animate-fadeIn" style={{animationDelay: "0.2s"}}>
+                        <motion.div variants={slideUp} className="column is-4">
+                            <div className="service-box">
                                 <div className="service-icon">
                                     <i className="fas fa-tools"></i>
                                 </div>
@@ -277,10 +309,10 @@ const Home: React.FC = () => {
                                 </p>
                                 <a href="#" className="button is-small is-outlined is-accent mt-4">Conocer paquetes</a>
                             </div>
-                        </div>
+                        </motion.div>
                         
-                        <div className="column is-4">
-                            <div className="service-box animate-fadeIn" style={{animationDelay: "0.4s"}}>
+                        <motion.div variants={slideUp} className="column is-4">
+                            <div className="service-box">
                                 <div className="service-icon">
                                     <i className="fas fa-exchange-alt"></i>
                                 </div>
@@ -290,24 +322,42 @@ const Home: React.FC = () => {
                                 </p>
                                 <a href="#" className="button is-small is-outlined is-accent mt-4">Evaluar mi auto</a>
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
             
             {/* Categorías Populares */}
             <section className="section has-background-black-ter">
                 <div className="container">
-                    <h2 className="title is-2 has-text-centered animate-fadeIn section-title">
+                    <motion.h2
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={slideUp}
+                        className="title is-2 has-text-centered section-title"
+                    >
                         Categorías Populares
-                    </h2>
-                    <p className="subtitle has-text-centered has-text-grey-light mb-6">
+                    </motion.h2>
+                    <motion.p
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={fadeIn}
+                        className="subtitle has-text-centered has-text-grey-light mb-6"
+                    >
                         Explora vehículos según tus preferencias
-                    </p>
+                    </motion.p>
                     
-                    <div className="columns is-multiline">
-                        <div className="column is-3-desktop is-6-tablet">
-                            <div className="category-card animate-fadeIn">
+                    <motion.div
+                        className="columns is-multiline"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={staggerContainer}
+                    >
+                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
+                            <div className="category-card">
                                 <img 
                                     src="https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
                                     alt="Sedanes" 
@@ -320,9 +370,9 @@ const Home: React.FC = () => {
                                     </Link>
                                 </div>
                             </div>
-                        </div>
-                        <div className="column is-3-desktop is-6-tablet">
-                            <div className="category-card animate-fadeIn">
+                        </motion.div>
+                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
+                            <div className="category-card">
                                 <img 
                                     src="https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
                                     alt="SUVs" 
@@ -335,9 +385,9 @@ const Home: React.FC = () => {
                                     </Link>
                                 </div>
                             </div>
-                        </div>
-                        <div className="column is-3-desktop is-6-tablet">
-                            <div className="category-card animate-fadeIn">
+                        </motion.div>
+                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
+                            <div className="category-card">
                                 <img 
                                     src="https://images.pexels.com/photos/3764984/pexels-photo-3764984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
                                     alt="Deportivos" 
@@ -350,9 +400,9 @@ const Home: React.FC = () => {
                                     </Link>
                                 </div>
                             </div>
-                        </div>
-                        <div className="column is-3-desktop is-6-tablet">
-                            <div className="category-card animate-fadeIn">
+                        </motion.div>
+                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
+                            <div className="category-card">
                                 <img 
                                     src="https://images.pexels.com/photos/2526127/pexels-photo-2526127.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
                                     alt="Eléctricos" 
@@ -365,8 +415,8 @@ const Home: React.FC = () => {
                                     </Link>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
             
@@ -374,17 +424,23 @@ const Home: React.FC = () => {
             <Testimonials />
             
             {/* Call to Action */}
-            <section className="section newsletter-section">
+            <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeIn}
+                className="section newsletter-section"
+            >
                 <div className="container">
                     <div className="columns is-vcentered">
                         <div className="column is-6">
-                            <h3 className="title is-3 has-text-white mb-4">¡Mantente informado!</h3>
-                            <p className="subtitle has-text-white-bis mb-5">
+                            <motion.h3 variants={slideUp} className="title is-3 has-text-white mb-4">¡Mantente informado!</motion.h3>
+                            <motion.p variants={slideUp} className="subtitle has-text-white-bis mb-5">
                                 Recibe las últimas noticias y ofertas especiales directamente en tu correo electrónico.
-                            </p>
+                            </motion.p>
                         </div>
                         <div className="column is-6">
-                            <div className="field has-addons">
+                            <motion.div variants={slideUp} className="field has-addons">
                                 <div className="control is-expanded">
                                     <input className="input is-medium" type="email" placeholder="Tu correo electrónico" />
                                 </div>
@@ -393,14 +449,14 @@ const Home: React.FC = () => {
                                         Suscribirse
                                     </button>
                                 </div>
-                            </div>
-                            <p className="has-text-grey-light is-size-7 mt-2">
+                            </motion.div>
+                            <motion.p variants={fadeIn} className="has-text-grey-light is-size-7 mt-2">
                                 Al suscribirte aceptas nuestra política de privacidad. Nunca compartiremos tu correo electrónico.
-                            </p>
+                            </motion.p>
                         </div>
                     </div>
                 </div>
-            </section>
+            </motion.section>
         </div>
     );
 };

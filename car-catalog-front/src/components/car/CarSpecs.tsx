@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import type { Car } from '@/types';
+import { slideUp, staggerContainer } from '../../animations/variants';
 
 interface CarSpecsProps {
     car: Car;
@@ -7,10 +9,15 @@ interface CarSpecsProps {
 
 const CarSpecs: React.FC<CarSpecsProps> = ({ car }) => {
     return (
-        <div id="especificaciones">
-            <h4 className="title is-4 mb-4 has-text-white">Especificaciones Técnicas</h4>
+        <motion.div
+            id="especificaciones"
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+        >
+            <motion.h4 variants={slideUp} className="title is-4 mb-4 has-text-white">Especificaciones Técnicas</motion.h4>
             <div className="columns is-multiline">
-                <div className="column is-6">
+                <motion.div variants={slideUp} className="column is-6">
                     <div className="spec-box">
                         <h5 className="title is-5 has-text-accent">Motor</h5>
                         <div className="content">
@@ -30,9 +37,9 @@ const CarSpecs: React.FC<CarSpecsProps> = ({ car }) => {
                             )}
                         </div>
                     </div>
-                </div>
+                </motion.div>
                 
-                <div className="column is-6">
+                <motion.div variants={slideUp} className="column is-6">
                     <div className="spec-box">
                         <h5 className="title is-5 has-text-accent">Transmisión</h5>
                         <div className="content">
@@ -53,9 +60,9 @@ const CarSpecs: React.FC<CarSpecsProps> = ({ car }) => {
                             )}
                         </div>
                     </div>
-                </div>
+                </motion.div>
                 
-                <div className="column is-6">
+                <motion.div variants={slideUp} className="column is-6">
                     <div className="spec-box">
                         <h5 className="title is-5 has-text-accent">Rendimiento</h5>
                         <div className="content">
@@ -80,9 +87,9 @@ const CarSpecs: React.FC<CarSpecsProps> = ({ car }) => {
                             </p>
                         </div>
                     </div>
-                </div>
+                </motion.div>
                 
-                <div className="column is-6">
+                <motion.div variants={slideUp} className="column is-6">
                     <div className="spec-box">
                         <h5 className="title is-5 has-text-accent">General</h5>
                         <div className="content">
@@ -95,18 +102,22 @@ const CarSpecs: React.FC<CarSpecsProps> = ({ car }) => {
                                 <span className="spec-value has-text-white">{car.year}</span>
                             </p>
                             <p>
-                                <span className="spec-label">Marca:</span> 
-                                <span className="spec-value has-text-white">{car.make}</span>
+                                <span className="icon car-spec-icon">
+                                    <i className="fas fa-industry"></i>
+                                </span>
+                                <strong>Marca:</strong> {car.make}
                             </p>
                             <p>
-                                <span className="spec-label">Modelo:</span> 
-                                <span className="spec-value has-text-white">{car.model}</span>
+                                <span className="icon car-spec-icon">
+                                    <i className="fas fa-car"></i>
+                                </span>
+                                <strong>Modelo:</strong> {car.model}
                             </p>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

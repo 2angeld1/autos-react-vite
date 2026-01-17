@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useCarContext } from '../context/CarContext';
 import ErrorBoundaryImage from './ErrorBoundaryImage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import type { Car } from '@/types';
+import { cardHover } from '../animations/variants';
 
 interface CarCardProps {
     car: Car;
@@ -39,8 +41,15 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
     };
 
     return (
-        <div className="is-6-tablet" style={{ display: 'flex' }}>
-            <div className="card car-card bg-gray-800 border-gray-700 text-white" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
+        <motion.div
+            className="is-6-tablet"
+            style={{ display: 'flex' }}
+            variants={cardHover}
+            initial="rest"
+            whileHover="hover"
+            layout
+        >
+            <motion.div className="card car-card bg-gray-800 border-gray-700 text-white" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
                 <div className="card-image">
                     {imgError ? (
                         <div
@@ -115,8 +124,8 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         <span>Ver detalles</span>
                     </Link>
                 </footer>
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
 

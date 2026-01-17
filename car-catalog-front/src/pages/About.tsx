@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion'; // Added import
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faRocket,
@@ -19,6 +20,7 @@ import {
     faInstagram,
     faLinkedin
 } from '@fortawesome/free-brands-svg-icons';
+import { slideUp, staggerContainer, scaleIn, fadeIn } from '../animations/variants'; // Added import
 
 const About: React.FC = () => {
     const stats = [
@@ -77,27 +79,44 @@ const About: React.FC = () => {
     return (
         <div className="about-page">
             {/* Hero Section */}
-            <section className="hero is-large has-bg-gradient">
+            <motion.section
+                className="hero is-large has-bg-gradient"
+                initial="hidden"
+                animate="visible"
+                variants={staggerContainer}
+            >
                 <div className="hero-body">
                     <div className="container has-text-centered">
-                        <h1 className="title is-1 has-text-white mb-6" style={{
-                            fontSize: '6rem',
-                            textShadow: '0 4px 60px rgba(249, 115, 22, 0.4)'
-                        }}>
-                            <FontAwesomeIcon icon={faInfoCircle} style={{ color: '#f97316' }} />
-                        </h1>
-                        <p className="subtitle is-4 has-text-white-bis" style={{ maxWidth: '700px', margin: '0 auto' }}>
+                        <motion.div variants={scaleIn}>
+                            <h1 className="title is-1 has-text-white mb-6" style={{
+                                fontSize: '6rem',
+                                textShadow: '0 4px 60px rgba(249, 115, 22, 0.4)'
+                            }}>
+                                <FontAwesomeIcon icon={faInfoCircle} style={{ color: '#f97316' }} />
+                            </h1>
+                        </motion.div>
+                        <motion.p
+                            variants={slideUp}
+                            className="subtitle is-4 has-text-white-bis"
+                            style={{ maxWidth: '700px', margin: '0 auto' }}
+                        >
                             Tu destino premium para encontrar el vehículo perfecto. 
                             Combinamos tecnología de vanguardia con pasión por los automóviles.
-                        </p>
+                        </motion.p>
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* Stats Section */}
             <section className="section" style={{ marginTop: '-80px', position: 'relative', zIndex: 10 }}>
                 <div className="container">
-                    <div className="columns is-multiline">
+                    <motion.div
+                        className="columns is-multiline"
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true, margin: "-100px" }}
+                        variants={staggerContainer}
+                    >
                         {stats.map((stat, index) => (
                             <div key={index} className="column is-3-desktop is-6-tablet">
                                 <div className="box has-text-centered stat-card" style={{
@@ -118,15 +137,22 @@ const About: React.FC = () => {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                    </motion.div>
                 </div>
             </section>
 
             {/* Mission Section */}
-            <section className="section" style={{ background: '#0a0a1a' }}>
+            <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={fadeIn}
+                className="section"
+                style={{ background: '#0a0a1a' }}
+            >
                 <div className="container">
                     <div className="columns is-vcentered">
-                        <div className="column is-6">
+                        <motion.div variants={slideUp} className="column is-6">
                             <h2 className="title is-2 has-text-white mb-4">
                                 Nuestra <span style={{ color: '#f97316' }}>Misión</span>
                             </h2>
@@ -140,8 +166,8 @@ const About: React.FC = () => {
                                 ofreciendo información detallada y verificada de cada vehículo para que puedas 
                                 tomar decisiones informadas.
                             </p>
-                        </div>
-                        <div className="column is-6">
+                        </motion.div>
+                        <motion.div variants={scaleIn} className="column is-6">
                             <div style={{
                                 background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%)',
                                 borderRadius: '24px',
@@ -154,25 +180,32 @@ const About: React.FC = () => {
                                     style={{ borderRadius: '16px', width: '100%' }}
                                 />
                             </div>
-                        </div>
+                        </motion.div>
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* Values Section */}
-            <section className="section" style={{ background: '#0f0f23' }}>
+            <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+                className="section"
+                style={{ background: '#0f0f23' }}
+            >
                 <div className="container">
-                    <div className="has-text-centered mb-6">
+                    <motion.div variants={slideUp} className="has-text-centered mb-6">
                         <h2 className="title is-2 has-text-white">
                             Nuestros <span style={{ color: '#f97316' }}>Valores</span>
                         </h2>
                         <p className="has-text-grey-light" style={{ maxWidth: '600px', margin: '0 auto' }}>
                             Los principios que guían cada decisión que tomamos
                         </p>
-                    </div>
+                    </motion.div>
                     <div className="columns is-multiline">
                         {values.map((value, index) => (
-                            <div key={index} className="column is-6-tablet is-3-desktop">
+                            <motion.div key={index} variants={fadeIn} className="column is-6-tablet is-3-desktop">
                                 <div className="box value-card" style={{
                                     background: 'linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%)',
                                     border: '1px solid rgba(255,255,255,0.1)',
@@ -195,26 +228,33 @@ const About: React.FC = () => {
                                     <h3 className="title is-5 has-text-white mb-3">{value.title}</h3>
                                     <p className="has-text-grey-light">{value.description}</p>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* Team Section */}
-            <section className="section" style={{ background: '#0a0a1a' }}>
+            <motion.section
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+                className="section"
+                style={{ background: '#0a0a1a' }}
+            >
                 <div className="container">
-                    <div className="has-text-centered mb-6">
+                    <motion.div variants={slideUp} className="has-text-centered mb-6">
                         <h2 className="title is-2 has-text-white">
                             Nuestro <span style={{ color: '#f97316' }}>Equipo</span>
                         </h2>
                         <p className="has-text-grey-light" style={{ maxWidth: '600px', margin: '0 auto' }}>
                             Profesionales apasionados por brindarte la mejor experiencia
                         </p>
-                    </div>
+                    </motion.div>
                     <div className="columns is-multiline is-centered">
                         {team.map((member, index) => (
-                            <div key={index} className="column is-6-tablet is-3-desktop">
+                            <motion.div key={index} variants={fadeIn} className="column is-6-tablet is-3-desktop">
                                 <div className="has-text-centered team-card" style={{
                                     padding: '2rem'
                                 }}>
@@ -232,11 +272,11 @@ const About: React.FC = () => {
                                     <h3 className="title is-5 has-text-white mb-1">{member.name}</h3>
                                     <p className="has-text-warning">{member.role}</p>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
                     </div>
                 </div>
-            </section>
+            </motion.section>
 
             {/* Contact Section */}
             <section className="section" style={{ 

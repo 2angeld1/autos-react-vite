@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Download, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Car, CarFilters } from '@/types';
 import { useGet } from '@/hooks/useApi';
 import Button from '@/components/common/Button';
@@ -10,6 +11,7 @@ import { Breadcrumb } from '@/components/layout';
 import { api } from '@/services/api'; // Asegúrate de importar api
 import toast from 'react-hot-toast';
 import Swal from 'sweetalert2'; // Agrega esta importación si no está
+import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
 const Cars: React.FC = () => {
   const navigate = useNavigate();
@@ -103,18 +105,26 @@ const Cars: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="space-y-6"
+    >
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <motion.div
+        variants={staggerContainer}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      >
+        <motion.div variants={slideUp}>
           <h1 className="text-2xl font-bold text-gray-900">{t('nav.cars')}</h1>
           <p className="text-gray-600">{t('cars.manageCars')}</p>
-        </div>
+        </motion.div>
 
-        <div className="mt-4 sm:mt-0 flex gap-3">
+        <motion.div variants={slideUp} className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             onClick={() => toast.success(t('common.comingSoon'))}
@@ -135,26 +145,30 @@ const Cars: React.FC = () => {
           >
             {t('cars.addCar')}
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <CarFiltersComponent
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        onReset={handleResetFilters}
-        loading={carsLoading}
-      />
+      <motion.div variants={slideUp}>
+        <CarFiltersComponent
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onReset={handleResetFilters}
+          loading={carsLoading}
+        />
+      </motion.div>
 
       {/* Table */}
-      <CarTable
-        cars={carsResponse?.data || []}
-        loading={carsLoading}
-        onEdit={handleEditCar}
-        onDelete={handleDeleteCar}
-        onView={handleViewCar}
-      />
-    </div>
+      <motion.div variants={slideUp}>
+        <CarTable
+          cars={carsResponse?.data || []}
+          loading={carsLoading}
+          onEdit={handleEditCar}
+          onDelete={handleDeleteCar}
+          onView={handleViewCar}
+        />
+      </motion.div>
+    </motion.div>
   );
 };
 

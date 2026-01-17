@@ -12,6 +12,7 @@ import {
   Lock,
   Smartphone
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authSlice';
 import { useTheme } from '@/context/ThemeContext';
 import Button from '@/components/common/Button';
@@ -19,6 +20,7 @@ import Input from '@/components/common/Input';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
 interface SettingsSection {
   id: string;
@@ -674,15 +676,20 @@ const Settings: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="p-6"
+    >
+      <motion.div variants={slideUp} className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
         <p className="text-gray-600">Manage your account settings and preferences</p>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {/* Settings Navigation */}
-        <div className="md:col-span-1">
+        <motion.div variants={slideUp} className="md:col-span-1">
           <nav className="space-y-1">
             {settingsSections.map((section) => {
               const Icon = section.icon;
@@ -702,14 +709,24 @@ const Settings: React.FC = () => {
               );
             })}
           </nav>
-        </div>
+        </motion.div>
 
         {/* Settings Content */}
-        <div className="md:col-span-3">
-          {renderSection()}
-        </div>
-      </div>
-    </div>
+        <motion.div variants={slideUp} className="md:col-span-3">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeSection}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {renderSection()}
+            </motion.div>
+          </AnimatePresence>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

@@ -1,81 +1,131 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useCarContext } from '@/context/CarContext';
 import CarCard from '@/components/CarCard';
 import type { Car } from '@/types';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart, faArrowLeft, faCompass } from '@fortawesome/free-solid-svg-icons';
 
 const Favorites: React.FC = () => {
   const { getFavorites } = useCarContext();
   const favoriteCars: Car[] = getFavorites();
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-900"
+    >
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-blue-600 to-blue-800 py-16 mb-8">
-        <div className="container mx-auto px-4">
+      <section className="hero is-medium has-bg-gradient py-16 mb-8" style={{
+        background: 'linear-gradient(135deg, #0a0a1a 0%, #16213e 100%)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-20" style={{
+          background: 'radial-gradient(circle at 20% 30%, #f97316 0%, transparent 40%)'
+        }} />
+
+        <div className="container mx-auto px-4 relative z-10">
           <div className="text-center">
-            <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-              Mis Favoritos
-            </h1>
-            <h2 className="text-xl text-blue-100">
-              Aquí encontrarás todos tus autos favoritos
-            </h2>
+            <motion.div variants={scaleIn} className="mb-6">
+              <span className="icon is-large has-text-danger" style={{ fontSize: '3rem' }}>
+                <FontAwesomeIcon icon={faHeart} />
+              </span>
+            </motion.div>
+            <motion.h1 variants={slideUp} className="title is-1 has-text-white font-bold mb-4">
+              Mis <span className="has-text-accent">Favoritos</span>
+            </motion.h1>
+            <motion.p variants={fadeIn} className="subtitle is-4 has-text-grey-light">
+              Tu colección personal de vehículos extraordinarios
+            </motion.p>
           </div>
         </div>
       </section>
-      
+
       {/* Content Section */}
       <div className="container mx-auto px-4 pb-12">
-        {favoriteCars.length === 0 ? (
+        <AnimatePresence mode="wait">
+          {favoriteCars.length === 0 ? (
           /* Empty State */
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-gray-800 border border-gray-700 rounded-lg p-8 text-center">
-              <div className="w-16 h-16 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-6">
-                <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
+            <motion.div
+              key="empty"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="max-w-2xl mx-auto"
+            >
+              <div className="bg-gray-800 border border-gray-700 rounded-3xl p-12 text-center shadow-2xl">
+                <div className="w-24 h-24 bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-8">
+                  <FontAwesomeIcon icon={faCompass} className="is-size-1 text-gray-400" />
+                </div>
+
+                <h2 className="title is-3 has-text-white mb-4">
+                  Tu garaje está vacío
+                </h2>
+                <p className="subtitle is-5 has-text-grey-light mb-8">
+                  Explora nuestro catálogo y guarda los autos que te enamoren en un solo lugar.
+                </p>
+
+                <Link
+                  to="/" 
+                  className="button is-accent is-large is-rounded px-6 py-4 transition-all hover:scale-105"
+                >
+                  <span className="icon mr-2">
+                    <FontAwesomeIcon icon={faArrowLeft} />
+                  </span>
+                  <span>Ir al catálogo</span>
+                </Link>
               </div>
-              
-              <p className="text-xl font-semibold text-white mb-4">
-                No tienes autos favoritos
-              </p>
-              <p className="text-gray-400 mb-6">
-                Explora nuestro catálogo y agrega algunos autos a tus favoritos
-              </p>
-              
-              <Link 
-                to="/" 
-                className="inline-flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200"
+            </motion.div>
+          ) : (
+            /* Cars Grid */
+              <motion.div
+                key="grid"
+                variants={staggerContainer}
+                className="space-y-8"
               >
-                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
-                </svg>
-                Ir al catálogo
-              </Link>
-            </div>
-          </div>
-        ) : (
-          /* Cars Grid */
-          <div className="space-y-6">
-            {/* Header */}
-            <div className="flex justify-between items-center">
-              <h3 className="text-2xl font-bold text-white">
-                Tus favoritos ({favoriteCars.length})
-              </h3>
-            </div>
-            
-            {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {favoriteCars.map((car: Car) => (
-                <CarCard key={car.id} car={car} />
-              ))}
-            </div>
-          </div>
-        )}
+                {/* Header */}
+                <div className="flex justify-between items-center">
+                  <h3 className="title is-3 has-text-white mb-0">
+                    Tus favoritos <span className="tag is-accent is-medium is-rounded ml-3">{favoriteCars.length}</span>
+                  </h3>
+                  <Link to="/" className="button is-text has-text-accent has-text-weight-bold">
+                    Ver más autos
+                  </Link>
+                </div>
+
+                {/* Grid */}
+                <motion.div className="columns is-multiline">
+                  {favoriteCars.map((car: Car) => (
+                    <CarCard key={car.id} car={car} />
+                  ))}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-
-    </div>
+      <style>{`
+                .has-text-accent {
+                    color: #f97316 !important;
+                }
+                .button.is-accent {
+                    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+                    border: none;
+                    color: white;
+                    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
+                }
+                .tag.is-accent {
+                    background: #f97316;
+                    color: white;
+                }
+            `}</style>
+    </motion.div>
   );
 };
 

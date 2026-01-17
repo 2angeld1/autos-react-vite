@@ -17,7 +17,9 @@ import {
   Edit2,
   Calendar
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
+import { fadeIn, slideUp, staggerContainer, scaleIn, cardHover } from '@/animations/variants';
 
 // Mock data for bookings
 const mockBookings = [
@@ -137,15 +139,20 @@ const Bookings: React.FC = () => {
   const confirmedCount = mockBookings.filter(b => b.status === 'confirmed').length;
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-50 p-6"
+    >
       {/* Header */}
-      <div className="mb-8">
+      <motion.div variants={slideUp} className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white">
+              <motion.div variants={scaleIn} className="p-2 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl text-white">
                 <CalendarCheck className="h-7 w-7" />
-              </div>
+              </motion.div>
               Bookings
             </h1>
             <p className="text-gray-500 mt-1">Manage test drives, consultations and appointments</p>
@@ -157,11 +164,11 @@ const Bookings: React.FC = () => {
             New Booking
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Today's Bookings</p>
@@ -171,9 +178,9 @@ const Bookings: React.FC = () => {
               <Calendar className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Pending</p>
@@ -183,9 +190,9 @@ const Bookings: React.FC = () => {
               <AlertCircle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Confirmed</p>
@@ -195,9 +202,9 @@ const Bookings: React.FC = () => {
               <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Bookings</p>
@@ -207,11 +214,11 @@ const Bookings: React.FC = () => {
               <CalendarCheck className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-col lg:flex-row gap-4">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -243,115 +250,130 @@ const Bookings: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Bookings List */}
-      <div className="space-y-4">
-        {filteredBookings.map(booking => {
-          const StatusIcon = statusConfig[booking.status as keyof typeof statusConfig].icon;
-          const statusColor = statusConfig[booking.status as keyof typeof statusConfig].color;
+      <motion.div
+        layout
+        className="space-y-4"
+      >
+        <AnimatePresence>
+          {filteredBookings.map(booking => {
+            const StatusIcon = statusConfig[booking.status as keyof typeof statusConfig].icon;
+            const statusColor = statusConfig[booking.status as keyof typeof statusConfig].color;
 
-          return (
-            <div
-              key={booking.id}
-              className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow"
-            >
-              <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                {/* Booking ID & Status */}
-                <div className="flex items-center gap-4 lg:w-48">
-                  <div>
-                    <p className="text-sm text-gray-500">Booking ID</p>
-                    <p className="font-bold text-gray-900">{booking.id}</p>
-                  </div>
-                  <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
-                    <StatusIcon className="h-4 w-4" />
-                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                  </span>
-                </div>
-
-                {/* Customer Info */}
-                <div className="flex-1 lg:border-l lg:pl-4 border-gray-100">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
-                      <User className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="font-semibold text-gray-900">{booking.customer.name}</p>
-                      <div className="flex items-center gap-3 text-sm text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {booking.customer.email}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {booking.customer.phone}
-                        </span>
+            return (
+              <motion.div
+                layout
+                initial="hidden"
+                animate="visible"
+                exit="hidden"
+                variants={fadeIn}
+                whileHover="hover"
+                key={booking.id}
+              >
+                <motion.div
+                  variants={cardHover}
+                  className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 hover:shadow-md transition-shadow"
+                >
+                  <div className="flex flex-col lg:flex-row lg:items-center gap-4">
+                    {/* Booking ID & Status */}
+                    <div className="flex items-center gap-4 lg:w-48">
+                      <div>
+                        <p className="text-sm text-gray-500">Booking ID</p>
+                        <p className="font-bold text-gray-900">{booking.id}</p>
                       </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Car Info */}
-                <div className="lg:border-l lg:pl-4 border-gray-100 lg:w-56">
-                  <div className="flex items-center gap-3">
-                    <div className="w-16 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
-                      <Car className="h-5 w-5 text-gray-400" />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900">{booking.car.name}</p>
-                      <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
-                        {booking.type}
+                      <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${statusColor}`}>
+                        <StatusIcon className="h-4 w-4" />
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
                     </div>
-                  </div>
-                </div>
 
-                {/* Date & Time */}
-                <div className="lg:border-l lg:pl-4 border-gray-100 lg:w-40">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Calendar className="h-4 w-4" />
-                    <span className="font-medium">{booking.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-500">
-                    <Clock className="h-4 w-4" />
-                    <span>{booking.time}</span>
-                  </div>
-                </div>
+                    {/* Customer Info */}
+                    <div className="flex-1 lg:border-l lg:pl-4 border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full flex items-center justify-center">
+                          <User className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-gray-900">{booking.customer.name}</p>
+                          <div className="flex items-center gap-3 text-sm text-gray-500">
+                            <span className="flex items-center gap-1">
+                              <Mail className="h-3 w-3" />
+                              {booking.customer.email}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Phone className="h-3 w-3" />
+                              {booking.customer.phone}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                {/* Actions */}
-                <div className="flex gap-2 lg:border-l lg:pl-4 border-gray-100">
-                  <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />}>
-                    View
-                  </Button>
-                  <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />}>
-                    Edit
-                  </Button>
-                  <button className="p-2 hover:bg-gray-100 rounded-lg">
-                    <MoreVertical className="h-5 w-5 text-gray-400" />
-                  </button>
-                </div>
-              </div>
+                    {/* Car Info */}
+                    <div className="lg:border-l lg:pl-4 border-gray-100 lg:w-56">
+                      <div className="flex items-center gap-3">
+                        <div className="w-16 h-10 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                          <Car className="h-5 w-5 text-gray-400" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-gray-900">{booking.car.name}</p>
+                          <span className="text-xs px-2 py-0.5 bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 rounded-full">
+                            {booking.type}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
 
-              {booking.notes && (
-                <div className="mt-3 pt-3 border-t border-gray-100">
-                  <p className="text-sm text-gray-500">
-                    <span className="font-medium">Notes:</span> {booking.notes}
-                  </p>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+                    {/* Date & Time */}
+                    <div className="lg:border-l lg:pl-4 border-gray-100 lg:w-40">
+                      <div className="flex items-center gap-2 text-gray-600">
+                        <Calendar className="h-4 w-4" />
+                        <span className="font-medium">{booking.date}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-gray-500">
+                        <Clock className="h-4 w-4" />
+                        <span>{booking.time}</span>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex gap-2 lg:border-l lg:pl-4 border-gray-100">
+                      <Button variant="ghost" size="sm" icon={<Eye className="h-4 w-4" />}>
+                        View
+                      </Button>
+                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />}>
+                        Edit
+                      </Button>
+                      <button className="p-2 hover:bg-gray-100 rounded-lg">
+                        <MoreVertical className="h-5 w-5 text-gray-400" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {booking.notes && (
+                    <div className="mt-3 pt-3 border-t border-gray-100">
+                      <p className="text-sm text-gray-500">
+                        <span className="font-medium">Notes:</span> {booking.notes}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
+      </motion.div>
 
       {filteredBookings.length === 0 && (
-        <div className="text-center py-12">
+        <motion.div variants={fadeIn} className="text-center py-12">
           <CalendarCheck className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No bookings found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

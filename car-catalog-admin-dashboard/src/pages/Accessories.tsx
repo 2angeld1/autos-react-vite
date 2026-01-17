@@ -11,11 +11,13 @@ import {
   AlertTriangle,
   Loader2
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import AccessoryForm from '@/components/accessories/AccessoryForm';
 import { inventoryService, Accessory } from '@/services/inventory';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 const Accessories: React.FC = () => {
   const [accessories, setAccessories] = useState<Accessory[]>([]);
@@ -111,15 +113,20 @@ const Accessories: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-50 p-6"
+    >
       {/* Header */}
-      <div className="mb-8">
+      <motion.div variants={slideUp} className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl text-white">
+              <motion.div variants={scaleIn} className="p-2 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl text-white">
                 <Package className="h-7 w-7" />
-              </div>
+              </motion.div>
               Accessories
             </h1>
             <p className="text-gray-500 mt-1">Manage car parts, add-ons and accessories</p>
@@ -132,11 +139,14 @@ const Accessories: React.FC = () => {
             Add Accessory
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <motion.div
+        variants={staggerContainer}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
+      >
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Accessories</p>
@@ -146,9 +156,9 @@ const Accessories: React.FC = () => {
               <Package className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Out of Stock</p>
@@ -158,9 +168,9 @@ const Accessories: React.FC = () => {
               <Package className="h-6 w-6 text-red-600 dark:text-red-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Inventory Value</p>
@@ -170,9 +180,9 @@ const Accessories: React.FC = () => {
               <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Low Stock</p>
@@ -182,11 +192,11 @@ const Accessories: React.FC = () => {
               <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -215,10 +225,10 @@ const Accessories: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Accessories Table-like Grid */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <thead className="bg-gray-50 border-b border-gray-100">
@@ -302,14 +312,14 @@ const Accessories: React.FC = () => {
             </tbody>
           </table>
         </div>
-      </div>
+      </motion.div>
 
       {filteredAccessories.length === 0 && !loading && (
-        <div className="text-center py-12">
+        <motion.div variants={slideUp} className="text-center py-12">
           <Package className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No accessories found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
+        </motion.div>
       )}
 
       {/* Modal for Add/Edit */}
@@ -326,7 +336,7 @@ const Accessories: React.FC = () => {
           loading={isSubmitting}
         />
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

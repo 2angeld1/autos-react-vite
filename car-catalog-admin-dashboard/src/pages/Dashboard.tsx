@@ -2,9 +2,10 @@ import React from 'react';
 import {
   Car,
   Users,
-  Image, // Cambiado de 'Images' a 'Image'
+  Image,
   TrendingUp
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useGet } from '@/hooks/useApi';
 import { DashboardStats } from '@/types';
 import StatsCard from '@/components/dashboard/StatsCard';
@@ -14,6 +15,7 @@ import { formatCurrency } from '@/utils/formatters';
 import { formatDistanceToNow } from 'date-fns';
 import { Breadcrumb } from '@/components/layout';
 import { useTranslation } from 'react-i18next';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 // Activities will be derived from backend stats (recentCars and recentUsers)
 
@@ -127,75 +129,91 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="space-y-6"
+    >
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Header */}
-      <div>
+      <motion.div variants={slideUp}>
         <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <p className="text-gray-600">
           {t('dashboard.overview')}
         </p>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatsCard
-          title={t('dashboard.totalCars')}
-          value={stats?.totalCars || 0}
-          icon={Car}
-          color="blue"
-          loading={filesLoading}
-          change={{
-            value: 12,
-            type: 'increase',
-            period: t('dashboard.lastMonth'),
-          }}
-        />
-        <StatsCard
-          title={t('dashboard.totalUsers')}
-          value={stats?.totalUsers || 0}
-          icon={Users}
-          color="green"
-          loading={statsLoading}
-          change={{
-            value: 8,
-            type: 'increase',
-            period: t('dashboard.lastMonth'),
-          }}
-        />
-        <StatsCard
-          title={t('cars.available')}
-          value={stats?.activeCars || 0}
-          icon={Car}
-          color="purple"
-          loading={statsLoading}
-          change={{
-            value: 5,
-            type: 'increase',
-            period: t('dashboard.lastWeek'),
-          }}
-        />
-        <StatsCard
-          title={t('dashboard.totalImages')}
-          value={filesStatsResponse?.data?.totalFiles || filesStatsResponse?.totalFiles || 0}
-          icon={Image} // Corregido aquí también
-          color="yellow"
-          loading={statsLoading}
-          change={{
-            value: 3,
-            type: 'decrease',
-            period: t('dashboard.lastWeek'),
-          }}
-        />
-      </div>
+      <motion.div
+        variants={staggerContainer}
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        <motion.div variants={scaleIn}>
+          <StatsCard
+            title={t('dashboard.totalCars')}
+            value={stats?.totalCars || 0}
+            icon={Car}
+            color="blue"
+            loading={filesLoading}
+            change={{
+              value: 12,
+              type: 'increase',
+              period: t('dashboard.lastMonth'),
+            }}
+          />
+        </motion.div>
+        <motion.div variants={scaleIn}>
+          <StatsCard
+            title={t('dashboard.totalUsers')}
+            value={stats?.totalUsers || 0}
+            icon={Users}
+            color="green"
+            loading={statsLoading}
+            change={{
+              value: 8,
+              type: 'increase',
+              period: t('dashboard.lastMonth'),
+            }}
+          />
+        </motion.div>
+        <motion.div variants={scaleIn}>
+          <StatsCard
+            title={t('cars.available')}
+            value={stats?.activeCars || 0}
+            icon={Car}
+            color="purple"
+            loading={statsLoading}
+            change={{
+              value: 5,
+              type: 'increase',
+              period: t('dashboard.lastWeek'),
+            }}
+          />
+        </motion.div>
+        <motion.div variants={scaleIn}>
+          <StatsCard
+            title={t('dashboard.totalImages')}
+            value={filesStatsResponse?.data?.totalFiles || filesStatsResponse?.totalFiles || 0}
+            icon={Image}
+            color="yellow"
+            loading={statsLoading}
+            change={{
+              value: 3,
+              type: 'decrease',
+              period: t('dashboard.lastWeek'),
+            }}
+          />
+        </motion.div>
+      </motion.div>
 
       {/* Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Recent Cars & Users tables */}
         <div className="lg:col-span-2 space-y-6">
-          <div>
+          <motion.div variants={slideUp}>
             <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.recentCars')}</h3>
             <Table
               columns={carColumns}
@@ -204,9 +222,9 @@ const Dashboard: React.FC = () => {
               rowKey={(r) => r._id || r.id}
               emptyText={t('common.noResults')}
             />
-          </div>
+          </motion.div>
 
-          <div>
+          <motion.div variants={slideUp}>
             <h3 className="text-lg font-medium text-gray-900 mb-2">{t('dashboard.recentUsers')}</h3>
             <Table
               columns={userColumns}
@@ -215,41 +233,47 @@ const Dashboard: React.FC = () => {
               rowKey={(r) => r._id || r.id}
               emptyText={t('common.noResults')}
             />
-          </div>
+          </motion.div>
         </div>
 
         {/* Recent Activity */}
-        <div>
+        <motion.div variants={slideUp}>
             <RecentActivity
               activities={activities}
               loading={statsLoading}
             />
-        </div>
+        </motion.div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow p-6">
+      <motion.div
+        variants={slideUp}
+        className="bg-white rounded-lg shadow p-6"
+      >
         <h3 className="text-lg font-medium text-gray-900 mb-4">{t('dashboard.quickActions')}</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
+        <motion.div
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        >
+          <motion.button variants={scaleIn} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center w-full">
             <Car className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">{t('cars.addCar')}</span>
-          </button>
-          <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
+            <span className="text-sm text-gray-600 block">{t('cars.addCar')}</span>
+          </motion.button>
+          <motion.button variants={scaleIn} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center w-full">
             <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">{t('users.addUser')}</span>
-          </button>
-          <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
+            <span className="text-sm text-gray-600 block">{t('users.addUser')}</span>
+          </motion.button>
+          <motion.button variants={scaleIn} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center w-full">
             <Image className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">{t('images.upload')}</span>
-          </button>
-          <button className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center">
+            <span className="text-sm text-gray-600 block">{t('images.upload')}</span>
+          </motion.button>
+          <motion.button variants={scaleIn} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-primary-300 hover:bg-primary-50 transition-colors text-center w-full">
             <TrendingUp className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <span className="text-sm text-gray-600">{t('nav.analytics')}</span>
-          </button>
-        </div>
-      </div>
-    </div>
+            <span className="text-sm text-gray-600 block">{t('nav.analytics')}</span>
+          </motion.button>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   );
 };
 

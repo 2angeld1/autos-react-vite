@@ -1,6 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Download, UserPlus, Trash2, Shield, ShieldOff } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import UserTable from '@/components/users/UserTable';
 import UserForm from '@/components/users/UserForm';
@@ -10,6 +11,7 @@ import Breadcrumb from '@/components/layout/Breadcrumb';
 import { useGet, usePost, usePut, useDelete } from '@/hooks/useApi';
 import { User, ApiResponse } from '@/types';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
 const Users: React.FC = () => {
   const { t } = useTranslation();
@@ -212,21 +214,29 @@ const Users: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="space-y-6"
+    >
       {/* Breadcrumb */}
       <Breadcrumb items={breadcrumbItems} />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div>
+      <motion.div
+        variants={staggerContainer}
+        className="flex flex-col sm:flex-row sm:items-center sm:justify-between"
+      >
+        <motion.div variants={slideUp}>
           <h1 className="text-2xl font-bold text-gray-900">{t('users.title')}</h1>
           <p className="text-gray-600">
             {t('users.manageUsers')}
             {usersData && ` • ${usersData.total} ${t('common.total').toLowerCase()}`}
           </p>
-        </div>
+        </motion.div>
         
-        <div className="mt-4 sm:mt-0 flex gap-3">
+        <motion.div variants={slideUp} className="mt-4 sm:mt-0 flex gap-3">
           <Button
             variant="outline"
             onClick={exportUsers}
@@ -240,33 +250,37 @@ const Users: React.FC = () => {
           >
             {t('users.addUser')}
           </Button>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <UserFiltersComponent
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        onReset={handleResetFilters}
-        loading={usersLoading}
-      />
+      <motion.div variants={slideUp}>
+        <UserFiltersComponent
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onReset={handleResetFilters}
+          loading={usersLoading}
+        />
+      </motion.div>
 
       {/* Table */}
-      <UserTable
-        users={usersData?.users || []}
-        loading={usersLoading}
-        onEdit={handleEditUser}
-        onDelete={handleDeleteUser}
-        onView={handleViewUser}
-        onToggleStatus={handleToggleUserStatus}
-        sortKey={sortKey}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-      />
+      <motion.div variants={slideUp}>
+        <UserTable
+          users={usersData?.users || []}
+          loading={usersLoading}
+          onEdit={handleEditUser}
+          onDelete={handleDeleteUser}
+          onView={handleViewUser}
+          onToggleStatus={handleToggleUserStatus}
+          sortKey={sortKey}
+          sortDirection={sortDirection}
+          onSort={handleSort}
+        />
+      </motion.div>
 
       {/* Pagination */}
       {usersData && usersData.pages > 1 && (
-        <div className="flex items-center justify-between">
+        <motion.div variants={slideUp} className="flex items-center justify-between">
           <p className="text-sm text-gray-700">
             {t('table.showing')} {((currentPage - 1) * pageSize) + 1} {t('table.to')}{' '}
             {Math.min(currentPage * pageSize, usersData.total)} {t('table.of')}{' '}
@@ -309,7 +323,7 @@ const Users: React.FC = () => {
               {t('table.next')}
             </Button>
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* User Form Modal */}
@@ -449,7 +463,7 @@ const Users: React.FC = () => {
           )}
         </div>
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

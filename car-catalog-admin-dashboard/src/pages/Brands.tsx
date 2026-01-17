@@ -11,11 +11,13 @@ import {
   Loader2,
   Check
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import BrandForm from '@/components/brands/BrandForm';
 import { inventoryService, Brand } from '@/services/inventory';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer, cardHover, scaleIn } from '@/animations/variants';
 
 const countries = ['All', 'Japan', 'Germany', 'USA', 'Italy', 'UK', 'France', 'South Korea'];
 
@@ -109,15 +111,20 @@ const Brands: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-50 p-6"
+    >
       {/* Header */}
-      <div className="mb-8">
+      <motion.div variants={slideUp} className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
+              <motion.div variants={scaleIn} className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl text-white">
                 <Building2 className="h-7 w-7" />
-              </div>
+              </motion.div>
               Brands
             </h1>
             <p className="text-gray-500 mt-1">Manage car manufacturers and brands</p>
@@ -130,11 +137,14 @@ const Brands: React.FC = () => {
             Add Brand
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <motion.div
+        variants={staggerContainer}
+        className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"
+      >
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Brands</p>
@@ -144,9 +154,9 @@ const Brands: React.FC = () => {
               <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Featured Brands</p>
@@ -156,9 +166,9 @@ const Brands: React.FC = () => {
               <TrendingUp className="h-6 w-6 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Countries</p>
@@ -168,9 +178,9 @@ const Brands: React.FC = () => {
               <Globe className="h-6 w-6 text-purple-600 dark:text-purple-400" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Active</p>
@@ -180,11 +190,11 @@ const Brands: React.FC = () => {
               <Check className="h-6 w-6 text-green-600 dark:text-green-400" />
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -213,88 +223,103 @@ const Brands: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Brands Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {filteredBrands.map(brand => (
-          <div
-            key={brand._id}
-            className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all hover:-translate-y-1"
-          >
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
-                  {brand.logo ? (
-                    <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain p-2" />
-                  ) : (
-                    <Building2 className="h-8 w-8 text-gray-400" />
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {brand.featured && (
-                    <span className="text-xs px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full font-medium">
-                      Featured
-                    </span>
-                  )}
-                  {brand.status === 'inactive' && (
-                    <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full font-medium">
-                      Inactive
-                    </span>
-                  )}
-                </div>
-              </div>
+      <motion.div
+        layout
+        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+      >
+        <AnimatePresence>
+          {filteredBrands.map(brand => (
+            <motion.div
+              layout
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+              variants={fadeIn}
+              key={brand._id}
+              whileHover="hover"
+            >
+              <motion.div
+                variants={cardHover}
+                className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all"
+              >
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center overflow-hidden">
+                      {brand.logo ? (
+                        <img src={brand.logo} alt={brand.name} className="w-full h-full object-contain p-2" />
+                      ) : (
+                        <Building2 className="h-8 w-8 text-gray-400" />
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {brand.featured && (
+                        <span className="text-xs px-2 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-700 dark:text-amber-300 rounded-full font-medium">
+                          Featured
+                        </span>
+                      )}
+                      {brand.status === 'inactive' && (
+                        <span className="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full font-medium">
+                          Inactive
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-              <h3 className="text-xl font-bold text-gray-900 mb-1">{brand.name}</h3>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
-                <MapPin className="h-4 w-4" />
-                <span>{brand.country}</span>
-                {brand.founded && (
-                  <>
-                    <span className="text-gray-300">•</span>
-                    <span>Founded {brand.founded}</span>
-                  </>
-                )}
-              </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">{brand.name}</h3>
 
-              <div className="flex items-center justify-between py-3 border-t border-gray-100">
-                <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-gray-400" />
-                  <a
-                    href={brand.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 hover:text-blue-700 text-sm truncate max-w-[150px]"
-                  >
-                    {brand.website || 'No website'}
-                  </a>
+                  <div className="flex items-center gap-2 text-sm text-gray-500 mb-4">
+                    <MapPin className="h-4 w-4" />
+                    <span>{brand.country}</span>
+                    {brand.founded && (
+                      <>
+                        <span className="text-gray-300">•</span>
+                        <span>Founded {brand.founded}</span>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between py-3 border-t border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <Globe className="h-4 w-4 text-gray-400" />
+                      <a
+                        href={brand.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:text-blue-700 text-sm truncate max-w-[150px]"
+                      >
+                        {brand.website || 'No website'}
+                      </a>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2 pt-3 border-t border-gray-100">
+                    <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditBrand(brand)}>
+                      Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-red-600 hover:bg-red-50"
+                      icon={<Trash2 className="h-4 w-4" />}
+                      onClick={() => handleDeleteBrand(brand._id)}
+                    />
+                  </div>
                 </div>
-              </div>
-
-              <div className="flex gap-2 pt-3 border-t border-gray-100">
-                <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditBrand(brand)}>
-                  Edit
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-600 hover:bg-red-50"
-                  icon={<Trash2 className="h-4 w-4" />}
-                  onClick={() => handleDeleteBrand(brand._id)}
-                />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
+              </motion.div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
       {filteredBrands.length === 0 && !loading && (
-        <div className="text-center py-12">
+        <motion.div variants={fadeIn} className="text-center py-12">
           <Building2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No brands found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
+        </motion.div>
       )}
 
       <Modal
@@ -310,7 +335,7 @@ const Brands: React.FC = () => {
           loading={isSubmitting}
         />
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

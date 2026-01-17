@@ -9,6 +9,8 @@ import { ImagePicker } from '@/components/files';
 import { filesService } from '@/services/files';
 import { Car, FileItem } from '@/types';
 import { useGet } from '@/hooks/useApi';
+import { motion } from 'framer-motion';
+import { slideUp, staggerContainer } from '@/animations/variants';
 
 interface CarFormData {
   make: string;
@@ -226,9 +228,16 @@ const CarForm: React.FC<CarFormProps> = ({
   };
 
   const formContent = (
-    <form id="car-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-6">
+    <motion.form
+      id="car-form"
+      onSubmit={handleSubmit(onFormSubmit)}
+      className="space-y-6"
+      variants={staggerContainer}
+      initial="hidden"
+      animate="visible"
+    >
       {/* Image Upload */}
-      <div>
+      <motion.div variants={slideUp}>
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Imagen del Auto
         </label>
@@ -307,10 +316,10 @@ const CarForm: React.FC<CarFormProps> = ({
             </label>
           </div>
         )}
-      </div>
+      </motion.div>
 
       {/* Basic Information */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div variants={slideUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('cars.make')}
@@ -356,10 +365,10 @@ const CarForm: React.FC<CarFormProps> = ({
           error={errors.price?.message}
           placeholder={t('cars.examplePrice')}
         />
-      </div>
+      </motion.div>
 
       {/* Description */}
-      <div>
+      <motion.div variants={slideUp}>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           {t('cars.description')}
         </label>
@@ -372,10 +381,10 @@ const CarForm: React.FC<CarFormProps> = ({
         {errors.description && (
           <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
         )}
-      </div>
+      </motion.div>
 
       {/* Technical Specifications */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div variants={slideUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t('cars.fuelType')}
@@ -488,10 +497,10 @@ const CarForm: React.FC<CarFormProps> = ({
           error={errors.combination_mpg?.message}
           placeholder="28"
         />
-      </div>
+      </motion.div>
 
       {/* Extras: Accessories & Promotions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <motion.div variants={slideUp} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Accesorios
@@ -527,19 +536,21 @@ const CarForm: React.FC<CarFormProps> = ({
             ))}
           </select>
         </div>
-      </div>
+      </motion.div>
 
       {/* Features */}
-      <Input
-        label={t('cars.features')}
-        {...register('features')}
-        error={errors.features?.message}
-        placeholder={t('cars.featuresPlaceholder')}
-        helperText={t('cars.featuresPlaceholder')}
-      />
+      <motion.div variants={slideUp}>
+        <Input
+          label={t('cars.features')}
+          {...register('features')}
+          error={errors.features?.message}
+          placeholder={t('cars.featuresPlaceholder')}
+          helperText={t('cars.featuresPlaceholder')}
+        />
+      </motion.div>
 
       {/* Availability */}
-      <div className="flex items-center">
+      <motion.div variants={slideUp} className="flex items-center">
         <input
           type="checkbox"
           id="isAvailable"
@@ -549,15 +560,15 @@ const CarForm: React.FC<CarFormProps> = ({
         <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-900">
           {t('cars.isAvailable')}
         </label>
-      </div>
-    </form>
+      </motion.div>
+    </motion.form>
   );
 
   // Always render as page
   return (
     <div className="space-y-6">
       {formContent}
-      <div className="flex justify-end space-x-4">
+      <motion.div variants={slideUp} className="flex justify-end space-x-4">
         <Button variant="outline" onClick={handleClose} disabled={loading}>
           {t('common.cancel')}
         </Button>
@@ -568,7 +579,7 @@ const CarForm: React.FC<CarFormProps> = ({
         >
           {car ? t('cars.editCar') : t('cars.addCar')}
         </Button>
-      </div>
+      </motion.div>
 
       {/* Image Picker Modal */}
       <ImagePicker

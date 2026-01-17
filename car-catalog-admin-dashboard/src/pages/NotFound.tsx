@@ -2,14 +2,21 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Home, ArrowLeft } from 'lucide-react';
 import Button from '@/components/common/Button';
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp, scaleIn } from '@/animations/variants';
 
 const NotFound: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="text-center">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeIn}
+          className="text-center"
+        >
           {/* 404 Animation */}
-          <div className="mx-auto h-32 w-32 text-primary-600 mb-8">
+          <motion.div variants={scaleIn} className="mx-auto h-32 w-32 text-primary-600 mb-8">
             <svg
               className="w-full h-full"
               fill="none"
@@ -23,19 +30,19 @@ const NotFound: React.FC = () => {
                 d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6 0h6m-6 0h6M7 12h10M5 12h14M3 12h18"
               />
             </svg>
-          </div>
+          </motion.div>
 
           {/* Error Message */}
-          <h1 className="text-9xl font-bold text-gray-300 mb-4">404</h1>
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          <motion.h1 variants={slideUp} className="text-9xl font-bold text-gray-300 mb-4">404</motion.h1>
+          <motion.h2 variants={slideUp} className="text-3xl font-bold text-gray-900 mb-2">
             Page not found
-          </h2>
-          <p className="text-gray-600 mb-8">
+          </motion.h2>
+          <motion.p variants={slideUp} className="text-gray-600 mb-8">
             Sorry, we couldn't find the page you're looking for.
-          </p>
+          </motion.p>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <motion.div variants={slideUp} className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               onClick={() => window.history.back()}
               variant="outline"
@@ -48,10 +55,10 @@ const NotFound: React.FC = () => {
                 Go to Dashboard
               </Button>
             </Link>
-          </div>
+          </motion.div>
 
           {/* Additional Help */}
-          <div className="mt-12 text-center">
+          <motion.div variants={slideUp} className="mt-12 text-center">
             <h3 className="text-lg font-medium text-gray-900 mb-4">
               What you can do:
             </h3>
@@ -61,8 +68,8 @@ const NotFound: React.FC = () => {
               <li>• Visit our dashboard to find what you need</li>
               <li>• Contact support if you think this is a mistake</li>
             </ul>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   );

@@ -16,11 +16,13 @@ import {
   Zap,
   Loader2
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import PromotionForm from '@/components/promotions/PromotionForm';
 import { promotionService, Promotion } from '@/services/promotions';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer, scaleIn, cardHover } from '@/animations/variants';
 
 const statusConfig = {
   active: { color: 'bg-green-100 text-green-700', label: 'Active' },
@@ -147,15 +149,20 @@ const Promotions: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-50 p-6"
+    >
       {/* Header */}
-      <div className="mb-8">
+      <motion.div variants={slideUp} className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl text-white">
+              <motion.div variants={scaleIn} className="p-2 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl text-white">
                 <Percent className="h-7 w-7" />
-              </div>
+              </motion.div>
               Promotions
             </h1>
             <p className="text-gray-500 mt-1">Manage discount codes and special offers</p>
@@ -169,11 +176,11 @@ const Promotions: React.FC = () => {
             Create Promotion
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Active Promotions</p>
@@ -183,9 +190,9 @@ const Promotions: React.FC = () => {
               <Zap className="h-6 w-6 text-green-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Promotions</p>
@@ -195,9 +202,9 @@ const Promotions: React.FC = () => {
               <Tag className="h-6 w-6 text-orange-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Redemptions</p>
@@ -207,9 +214,9 @@ const Promotions: React.FC = () => {
               <Percent className="h-6 w-6 text-blue-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Customer Savings</p>
@@ -219,11 +226,11 @@ const Promotions: React.FC = () => {
               <DollarSign className="h-6 w-6 text-purple-600" />
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
@@ -251,16 +258,20 @@ const Promotions: React.FC = () => {
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
 
       {/* Promotions Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {filteredPromotions.map(promo => {
           const statusStyle = statusConfig[promo.status as keyof typeof statusConfig];
           const usagePercent = promo.usageLimit > 0 ? (promo.usedCount / promo.usageLimit) * 100 : 0;
 
           return (
-            <div
+            <motion.div
+              variants={cardHover}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
               key={promo._id}
               className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-shadow"
             >
@@ -404,17 +415,17 @@ const Promotions: React.FC = () => {
                   onClick={() => handleDeletePromotion(promo._id)}
                 />
               </div>
-            </div>
+            </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {filteredPromotions.length === 0 && !loading && (
-        <div className="text-center py-12">
+        <motion.div variants={slideUp} className="text-center py-12">
           <Percent className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No promotions found</h3>
           <p className="text-gray-500">Try adjusting your search or filter criteria</p>
-        </div>
+        </motion.div>
       )}
 
       {/* Modal for Add/Edit */}
@@ -431,7 +442,7 @@ const Promotions: React.FC = () => {
           loading={isSubmitting}
         />
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

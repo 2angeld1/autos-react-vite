@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { fetchCarById } from '../services/api';
 import { useCarContext } from '../context/CarContext';
 import { useCarImage } from '../hooks/useCarImage';
 import type { Car } from '@/types';
 import SafeCarImage from '../components/SafeCarImage';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
 
 // Components
 import CarTabs from '../components/car/CarTabs';
 
 const CarDetails: React.FC = () => {
+    // ... previous logic ...
     const { id } = useParams<{ id: string }>();
     const { cars, toggleFavorite, isFavorite } = useCarContext();
     const [car, setCar] = useState<Car | null>(null);
@@ -138,7 +141,12 @@ const CarDetails: React.FC = () => {
     const backgroundImageUrl = bgImage || carImageHook.imageSrc;
 
     return (
-        <div className="animated has-background-dark">
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeIn}
+            className="has-background-dark"
+        >
             <section 
                 className={`car-detail-hero ${bgLoading ? 'loading' : ''}`} 
                 style={{ 
@@ -151,7 +159,7 @@ const CarDetails: React.FC = () => {
                 }}
             >
                 <div className="container pt-6 pb-6">
-                    <nav className="breadcrumb has-bullet-separator is-centered" aria-label="breadcrumbs">
+                    <motion.nav variants={fadeIn} className="breadcrumb has-bullet-separator is-centered" aria-label="breadcrumbs">
                         <ul>
                             <li>
                                 <Link to="/" className="has-text-white-bis">
@@ -173,15 +181,15 @@ const CarDetails: React.FC = () => {
                                 <a href="#" className="has-text-accent">{car.make} {car.model}</a>
                             </li>
                         </ul>
-                    </nav>
+                    </motion.nav>
                 
-                    <div className="columns is-vcentered mt-5">
+                    <motion.div variants={staggerContainer} className="columns is-vcentered mt-5">
                         <div className="column is-7">
-                            <h1 className="title is-1 has-text-white">{car.make} {car.model}</h1>
-                            <h2 className="subtitle is-3 has-text-accent">{car.year}</h2>
+                            <motion.h1 variants={slideUp} className="title is-1 has-text-white">{car.make} {car.model}</motion.h1>
+                            <motion.h2 variants={slideUp} className="subtitle is-3 has-text-accent">{car.year}</motion.h2>
                             
-                            <div className="car-highlights horizontal mt-5 mb-5">
-                                <div className="highlight-item">
+                            <motion.div variants={staggerContainer} className="car-highlights horizontal mt-5 mb-5">
+                                <motion.div variants={scaleIn} className="highlight-item">
                                     <span className="icon has-text-accent">
                                         <i className="fas fa-gas-pump"></i>
                                     </span>
@@ -189,9 +197,9 @@ const CarDetails: React.FC = () => {
                                         <p className="has-text-grey">Combustible</p>
                                         <p className="has-text-white has-text-weight-bold">{car.fuel_type}</p>
                                     </div>
-                                </div>
+                                </motion.div>
                                 
-                                <div className="highlight-item">
+                                <motion.div variants={scaleIn} className="highlight-item">
                                     <span className="icon has-text-accent">
                                         <i className="fas fa-cog"></i>
                                     </span>
@@ -201,10 +209,10 @@ const CarDetails: React.FC = () => {
                                             {car.transmission === 'a' ? 'Automática' : 'Manual'}
                                         </p>
                                     </div>
-                                </div>
+                                </motion.div>
                                 
                                 {car.cylinders && (
-                                    <div className="highlight-item">
+                                    <motion.div variants={scaleIn} className="highlight-item">
                                         <span className="icon has-text-accent">
                                             <i className="fas fa-compress-arrows-alt"></i>
                                         </span>
@@ -212,11 +220,11 @@ const CarDetails: React.FC = () => {
                                             <p className="has-text-grey">Cilindros</p>
                                             <p className="has-text-white has-text-weight-bold">{car.cylinders}</p>
                                         </div>
-                                    </div>
+                                    </motion.div>
                                 )}
-                            </div>
+                            </motion.div>
                             
-                            <div className="buttons are-medium">
+                            <motion.div variants={slideUp} className="buttons are-medium">
                                 <button 
                                     className={`button ${isFavorite(car.id) ? 'is-danger' : 'is-outlined is-light'}`}
                                     onClick={() => toggleFavorite(car.id)}
@@ -227,7 +235,7 @@ const CarDetails: React.FC = () => {
                                     <span>{isFavorite(car.id) ? 'En Favoritos' : 'Añadir a Favoritos'}</span>
                                 </button>
                                 
-                                <button className="button is-outlined is-accent">
+                                <button className="button is-outlined is-light">
                                     <span className="icon">
                                         <i className="fas fa-share-alt"></i>
                                     </span>
@@ -240,10 +248,10 @@ const CarDetails: React.FC = () => {
                                     </span>
                                     <span>Contactar</span>
                                 </a>
-                            </div>
+                            </motion.div>
                         </div>
                         
-                        <div className="column is-5">
+                        <motion.div variants={scaleIn} className="column is-5">
                             <div className="price-card glowing-border">
                                 <div className="price-card-content has-text-centered">
                                     <p className="is-size-4 has-text-white has-text-weight-light">Precio de Lista</p>
@@ -287,15 +295,21 @@ const CarDetails: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+                        </motion.div>
+                    </motion.div>
                 </div>
             </section>
             
             <div className="container p-4">                
                 <div className="columns">
                     <div className="column is-8">
-                        <div className="detail-section detail-gallery">
+                        <motion.div
+                            initial="hidden"
+                            whileInView="visible"
+                            viewport={{ once: true }}
+                            variants={fadeIn}
+                            className="detail-section detail-gallery"
+                        >
                             <div className="card">
                                 <div className="card-image">
                                     <figure className="image is-16by9" style={{ position: 'relative' }}>
@@ -360,7 +374,7 @@ const CarDetails: React.FC = () => {
                                     Este vehículo se encuentra en excelentes condiciones, listo para entrega inmediata.
                                 </p>
                             </div>
-                        </div>
+                        </motion.div>
                         
                         <div className="detail-section">
                             <CarTabs car={car} />
@@ -374,7 +388,13 @@ const CarDetails: React.FC = () => {
                                     </span>
                                     <span>Vehículos Similares</span>
                                 </h3>
-                                <div className="columns is-multiline">
+                                <motion.div
+                                    className="columns is-multiline"
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={staggerContainer}
+                                >
                                     {similarCars.map((similarCar) => (
                                         <SimilarCarCard 
                                             key={similarCar.id} 
@@ -383,12 +403,18 @@ const CarDetails: React.FC = () => {
                                             toggleFavorite={toggleFavorite}
                                         />
                                     ))}
-                                </div>
+                                </motion.div>
                             </div>
                         )}
                     </div>
                     
-                    <div className="column is-4">
+                    <motion.div
+                        initial="hidden"
+                        whileInView="visible"
+                        viewport={{ once: true }}
+                        variants={slideUp}
+                        className="column is-4"
+                    >
                         <div className="sticky-sidebar">
                             <div className="box">
                                 <h4 className="title is-5">
@@ -554,7 +580,7 @@ const CarDetails: React.FC = () => {
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </motion.div>
                 </div>
                 
                 <div className="buttons is-centered mt-6 mb-6">
@@ -570,7 +596,7 @@ const CarDetails: React.FC = () => {
             <div className="help-button animate-pulse">
                 <i className="fas fa-comments"></i>
             </div>
-        </div>
+        </motion.div>
     );
 };
 

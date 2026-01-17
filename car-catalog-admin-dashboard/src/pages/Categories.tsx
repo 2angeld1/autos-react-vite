@@ -10,11 +10,13 @@ import {
   Image as ImageIcon,
   Loader2
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import CategoryForm from '@/components/categories/CategoryForm';
 import { inventoryService, Category } from '@/services/inventory';
 import toast from 'react-hot-toast';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 const Categories: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -122,15 +124,20 @@ const Categories: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className="min-h-screen bg-gray-50 p-6"
+    >
       {/* Header */}
-      <div className="mb-8">
+      <motion.div variants={slideUp} className="mb-8">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl text-white">
+              <motion.div variants={scaleIn} className="p-2 bg-gradient-to-br from-pink-500 to-rose-600 rounded-xl text-white">
                 <Tag className="h-7 w-7" />
-              </div>
+              </motion.div>
               Categories
             </h1>
             <p className="text-gray-500 mt-1">Organize cars into categories and subcategories</p>
@@ -144,11 +151,11 @@ const Categories: React.FC = () => {
             Add Category
           </Button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+      <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Categories</p>
@@ -158,9 +165,9 @@ const Categories: React.FC = () => {
               <FolderTree className="h-6 w-6 text-pink-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Active</p>
@@ -170,9 +177,9 @@ const Categories: React.FC = () => {
               <Tag className="h-6 w-6 text-green-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Featured</p>
@@ -182,9 +189,9 @@ const Categories: React.FC = () => {
               <Tag className="h-6 w-6 text-amber-600" />
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+        <motion.div variants={scaleIn} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Subcategories</p>
@@ -194,11 +201,11 @@ const Categories: React.FC = () => {
               <FolderTree className="h-6 w-6 text-blue-600" />
             </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* Search */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 p-4 mb-6">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
           <input
@@ -209,10 +216,10 @@ const Categories: React.FC = () => {
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
           />
         </div>
-      </div>
+      </motion.div>
 
       {/* Categories List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="divide-y divide-gray-100">
           {mainCategories.map(category => {
             const subs = getSubcategories(category._id);
@@ -293,44 +300,52 @@ const Categories: React.FC = () => {
                 </div>
 
                 {/* Subcategories */}
-                {expandedCategories.has(category._id) && subs.length > 0 && (
-                  <div className="bg-gray-50 border-t border-gray-100">
-                    {subs.map((sub, index) => (
-                      <div
-                        key={sub._id}
-                        className={`flex items-center gap-4 px-4 py-3 ml-12 ${index !== subs.length - 1 ? 'border-b border-gray-100' : ''
-                          }`}
-                      >
-                        <div className="w-4 h-4 border-l-2 border-b-2 border-gray-300 rounded-bl" />
-                        <div className="flex-1">
-                          <p className="font-medium text-gray-700">{sub.name}</p>
+                <AnimatePresence>
+                  {expandedCategories.has(category._id) && subs.length > 0 && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="bg-gray-50 border-t border-gray-100 overflow-hidden"
+                    >
+                      {subs.map((sub, index) => (
+                        <div
+                          key={sub._id}
+                          className={`flex items-center gap-4 px-4 py-3 ml-12 ${index !== subs.length - 1 ? 'border-b border-gray-100' : ''
+                            }`}
+                        >
+                          <div className="w-4 h-4 border-l-2 border-b-2 border-gray-300 rounded-bl" />
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-700">{sub.name}</p>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button variant="ghost" size="sm" icon={<Edit2 className="h-3 w-3" />} onClick={() => handleEditCategory(sub)} />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-600 hover:bg-red-50"
+                              icon={<Trash2 className="h-3 w-3" />}
+                              onClick={() => handleDeleteCategory(sub._id)}
+                            />
+                          </div>
                         </div>
-                        <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="sm" icon={<Edit2 className="h-3 w-3" />} onClick={() => handleEditCategory(sub)} />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="text-red-600 hover:bg-red-50"
-                            icon={<Trash2 className="h-3 w-3" />}
-                            onClick={() => handleDeleteCategory(sub._id)}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
         </div>
-      </div>
+      </motion.div>
 
       {mainCategories.length === 0 && !loading && (
-        <div className="text-center py-12">
+        <motion.div variants={slideUp} className="text-center py-12">
           <Tag className="h-16 w-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900">No categories found</h3>
           <p className="text-gray-500">Try adjusting your search criteria</p>
-        </div>
+        </motion.div>
       )}
 
       {/* Modal for Add/Edit */}
@@ -348,7 +363,7 @@ const Categories: React.FC = () => {
           loading={isSubmitting}
         />
       </Modal>
-    </div>
+    </motion.div>
   );
 };
 

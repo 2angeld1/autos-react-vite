@@ -1,11 +1,17 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { fadeIn, staggerContainer, slideUp } from '../../animations/variants';
 
 const CarFeatures: React.FC = () => {
     return (
-        <div>
-            <h4 className="title is-4 mb-4">Características</h4>
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={staggerContainer}
+        >
+            <motion.h4 variants={slideUp} className="title is-4 mb-4 has-text-white">Características</motion.h4>
             <div className="columns is-multiline">
-                <div className="column is-6">
+                <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
                         <div className="feature-icon">
                             <i className="fas fa-car"></i>
@@ -21,8 +27,8 @@ const CarFeatures: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div className="column is-6">
+                </motion.div>
+                <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
                         <div className="feature-icon">
                             <i className="fas fa-couch"></i>
@@ -38,8 +44,8 @@ const CarFeatures: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div className="column is-6">
+                </motion.div>
+                <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
                         <div className="feature-icon">
                             <i className="fas fa-shield-alt"></i>
@@ -55,8 +61,8 @@ const CarFeatures: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-                </div>
-                <div className="column is-6">
+                </motion.div>
+                <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
                         <div className="feature-icon">
                             <i className="fas fa-laptop"></i>
@@ -72,9 +78,9 @@ const CarFeatures: React.FC = () => {
                             </ul>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
-        </div>
+        </motion.div>
     );
 };
 
