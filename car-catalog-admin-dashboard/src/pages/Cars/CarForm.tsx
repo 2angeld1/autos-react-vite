@@ -1,12 +1,14 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { ImageIcon, Trash2 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import Button from '@/components/common/Button';
 import { useTranslation } from 'react-i18next';
 import Input from '@/components/common/Input';
 import { ImagePicker } from '@/components/files';
 import { filesService } from '@/services/files';
 import { Car, FileItem } from '@/types';
+// ... (keep interface definitions)
 
 interface CarFormData {
   make: string;
@@ -140,6 +142,12 @@ const CarForm: React.FC<CarFormProps> = ({
   };
 
   const onFormSubmit = async (data: CarFormData) => {
+    // Validate image for new cars
+    if (!car && !selectedImage && !selectedFileItem) {
+      toast.error('Image is required for new cars');
+      return;
+    }
+
     const formData = new FormData();
 
     // Add form fields
