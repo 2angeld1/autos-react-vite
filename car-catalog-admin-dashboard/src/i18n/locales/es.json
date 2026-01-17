@@ -381,5 +381,10 @@
     "invalidNumber": "Debe ser un número válido",
     "minValue": "Debe ser al menos {{min}}",
     "maxValue": "Debe ser como máximo {{max}}"
+  },
+  "messages": {
+    "carCreated": "Auto creado exitosamente",
+    "carUpdated": "Auto actualizado exitosamente",
+    "error": "Error"
   }
 }

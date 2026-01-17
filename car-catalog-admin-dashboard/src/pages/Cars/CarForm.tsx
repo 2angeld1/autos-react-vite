@@ -8,7 +8,7 @@ import Input from '@/components/common/Input';
 import { ImagePicker } from '@/components/files';
 import { filesService } from '@/services/files';
 import { Car, FileItem } from '@/types';
-// ... (keep interface definitions)
+import { useGet } from '@/hooks/useApi';
 
 interface CarFormData {
   make: string;
@@ -48,6 +48,20 @@ const CarForm: React.FC<CarFormProps> = ({
   const [selectedFileItem, setSelectedFileItem] = React.useState<FileItem | null>(null);
   const [showImagePicker, setShowImagePicker] = React.useState(false);
   const [removeCurrentImage, setRemoveCurrentImage] = React.useState(false);
+
+  // Fetch Brands and Categories
+  const { data: brandsResponse } = useGet<any>('/inventory/brands', { immediate: true });
+  const { data: categoriesResponse } = useGet<any>('/inventory/categories', { immediate: true });
+
+  const brands = React.useMemo(() => {
+    if (brandsResponse?.success) return brandsResponse.data || [];
+    return [];
+  }, [brandsResponse]);
+
+  const categories = React.useMemo(() => {
+    if (categoriesResponse?.success) return categoriesResponse.data || [];
+    return [];
+  }, [categoriesResponse]);
 
   // Initialize image preview from car data
   React.useEffect(() => {
@@ -293,12 +307,26 @@ const CarForm: React.FC<CarFormProps> = ({
 
       {/* Basic Information */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Input
-          label={t('cars.make')}
-          {...register('make', { required: 'La marca es requerida' })}
-          error={errors.make?.message}
-          placeholder={t('cars.exampleMake')}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t('cars.make')}
+          </label>
+          <input
+            {...register('make', { required: 'La marca es requerida' })}
+            list="brands-list"
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            placeholder={t('cars.exampleMake')}
+          />
+          <datalist id="brands-list">
+            {brands.map((b: any) => (
+              <option key={b._id || b.id} value={b.name} />
+            ))}
+          </datalist>
+          {errors.make && (
+            <p className="mt-1 text-sm text-red-600">{errors.make.message}</p>
+          )}
+        </div>
+
         <Input
           label={t('cars.model')}
           {...register('model', { required: 'El modelo es requerido' })}
@@ -391,12 +419,26 @@ const CarForm: React.FC<CarFormProps> = ({
           placeholder="4"
         />
 
-        <Input
-          label={t('cars.class')}
-          {...register('class', { required: t('validation.required') as string })}
-          error={errors.class?.message}
-          placeholder={t('cars.searchPlaceholder')}
-        />
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            {t('cars.class')}
+          </label>
+          <select
+            {...register('class', { required: t('validation.required') as string })}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+          >
+            <option value="">{t('common.select') || 'Select class'}</option>
+            {categories.map((c: any) => (
+              <option key={c._id || c.id} value={c.name}>{c.name}</option>
+            ))}
+            {categories.length === 0 && (
+              <option value="SUV">SUV</option> // Fallback
+            )}
+          </select>
+          {errors.class && (
+            <p className="mt-1 text-sm text-red-600">{errors.class.message}</p>
+          )}
+        </div>
 
         <Input
           label={t('cars.displacement')}

@@ -25,7 +25,7 @@ const EditCar: React.FC = () => {
     const handleCarSubmit = async (formData: FormData) => {
         try {
             await updateCar(`/cars/${id}`, formData);
-            toast.success('Car updated successfully');
+            toast.success(t('messages.carUpdated') || 'Car updated successfully');
             navigate('/cars');
         } catch (error: any) {
             toast.error(error.message || 'Something went wrong');

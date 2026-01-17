@@ -5,9 +5,17 @@ import { handleValidationErrors, sanitizeInput, validatePagination } from '@/mid
 import { authenticateToken, requireAdmin } from '@/middleware/auth';
 import { param } from 'express-validator';
 import multer from 'multer';
+import fs from 'fs';
 
 const router = Router();
-const upload = multer({ dest: 'uploads/cars/' });
+const uploadDir = 'uploads/cars/';
+
+// Ensure upload directory exists
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const upload = multer({ dest: uploadDir });
 
 /**
  * @route   GET /api/cars
