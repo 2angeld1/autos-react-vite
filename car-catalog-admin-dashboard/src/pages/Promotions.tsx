@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Percent,
   Plus,
@@ -20,8 +20,7 @@ import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import PromotionForm from '@/components/promotions/PromotionForm';
-import { promotionService, Promotion } from '@/services/promotions';
-import toast from 'react-hot-toast';
+import { usePromotions } from '@/hooks/pages/usePromotions';
 import { fadeIn, slideUp, staggerContainer, scaleIn, cardHover } from '@/animations/variants';
 
 const statusConfig = {
@@ -32,109 +31,18 @@ const statusConfig = {
 };
 
 const Promotions: React.FC = () => {
-  const [promotions, setPromotions] = useState<Promotion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingPromotion, setEditingPromotion] = useState<Promotion | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const fetchPromotions = async () => {
-    try {
-      setLoading(true);
-      const response = await promotionService.getPromotions();
-      if (response.success) {
-        setPromotions(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching promotions:', error);
-      toast.error('Failed to load promotions');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPromotions();
-  }, []);
-
-  const handleAddPromotion = () => {
-    setEditingPromotion(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditPromotion = (promotion: Promotion) => {
-    setEditingPromotion(promotion);
-    setIsModalOpen(true);
-  };
-
-  const handleDeletePromotion = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this promotion?')) return;
-    try {
-      const response = await promotionService.deletePromotion(id);
-      if (response.success) {
-        toast.success('Promotion deleted successfully');
-        fetchPromotions();
-      }
-    } catch (error) {
-      toast.error('Failed to delete promotion');
-    }
-  };
-
-  const handleToggleStatus = async (id: string) => {
-    try {
-      const response = await promotionService.toggleStatus(id);
-      if (response.success) {
-        toast.success('Status updated');
-        fetchPromotions();
-      }
-    } catch (error) {
-      toast.error('Failed to update status');
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      setIsSubmitting(true);
-      if (editingPromotion) {
-        await promotionService.updatePromotion(editingPromotion._id, formData);
-        toast.success('Promotion updated successfully');
-      } else {
-        await promotionService.createPromotion(formData);
-        toast.success('Promotion created successfully');
-      }
-      setIsModalOpen(false);
-      fetchPromotions();
-    } catch (error) {
-      console.error('Error saving promotion:', error);
-      toast.error('Failed to save promotion');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const copyCode = (code: string) => {
-    navigator.clipboard.writeText(code);
-    toast.success('Code copied to clipboard!');
-  };
-
-  const filteredPromotions = promotions.filter(promo => {
-    const matchesSearch = 
-      promo.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      promo.code.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || promo.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
-
-  const activeCount = promotions.filter(p => p.status === 'active').length;
-  const totalUsed = promotions.reduce((sum, p) => sum + p.usedCount, 0);
-  const totalSavings = promotions.reduce((sum, p) => {
-    const avgDiscount = p.type === 'percentage' ? ((p.maxDiscount || 0) / 2) : p.value;
-    return sum + (avgDiscount * p.usedCount);
-  }, 0);
+  const { state, actions } = usePromotions();
+  const {
+    promotions,
+    loading,
+    searchTerm,
+    statusFilter,
+    isModalOpen,
+    editingPromotion,
+    isSubmitting,
+    filteredPromotions,
+    stats,
+  } = state;
 
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
@@ -171,7 +79,7 @@ const Promotions: React.FC = () => {
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
             className="bg-orange-600 hover:bg-orange-700 border-orange-600"
-            onClick={handleAddPromotion}
+            onClick={actions.handleAddPromotion}
           >
             Create Promotion
           </Button>
@@ -184,7 +92,7 @@ const Promotions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Active Promotions</p>
-              <p className="text-2xl font-bold text-green-600">{activeCount}</p>
+              <p className="text-2xl font-bold text-green-600">{stats.activeCount}</p>
             </div>
             <div className="p-3 bg-green-100 rounded-lg">
               <Zap className="h-6 w-6 text-green-600" />
@@ -208,7 +116,7 @@ const Promotions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Total Redemptions</p>
-              <p className="text-2xl font-bold text-gray-900">{totalUsed}</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.totalUsed}</p>
             </div>
             <div className="p-3 bg-blue-100 rounded-lg">
               <Percent className="h-6 w-6 text-blue-600" />
@@ -220,7 +128,7 @@ const Promotions: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Customer Savings</p>
-              <p className="text-2xl font-bold text-gray-900">${(totalSavings / 1000).toFixed(0)}K</p>
+              <p className="text-2xl font-bold text-gray-900">${(stats.totalSavings / 1000).toFixed(0)}K</p>
             </div>
             <div className="p-3 bg-purple-100 rounded-lg">
               <DollarSign className="h-6 w-6 text-purple-600" />
@@ -238,7 +146,7 @@ const Promotions: React.FC = () => {
               type="text"
               placeholder="Search promotions or codes..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => actions.setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
           </div>
@@ -246,7 +154,7 @@ const Promotions: React.FC = () => {
             {['all', 'active', 'scheduled', 'paused', 'expired'].map(status => (
               <button
                 key={status}
-                onClick={() => setStatusFilter(status)}
+                onClick={() => actions.setStatusFilter(status)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   statusFilter === status
                     ? 'bg-orange-600 text-white'
@@ -310,7 +218,7 @@ const Promotions: React.FC = () => {
                         {promo.code}
                       </code>
                       <button 
-                        onClick={() => copyCode(promo.code)}
+                        onClick={() => actions.copyCode(promo.code)}
                         className="p-2 hover:bg-gray-200 rounded-lg transition-colors"
                         title="Copy code"
                       >
@@ -384,7 +292,7 @@ const Promotions: React.FC = () => {
                   size="sm"
                   className="flex-1"
                   icon={<Edit2 className="h-4 w-4" />}
-                  onClick={() => handleEditPromotion(promo)}
+                  onClick={() => actions.handleEditPromotion(promo)}
                 >
                   Edit
                 </Button>
@@ -393,7 +301,7 @@ const Promotions: React.FC = () => {
                     variant="ghost"
                     size="sm"
                     icon={<ToggleRight className="h-4 w-4 text-green-600" />}
-                    onClick={() => handleToggleStatus(promo._id)}
+                    onClick={() => actions.handleToggleStatus(promo._id)}
                   >
                     Pause
                   </Button>
@@ -402,7 +310,7 @@ const Promotions: React.FC = () => {
                       variant="ghost"
                       size="sm"
                       icon={<ToggleLeft className="h-4 w-4 text-gray-400" />}
-                      onClick={() => handleToggleStatus(promo._id)}
+                      onClick={() => actions.handleToggleStatus(promo._id)}
                     >
                     Enable
                   </Button>
@@ -412,7 +320,7 @@ const Promotions: React.FC = () => {
                   size="sm"
                   className="text-red-600 hover:bg-red-50"
                   icon={<Trash2 className="h-4 w-4" />}
-                  onClick={() => handleDeletePromotion(promo._id)}
+                  onClick={() => actions.handleDeletePromotion(promo._id)}
                 />
               </div>
             </motion.div>
@@ -431,14 +339,14 @@ const Promotions: React.FC = () => {
       {/* Modal for Add/Edit */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => actions.setIsModalOpen(false)}
         size="lg"
         title={editingPromotion ? 'Edit Promotion' : 'Create New Promotion'}
       >
         <PromotionForm
           promotion={editingPromotion}
-          onSubmit={handleSubmit}
-          onClose={() => setIsModalOpen(false)}
+          onSubmit={actions.handleSubmit}
+          onClose={() => actions.setIsModalOpen(false)}
           loading={isSubmitting}
         />
       </Modal>

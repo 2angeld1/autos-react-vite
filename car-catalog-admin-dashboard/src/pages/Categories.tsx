@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Tag,
   Plus,
@@ -14,106 +14,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import CategoryForm from '@/components/categories/CategoryForm';
-import { inventoryService, Category } from '@/services/inventory';
-import toast from 'react-hot-toast';
+import { useCategories } from '@/hooks/pages/useCategories';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 const Categories: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingCategory, setEditingCategory] = useState<Category | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const fetchCategories = async () => {
-    try {
-      setLoading(true);
-      const response = await inventoryService.getCategories();
-      if (response.success) {
-        setCategories(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      toast.error('Failed to load categories');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  const toggleExpand = (id: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(id)) {
-      newExpanded.delete(id);
-    } else {
-      newExpanded.add(id);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
-  const handleAddCategory = () => {
-    setEditingCategory(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditCategory = (category: Category) => {
-    setEditingCategory(category);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteCategory = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this category? All its subcategories will become top-level or orphaned. Continue?')) return;
-    try {
-      const response = await inventoryService.deleteCategory(id);
-      if (response.success) {
-        toast.success('Category deleted successfully');
-        fetchCategories();
-      }
-    } catch (error) {
-      toast.error('Failed to delete category');
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      setIsSubmitting(true);
-      if (editingCategory) {
-        await inventoryService.updateCategory(editingCategory._id, formData);
-        toast.success('Category updated successfully');
-      } else {
-        await inventoryService.createCategory(formData);
-        toast.success('Category created successfully');
-      }
-      setIsModalOpen(false);
-      fetchCategories();
-    } catch (error) {
-      console.error('Error saving category:', error);
-      toast.error('Failed to save category');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const filteredCategories = categories.filter(cat =>
-    cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  // Group categories by parent
-  const mainCategories = filteredCategories.filter(c => !c.parentCategory);
-  const getSubcategories = (parentId: string) =>
-    categories.filter(c => {
-      const pId = typeof c.parentCategory === 'string'
-        ? c.parentCategory
-        : c.parentCategory?._id;
-      return pId === parentId;
-    });
+  const { state, actions } = useCategories();
+  const {
+    categories,
+    loading,
+    searchTerm,
+    expandedCategories,
+    isModalOpen,
+    editingCategory,
+    isSubmitting,
+    mainCategories,
+  } = state;
 
   if (loading && categories.length === 0) {
     return (
@@ -146,7 +61,7 @@ const Categories: React.FC = () => {
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
             className="bg-pink-600 hover:bg-pink-700 border-pink-600"
-            onClick={handleAddCategory}
+            onClick={actions.handleAddCategory}
           >
             Add Category
           </Button>
@@ -212,7 +127,7 @@ const Categories: React.FC = () => {
             type="text"
             placeholder="Search categories..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => actions.setSearchTerm(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
           />
         </div>
@@ -222,7 +137,7 @@ const Categories: React.FC = () => {
       <motion.div variants={slideUp} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="divide-y divide-gray-100">
           {mainCategories.map(category => {
-            const subs = getSubcategories(category._id);
+            const subs = actions.getSubcategories(category._id);
             return (
               <div key={category._id}>
                 {/* Main Category */}
@@ -231,7 +146,7 @@ const Categories: React.FC = () => {
                     {/* Expand Toggle */}
                     {subs.length > 0 ? (
                       <button
-                        onClick={() => toggleExpand(category._id)}
+                        onClick={() => actions.toggleExpand(category._id)}
                         className="p-1 hover:bg-gray-200 rounded transition-colors"
                       >
                         <ChevronRight
@@ -287,13 +202,13 @@ const Categories: React.FC = () => {
 
                     {/* Actions */}
                     <div className="flex items-center gap-1">
-                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditCategory(category)} />
+                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />} onClick={() => actions.handleEditCategory(category)} />
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-red-600 hover:bg-red-50"
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => handleDeleteCategory(category._id)}
+                        onClick={() => actions.handleDeleteCategory(category._id)}
                       />
                     </div>
                   </div>
@@ -320,13 +235,13 @@ const Categories: React.FC = () => {
                             <p className="font-medium text-gray-700">{sub.name}</p>
                           </div>
                           <div className="flex items-center gap-1">
-                            <Button variant="ghost" size="sm" icon={<Edit2 className="h-3 w-3" />} onClick={() => handleEditCategory(sub)} />
+                            <Button variant="ghost" size="sm" icon={<Edit2 className="h-3 w-3" />} onClick={() => actions.handleEditCategory(sub)} />
                             <Button
                               variant="ghost"
                               size="sm"
                               className="text-red-600 hover:bg-red-50"
                               icon={<Trash2 className="h-3 w-3" />}
-                              onClick={() => handleDeleteCategory(sub._id)}
+                              onClick={() => actions.handleDeleteCategory(sub._id)}
                             />
                           </div>
                         </div>
@@ -351,15 +266,15 @@ const Categories: React.FC = () => {
       {/* Modal for Add/Edit */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => actions.setIsModalOpen(false)}
         size="lg"
         title={editingCategory ? 'Edit Category' : 'Add New Category'}
       >
         <CategoryForm
           category={editingCategory}
           categories={categories}
-          onSubmit={handleSubmit}
-          onClose={() => setIsModalOpen(false)}
+          onSubmit={actions.handleSubmit}
+          onClose={() => actions.setIsModalOpen(false)}
           loading={isSubmitting}
         />
       </Modal>

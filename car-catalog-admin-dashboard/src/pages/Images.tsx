@@ -1,54 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Image, Folder, FileText, HardDrive, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Card from '@/components/common/Card';
 import { FileExplorer } from '@/components/files';
-import { filesService } from '@/services/files';
-import type { FileStats } from '@/types/file';
 import { formatNumber } from '@/utils/formatters';
+import { useImages } from '@/hooks/pages/useImages';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 const Images: React.FC = () => {
-  const [stats, setStats] = useState<FileStats>({
-    totalFiles: 0,
-    totalFolders: 0,
-    totalSize: 0,
-    byMimeType: {},
-    recentFiles: []
-  });
-  const [, setLoadingStats] = useState(true);
-
-  const fetchStats = React.useCallback(async () => {
-    setLoadingStats(true);
-    try {
-      const data = await filesService.getStats();
-      setStats(data);
-    } catch (error) {
-      console.error('Error loading stats:', error);
-    } finally {
-      setLoadingStats(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void fetchStats();
-  }, [fetchStats]);
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
-
-  // Count images from mimeType
-  const imageCount = Object.entries(stats.byMimeType)
-    .filter(([key]) => key.startsWith('image/'))
-    .reduce((sum, [, count]) => sum + count, 0);
-
-  // Count PDFs
-  const pdfCount = stats.byMimeType['application/pdf'] || 0;
+  const { state, actions, utils } = useImages();
+  const { stats, imageCount, pdfCount } = state;
+  const { fetchStats } = actions;
+  const { formatFileSize } = utils;
 
   return (
     <motion.div

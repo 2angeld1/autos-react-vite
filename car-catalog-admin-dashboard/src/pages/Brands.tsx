@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Building2,
   Plus,
@@ -15,92 +15,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import BrandForm from '@/components/brands/BrandForm';
-import { inventoryService, Brand } from '@/services/inventory';
-import toast from 'react-hot-toast';
+import { useBrands } from '@/hooks/pages/useBrands';
 import { fadeIn, slideUp, staggerContainer, cardHover, scaleIn } from '@/animations/variants';
 
 const countries = ['All', 'Japan', 'Germany', 'USA', 'Italy', 'UK', 'France', 'South Korea'];
 
 const Brands: React.FC = () => {
-  const [brands, setBrands] = useState<Brand[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCountry, setSelectedCountry] = useState('All');
+  const { state, actions } = useBrands();
 
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingBrand, setEditingBrand] = useState<Brand | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const fetchBrands = async () => {
-    try {
-      setLoading(true);
-      const response = await inventoryService.getBrands();
-      if (response.success) {
-        setBrands(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching brands:', error);
-      toast.error('Failed to load brands');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchBrands();
-  }, []);
-
-  const handleAddBrand = () => {
-    setEditingBrand(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditBrand = (brand: Brand) => {
-    setEditingBrand(brand);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteBrand = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this brand?')) return;
-    try {
-      const response = await inventoryService.deleteBrand(id);
-      if (response.success) {
-        toast.success('Brand deleted successfully');
-        fetchBrands();
-      }
-    } catch (error) {
-      toast.error('Failed to delete brand');
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      setIsSubmitting(true);
-      if (editingBrand) {
-        await inventoryService.updateBrand(editingBrand._id, formData);
-        toast.success('Brand updated successfully');
-      } else {
-        await inventoryService.createBrand(formData);
-        toast.success('Brand created successfully');
-      }
-      setIsModalOpen(false);
-      fetchBrands();
-    } catch (error) {
-      console.error('Error saving brand:', error);
-      toast.error('Failed to save brand');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const filteredBrands = brands.filter(brand => {
-    const matchesSearch = brand.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCountry = selectedCountry === 'All' || brand.country === selectedCountry;
-    return matchesSearch && matchesCountry;
-  });
-
-  const featuredCount = brands.filter(b => b.featured).length;
+  const {
+    brands,
+    loading,
+    searchTerm,
+    selectedCountry,
+    isModalOpen,
+    editingBrand,
+    isSubmitting,
+    filteredBrands,
+    featuredCount,
+  } = state;
 
   if (loading && brands.length === 0) {
     return (
@@ -132,7 +65,7 @@ const Brands: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
-            onClick={handleAddBrand}
+            onClick={actions.handleAddBrand}
           >
             Add Brand
           </Button>
@@ -202,7 +135,7 @@ const Brands: React.FC = () => {
               type="text"
               placeholder="Search brands..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => actions.setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -211,7 +144,7 @@ const Brands: React.FC = () => {
             {countries.map(country => (
               <button
                 key={country}
-                onClick={() => setSelectedCountry(country)}
+                onClick={() => actions.setSelectedCountry(country)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedCountry === country
                     ? 'bg-blue-600 text-white'
@@ -296,7 +229,7 @@ const Brands: React.FC = () => {
                   </div>
 
                   <div className="flex gap-2 pt-3 border-t border-gray-100">
-                    <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditBrand(brand)}>
+                    <Button variant="ghost" size="sm" className="flex-1" icon={<Edit2 className="h-4 w-4" />} onClick={() => actions.handleEditBrand(brand)}>
                       Edit
                     </Button>
                     <Button
@@ -304,7 +237,7 @@ const Brands: React.FC = () => {
                       size="sm"
                       className="text-red-600 hover:bg-red-50"
                       icon={<Trash2 className="h-4 w-4" />}
-                      onClick={() => handleDeleteBrand(brand._id)}
+                      onClick={() => actions.handleDeleteBrand(brand._id)}
                     />
                   </div>
                 </div>
@@ -324,14 +257,14 @@ const Brands: React.FC = () => {
 
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => actions.setIsModalOpen(false)}
         size="md"
         title={editingBrand ? 'Edit Brand' : 'Add New Brand'}
       >
         <BrandForm
           brand={editingBrand}
-          onSubmit={handleSubmit}
-          onClose={() => setIsModalOpen(false)}
+          onSubmit={actions.handleSubmit}
+          onClose={() => actions.setIsModalOpen(false)}
           loading={isSubmitting}
         />
       </Modal>

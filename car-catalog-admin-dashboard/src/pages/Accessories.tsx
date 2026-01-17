@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Package,
   Plus,
@@ -15,94 +15,23 @@ import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
 import AccessoryForm from '@/components/accessories/AccessoryForm';
-import { inventoryService, Accessory } from '@/services/inventory';
-import toast from 'react-hot-toast';
+import { useAccessories } from '@/hooks/pages/useAccessories';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
 const Accessories: React.FC = () => {
-  const [accessories, setAccessories] = useState<Accessory[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-
-  // Modal states
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingAccessory, setEditingAccessory] = useState<Accessory | undefined>(undefined);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const fetchAccessories = async () => {
-    try {
-      setLoading(true);
-      const response = await inventoryService.getAccessories();
-      if (response.success) {
-        setAccessories(response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching accessories:', error);
-      toast.error('Failed to load accessories');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchAccessories();
-  }, []);
-
-  const handleAddAccessory = () => {
-    setEditingAccessory(undefined);
-    setIsModalOpen(true);
-  };
-
-  const handleEditAccessory = (accessory: Accessory) => {
-    setEditingAccessory(accessory);
-    setIsModalOpen(true);
-  };
-
-  const handleDeleteAccessory = async (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this accessory?')) return;
-    try {
-      const response = await inventoryService.deleteAccessory(id);
-      if (response.success) {
-        toast.success('Accessory deleted successfully');
-        fetchAccessories();
-      }
-    } catch (error) {
-      toast.error('Failed to delete accessory');
-    }
-  };
-
-  const handleSubmit = async (formData: FormData) => {
-    try {
-      setIsSubmitting(true);
-      if (editingAccessory) {
-        await inventoryService.updateAccessory(editingAccessory._id, formData);
-        toast.success('Accessory updated successfully');
-      } else {
-        await inventoryService.createAccessory(formData);
-        toast.success('Accessory created successfully');
-      }
-      setIsModalOpen(false);
-      fetchAccessories();
-    } catch (error) {
-      console.error('Error saving accessory:', error);
-      toast.error('Failed to save accessory');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const categories = ['All', ...new Set(accessories.map(a => a.category))];
-
-  const filteredAccessories = accessories.filter(acc => {
-    const matchesSearch = acc.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || acc.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
-
-  const totalValue = filteredAccessories.reduce((sum, acc) => sum + (acc.price * acc.stock), 0);
-  const lowStockCount = filteredAccessories.filter(acc => acc.stock > 0 && acc.stock < 10).length;
-  const outOfStockCount = filteredAccessories.filter(acc => acc.stock === 0).length;
+  const { state, actions } = useAccessories();
+  const {
+    accessories,
+    loading,
+    searchTerm,
+    selectedCategory,
+    isModalOpen,
+    editingAccessory,
+    isSubmitting,
+    filteredAccessories,
+    stats,
+    categories,
+  } = state;
 
   if (loading && accessories.length === 0) {
     return (
@@ -134,7 +63,7 @@ const Accessories: React.FC = () => {
           <Button
             variant="primary"
             icon={<Plus className="h-5 w-5" />}
-            onClick={handleAddAccessory}
+            onClick={actions.handleAddAccessory}
           >
             Add Accessory
           </Button>
@@ -162,7 +91,7 @@ const Accessories: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Out of Stock</p>
-              <p className="text-2xl font-bold text-red-600">{outOfStockCount}</p>
+              <p className="text-2xl font-bold text-red-600">{stats.outOfStockCount}</p>
             </div>
             <div className="p-3 bg-red-100 dark:bg-red-900/30 rounded-lg">
               <Package className="h-6 w-6 text-red-600 dark:text-red-400" />
@@ -174,7 +103,7 @@ const Accessories: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Inventory Value</p>
-              <p className="text-2xl font-bold text-gray-900">${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+              <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
             </div>
             <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
               <DollarSign className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -186,7 +115,7 @@ const Accessories: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm text-gray-500">Low Stock</p>
-              <p className="text-2xl font-bold text-amber-600">{lowStockCount}</p>
+              <p className="text-2xl font-bold text-amber-600">{stats.lowStockCount}</p>
             </div>
             <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
               <AlertTriangle className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -204,7 +133,7 @@ const Accessories: React.FC = () => {
               type="text"
               placeholder="Search accessories..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => actions.setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             />
           </div>
@@ -213,7 +142,7 @@ const Accessories: React.FC = () => {
             {categories.map(category => (
               <button
                 key={category}
-                onClick={() => setSelectedCategory(category)}
+                onClick={() => actions.setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedCategory === category
                     ? 'bg-indigo-600 text-white'
@@ -297,13 +226,13 @@ const Accessories: React.FC = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />} onClick={() => handleEditAccessory(accessory)} />
+                      <Button variant="ghost" size="sm" icon={<Edit2 className="h-4 w-4" />} onClick={() => actions.handleEditAccessory(accessory)} />
                       <Button
                         variant="ghost"
                         size="sm"
                         className="text-red-600 hover:bg-red-50"
                         icon={<Trash2 className="h-4 w-4" />}
-                        onClick={() => handleDeleteAccessory(accessory._id)}
+                        onClick={() => actions.handleDeleteAccessory(accessory._id)}
                       />
                     </div>
                   </td>
@@ -325,14 +254,14 @@ const Accessories: React.FC = () => {
       {/* Modal for Add/Edit */}
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => actions.setIsModalOpen(false)}
         size="md"
         title={editingAccessory ? 'Edit Accessory' : 'Add New Accessory'}
       >
         <AccessoryForm
           accessory={editingAccessory}
-          onSubmit={handleSubmit}
-          onClose={() => setIsModalOpen(false)}
+          onSubmit={actions.handleSubmit}
+          onClose={() => actions.setIsModalOpen(false)}
           loading={isSubmitting}
         />
       </Modal>
