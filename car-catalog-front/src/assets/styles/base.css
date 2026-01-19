@@ -5,6 +5,32 @@ body {
   font-family: 'Roboto', 'Segoe UI', sans-serif;
 }
 
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--accent-color);
+  border-radius: 4px;
+  border: 2px solid var(--dark-bg);
+  /* Padding visual */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-accent);
+}
+
+/* Firefox Support */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-color) var(--dark-bg);
+}
 /* Formularios */
 .input, .select select, .textarea {
   background-color: #2c2c2c;

@@ -121,117 +121,53 @@ const FeaturedCars: React.FC = () => {
 };
 
 const FeaturedCarCard: React.FC<{ car: Car }> = ({ car }) => {
-    // Usar imagen del backend
     const carImageHook = useCarImage({ 
         car,
-        fallbackImage: car.image // Usar imagen del auto desde backend
+        fallbackImage: car.image
     });
-    
-    // ✅ Determinar si es marca china
-    const isChineseBrand = ['byd', 'nio', 'geely', 'xpeng', 'li auto', 'chery', 'great wall', 'mg'].includes(car.make.toLowerCase());
-    
+
     return (
-        <div className="featured-car-card animate-fadeIn" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-            <div className="card-image-container">
+        <div className="travel-card animate-fadeIn">
+            {/* Imagen de fondo */}
+            <div className="travel-card-image-wrapper">
                 <img 
                     src={carImageHook.imageSrc}
                     alt={`${car.make} ${car.model}`}
-                    className="car-image"
+                    className="travel-card-image"
                     onError={carImageHook.handleImageError}
-                    loading="lazy" // Mejora de rendimiento
+                    loading="lazy"
                 />
-                
-                {/* Overlay gradient */}
-                <div className="image-gradient-overlay"></div>
-                
-                {/* Year badge */}
-                <div className="car-year-badge">
-                    <span>{car.year}</span>
-                </div>
-                
-                {/* Price badge */}
-                <div className="car-price-badge">
-                    <span>${car.price?.toLocaleString() || 'Consultar'}</span>
-                </div>
-                
-                {/* Chinese brand badge */}
-                {isChineseBrand && (
-                    <div className="chinese-brand-badge">
-                        <span className="icon">
-                            <i className="fas fa-star"></i>
-                        </span>
-                        <span>Marca China</span>
-                    </div>
-                )}
-                
-                {/* Electric badge */}
-                {car.fuel_type === 'electricity' && (
-                    <div className="electric-badge">
-                        <span className="icon">
-                            <i className="fas fa-bolt"></i>
-                        </span>
-                        <span>Eléctrico</span>
-                    </div>
-                )}
+                <div className="travel-card-overlay"></div>
             </div>
-            
-            <div className="card-content" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                <div className="car-info">
-                    <h3 className="car-title">{car.make} {car.model}</h3>
-                    <p className="car-specs">
-                        {car.fuel_type === 'electricity' ? 'Eléctrico' : 
-                         car.fuel_type === 'hybrid' ? 'Híbrido' : 'Gasolina'}
-                        {car.transmission === 'a' ? ' • Automático' : ' • Manual'}
-                    </p>
-                </div>
-                
-                <div className="car-features" style={{ flexGrow: 1 }}>
-                    <div className="feature-chip">
-                        <span className="icon">
-                            <i className="fas fa-gas-pump"></i>
-                        </span>
-                        <span>{car.fuel_type === 'electricity' ? '⚡' : '⛽'}</span>
-                    </div>
-                    <div className="feature-chip">
-                        <span className="icon">
-                            <i className="fas fa-tachometer-alt"></i>
-                        </span>
-                        <span>{car.combination_mpg || car.highway_mpg || 'N/A'} MPG</span>
-                    </div>
-                    {car.cylinders !== undefined && car.cylinders > 0 && (
-                        <div className="feature-chip">
-                            <span className="icon">
-                                <i className="fas fa-cog"></i>
-                            </span>
-                            <span>{car.cylinders}V</span>
-                        </div>
-                    )}
-                </div>
-                
-                <div className="card-actions" style={{ marginTop: 'auto' }}>
-                    <Link
-                        to={`/car/${car.id}`}
-                        className="view-details-btn"
-                        style={{
-                            backgroundColor: '#ff3860',
-                            color: '#1a1a1a',
-                            fontWeight: 'normal',
-                            border: 'none',
-                            width: '100%',
-                            display: 'flex',
-                            justifyContent: 'center',
-                            alignItems: 'center',
-                            padding: '0.75rem',
-                            borderRadius: '8px'
-                        }}
-                    >
-                        <span>Ver detalles</span>
-                        <span className="icon">
-                            <i className="fas fa-arrow-right"></i>
-                        </span>
-                    </Link>
+
+            {/* Botón favorito */}
+            <div className="travel-card-top">
+                <button className="travel-favorite-btn">
+                    <i className="far fa-heart"></i>
+                </button>
+            </div>
+
+            {/* Contenido */}
+            <div className="travel-card-content">
+                <span className="travel-card-subtitle">{car.year} • {car.make}</span>
+                <h3 className="travel-card-title">{car.model}</h3>
+                <div className="travel-card-meta">
+                    <span className="travel-rating">
+                        <i className="fas fa-star"></i> 5.0
+                    </span>
+                    <span className="travel-reviews">
+                        {car.transmission === 'a' ? 'Automático' : 'Manual'}
+                    </span>
                 </div>
             </div>
+
+            {/* Barra de acción inferior */}
+            <Link to={`/car/${car.id}`} className="travel-card-bottom-action">
+                <span className="action-text">Ver más</span>
+                <div className="action-icon-circle">
+                    <i className="fas fa-chevron-right"></i>
+                </div>
+            </Link>
         </div>
     );
 };

@@ -1,11 +1,20 @@
 import nodemailer from 'nodemailer';
 import { logger } from '@/utils/logger';
 
+// Interface for Nodemailer attachments
+interface Attachment {
+  filename: string;
+  content: string | Buffer;
+  encoding?: string;
+  contentType?: string;
+}
+
 interface EmailOptions {
   to: string;
   subject: string;
   text?: string;
   html?: string;
+  attachments?: Attachment[];
 }
 
 export class EmailService {
@@ -21,7 +30,7 @@ export class EmailService {
         port: parseInt(process.env.EMAIL_PORT || '587'),
         secure: process.env.EMAIL_PORT === '465',
         auth: {
-          user: process.env.EMAIL_USER,
+          user: process.env.EMAIL_SMTP_USER || process.env.EMAIL_USER, // Usuario SMTP (ej: 'resend')
           pass: process.env.EMAIL_PASS
         }
       });
@@ -45,11 +54,13 @@ export class EmailService {
       }
 
       const mailOptions = {
-        from: process.env.EMAIL_USER,
+        from: process.env.EMAIL_FROM || process.env.EMAIL_USER, // Remitente visible (ej: onboarding@resend.dev)
+        replyTo: process.env.ADMIN_EMAIL, // Respuestas a tu Gmail
         to: options.to,
         subject: options.subject,
         text: options.text,
-        html: options.html
+        html: options.html,
+        attachments: options.attachments
       };
 
       await this.transporter.sendMail(mailOptions);

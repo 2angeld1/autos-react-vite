@@ -8,6 +8,7 @@ import fileRoutes from './files';
 import inventoryRoutes from './inventory';
 import promotionRoutes from './promotions';
 import notificationRoutes from './notifications';
+import quoteRoutes from './quoteRoutes';
 
 const router = Router();
 
@@ -21,6 +22,7 @@ router.use('/files', fileRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/promotions', promotionRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/quotes', quoteRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

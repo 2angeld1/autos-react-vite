@@ -10,6 +10,7 @@ import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/varian
 
 // Components
 import CarTabs from '../components/car/CarTabs';
+import QuoteModal from '../components/QuoteModal';
 
 const CarDetails: React.FC = () => {
     // ... previous logic ...
@@ -21,6 +22,7 @@ const CarDetails: React.FC = () => {
     const [similarCars, setSimilarCars] = useState<Car[]>([]);
     const [bgImage, setBgImage] = useState<string>('');
     const [bgLoading, setBgLoading] = useState<boolean>(true);
+    const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
     // ✅ SIEMPRE llamar el hook en el mismo orden, incluso si car es null
     const carForHook = car || { 
@@ -138,6 +140,7 @@ const CarDetails: React.FC = () => {
         </div>
     );
 
+
     const backgroundImageUrl = bgImage || carImageHook.imageSrc;
 
     return (
@@ -148,14 +151,16 @@ const CarDetails: React.FC = () => {
             className="has-background-dark"
         >
             <section 
-                className={`car-detail-hero ${bgLoading ? 'loading' : ''}`} 
+                className={`car-detail-hero minimalist-hero ${bgLoading ? 'loading' : ''}`} 
                 style={{ 
-                    backgroundImage: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.8)), url(${backgroundImageUrl})`,
+                    backgroundImage: `url("${backgroundImageUrl}")`,
                     backgroundRepeat: 'no-repeat',
                     backgroundPosition: 'center center',
                     backgroundSize: 'cover',
                     backgroundAttachment: 'fixed', // Efecto parallax sutil
-                    minHeight: '100vh' // Asegurar altura completa
+                    minHeight: '100vh', // Asegurar altura completa
+                    width: '100%',
+                    position: 'relative' // Aseguramos posicionamiento para el overlay
                 }}
             >
                 <div className="container pt-6 pb-6">
@@ -310,55 +315,49 @@ const CarDetails: React.FC = () => {
                             variants={fadeIn}
                             className="detail-section detail-gallery"
                         >
-                            <div className="card">
-                                <div className="card-image">
-                                    <figure className="image is-16by9" style={{ position: 'relative' }}>
+                            <motion.div
+                                className="gallery-container"
+                                initial="hidden"
+                                whileInView="visible"
+                                viewport={{ once: true, amount: 0.3 }}
+                                variants={fadeIn}
+                            >
+                                <figure className="image is-16by9 is-clickable" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
                                     <SafeCarImage
-                                            car={car}
-                                            src={car.image}
-                                            alt={`${car.make} ${car.model} ${car.year}`}
-                                            style={{ 
-                                                width: '100%',
-                                                height: '100%',
-                                                objectFit: 'cover',
-                                                transition: 'opacity 0.3s ease'
-                                            }}
-                                        />
-                                        
-                                        {carImageHook.imageError && (
-                                            <div className="image-fallback-indicator" style={{
-                                                position: 'absolute',
-                                                top: '15px',
-                                                right: '15px',
-                                                zIndex: 5
-                                            }}>
-                                                <span className="tag is-warning is-small">
-                                                    <span className="icon">
-                                                        <i className="fas fa-exclamation-triangle"></i>
-                                                    </span>
-                                                    <span>Imagen alternativa</span>
+                                        car={car}
+                                        src={car.image}
+                                        alt={`${car.make} ${car.model} ${car.year}`}
+                                        className="main-gallery-image"
+                                        style={{
+                                            width: '100%',
+                                            height: '100%',
+                                            objectFit: 'cover'
+                                        }}
+                                    />
+
+                                    {carImageHook.imageError && (
+                                        <div className="image-fallback-indicator">
+                                            <span className="tag is-warning is-small">
+                                                <span className="icon">
+                                                    <i className="fas fa-exclamation-triangle"></i>
                                                 </span>
-                                            </div>
-                                        )}
-                                        
-                                        {!carImageHook.imageError && (
-                                            <div className="image-quality-badge" style={{
-                                                position: 'absolute',
-                                                top: '15px',
-                                                left: '15px',
-                                                zIndex: 5
-                                            }}>
-                                                <span className="tag is-success is-small">
-                                                    <span className="icon">
-                                                        <i className="fas fa-check"></i>
-                                                    </span>
-                                                    <span>Original</span>
+                                                <span>Imagen alternativa</span>
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {!carImageHook.imageError && (
+                                        <div className="image-quality-badge">
+                                            <span className="tag is-success is-small">
+                                                <span className="icon">
+                                                    <i className="fas fa-check"></i>
                                                 </span>
-                                            </div>
-                                        )}
-                                    </figure>
-                                </div>
-                            </div>
+                                                <span>Original</span>
+                                            </span>
+                                        </div>
+                                    )}
+                                </figure>
+                            </motion.div>
                             
                             <div className="mt-5">
                                 <h3 className="title is-4 mb-3 has-text-accent">
@@ -473,6 +472,32 @@ const CarDetails: React.FC = () => {
                                 </div>
                             </div>
                             
+                            <div className="box mt-4 has-background-grey-darker" style={{ border: '1px solid #7957d5' }}>
+                                <h4 className="title is-5 has-text-centered has-text-white mb-4">
+                                    ¿Te interesa este auto?
+                                </h4>
+                                <button
+                                    onClick={() => setIsQuoteOpen(true)}
+                                    className="button is-primary is-fullwidth is-large animate-pulse"
+                                    style={{
+                                        background: 'linear-gradient(45deg, #7957d5, #b86bff)',
+                                        border: 'none',
+                                        fontWeight: 'bold',
+                                        boxShadow: '0 4px 15px rgba(121, 87, 213, 0.4)'
+                                    }}
+                                >
+                                    <span className="icon">
+                                        <i className="fas fa-file-invoice-dollar"></i>
+                                    </span>
+                                    <span>Solicitar Cotización</span>
+                                </button>
+                                {car.price && (
+                                    <p className="has-text-centered mt-3 has-text-grey-light is-size-7">
+                                        Precio Total: ${car.price.toLocaleString()}
+                                    </p>
+                                )}
+                            </div>
+
                             <div className="box mt-4" id="contact">
                                 <h4 className="title is-5">
                                     <span className="icon">
@@ -481,7 +506,7 @@ const CarDetails: React.FC = () => {
                                     <span>Contactar Vendedor</span>
                                 </h4>
                                 <div className="content">
-                                    <p className="has-text-grey-dark mb-3">
+                                    <p className="has-text-grey-light mb-3">
                                         ¿Interesado en este vehículo? Contáctanos para más información.
                                     </p>
                                     <div className="field">
@@ -596,6 +621,15 @@ const CarDetails: React.FC = () => {
             <div className="help-button animate-pulse">
                 <i className="fas fa-comments"></i>
             </div>
+
+            {/* Modal de Cotización */}
+            {car && (
+                <QuoteModal
+                    isOpen={isQuoteOpen}
+                    onClose={() => setIsQuoteOpen(false)}
+                    car={car}
+                />
+            )}
         </motion.div>
     );
 };

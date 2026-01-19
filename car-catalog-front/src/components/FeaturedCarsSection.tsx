@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import SearchFilter from './SearchFilter';
-import CarCard from './CarCard';
+import TravelCarCard from './TravelCarCard';
 import { Car, SearchFilters } from '@/types';
 
 interface FeaturedCarsSectionProps {
@@ -208,7 +208,7 @@ const FeaturedCarsSection: React.FC<FeaturedCarsSectionProps> = ({
                             >
                                 {displayedCars.map((car: Car) => (
                                     <div key={car.id} className="auto-carousel-item">
-                                        <CarCard car={car} />
+                                        <TravelCarCard car={car} />
                                     </div>
                                 ))}
                             </div>
