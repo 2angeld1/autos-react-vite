@@ -10,7 +10,7 @@ import {
   X,
   Wrench,
   Tag,
-  CalendarCheck,
+  FileText,
   Percent,
   Building2,
   Zap
@@ -74,9 +74,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
       titleKey: 'nav.sales',
       items: [
         {
-          name: t('nav.bookings'),
-          href: '/bookings',
-          icon: CalendarCheck,
+          name: 'Quotes',
+          href: '/quotes',
+          icon: FileText,
         },
         {
           name: t('nav.promotions'),

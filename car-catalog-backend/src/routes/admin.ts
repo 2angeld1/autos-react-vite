@@ -10,6 +10,7 @@ import Brand from '@/models/Brand';
 import Category from '@/models/Category';
 import Accessory from '@/models/Accessory';
 import Promotion from '@/models/Promotion';
+import Quote from '@/models/Quote';
 import { logger } from '@/utils/logger';
 
 const router = Router();
@@ -28,14 +29,46 @@ router.get('/stats', async (req: AuthRequest, res) => {
     logger.info('Getting admin dashboard stats...');
 
     // Get basic counts
-    const [totalCars, totalUsers, activeCars, activeUsers] = await Promise.all([
+    const [totalCars, totalUsers, activeCars, activeUsers, totalQuotes, pendingQuotes] = await Promise.all([
       Car.countDocuments(),
       User.countDocuments(),
       Car.countDocuments({ isAvailable: true }),
-      User.countDocuments({ isActive: true })
+      User.countDocuments({ isActive: true }),
+      Quote.countDocuments(),
+      Quote.countDocuments({ status: 'pending' })
     ]);
 
-    // Get recent cars and users
+    // Calcular valor del inventario
+    const inventoryValueAggregate = await Car.aggregate([
+      { $match: { isAvailable: true } },
+      { $group: { _id: null, totalValue: { $sum: "$price" } } }
+    ]);
+    const inventoryValue = inventoryValueAggregate[0]?.totalValue || 0;
+
+    // Gráfica 1: Autos por Marca (Top 5)
+    const carsByMake = await Car.aggregate([
+      { $group: { _id: "$make", count: { $sum: 1 } } },
+      { $sort: { count: -1 } },
+      { $limit: 5 }
+    ]);
+
+    // Gráfica 2: Leads por Mes (Últimos 6 meses)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    // Agrupación flexible por fecha
+    const quotesByMonth = await Quote.aggregate([
+      { $match: { createdAt: { $gte: sixMonthsAgo } } },
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
+          count: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ]);
+
+    // Get recent cars and users (Mantener por compatibilidad hasta actualizar frontend)
     const [recentCars, recentUsers] = await Promise.all([
       Car.find({ isAvailable: true })
         .sort({ createdAt: -1 })
@@ -54,8 +87,15 @@ router.get('/stats', async (req: AuthRequest, res) => {
       totalUsers,
       activeCars,
       activeUsers,
+      totalQuotes,
+      pendingQuotes,
+      inventoryValue,
       recentCars,
-      recentUsers
+      recentUsers,
+      charts: {
+        carsByMake,
+        quotesByMonth
+      }
     };
 
     logger.info('Dashboard stats retrieved successfully');

@@ -19,7 +19,7 @@ const Settings = React.lazy(() => import('@/pages/Settings'));
 const Analytics = React.lazy(() => import('@/pages/Analytics'));
 const Accessories = React.lazy(() => import('@/pages/Accessories'));
 const Brands = React.lazy(() => import('@/pages/Brands'));
-const Bookings = React.lazy(() => import('@/pages/Bookings'));
+const Quotes = React.lazy(() => import('@/pages/Quotes/Quotes'));
 const Promotions = React.lazy(() => import('@/pages/Promotions'));
 const Categories = React.lazy(() => import('@/pages/Categories'));
 
@@ -74,7 +74,7 @@ const AppRoutes: React.FC = () => {
           <Route path="categories" element={<Categories />} />
 
           {/* Sales Routes */}
-          <Route path="bookings" element={<Bookings />} />
+          <Route path="quotes" element={<Quotes />} />
           <Route path="promotions" element={<Promotions />} />
 
           {/* Users Routes - Admin only */}

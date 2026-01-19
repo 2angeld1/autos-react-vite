@@ -1,10 +1,10 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { ImageIcon, Trash2 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import Button from '@/components/common/Button';
 import { useTranslation } from 'react-i18next';
 import Input from '@/components/common/Input';
+import { Dropzone } from '@/components/common';
 import { ImagePicker } from '@/components/files';
 import { filesService } from '@/services/files';
 import { Car, FileItem } from '@/types';
@@ -145,19 +145,6 @@ const CarForm: React.FC<CarFormProps> = ({
     }
   }, [car, reset]);
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setSelectedImage(file);
-      setSelectedFileItem(null);
-      setRemoveCurrentImage(false);
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const handleImagePickerSelect = (file: FileItem) => {
     setSelectedFileItem(file);
@@ -241,81 +228,26 @@ const CarForm: React.FC<CarFormProps> = ({
         <label className="block text-sm font-medium text-gray-700 mb-2">
           Imagen del Auto
         </label>
-        {imagePreview ? (
-          <div className="relative inline-block">
-            <img
-              src={imagePreview}
-              alt="Vista previa del auto"
-              className="h-32 w-48 object-cover rounded-lg border"
-              onError={(e) => {
-                (e.target as HTMLImageElement).src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="192" height="128" viewBox="0 0 192 128"><rect fill="%23f3f4f6" width="192" height="128"/><text x="96" y="64" text-anchor="middle" fill="%239ca3af" font-size="12">Image not found</text></svg>';
-              }}
-            />
-            <button
-              type="button"
-              onClick={removeImage}
-              className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md transition-colors"
-              title="Eliminar imagen"
-            >
-              <Trash2 className="h-4 w-4" />
-            </button>
-          </div>
-        ) : (
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary-400 transition-colors">
-            <ImageIcon className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-            <div className="flex flex-col items-center gap-2">
-              <Button
-                type="button"
-                variant="primary"
-                size="sm"
-                onClick={() => setShowImagePicker(true)}
-              >
-                Seleccionar del Gestor de Archivos
-              </Button>
-              <span className="text-xs text-gray-400">o</span>
-              <label className="cursor-pointer">
-                <span className="text-sm font-medium text-primary-600 hover:text-primary-500">
-                  Subir una imagen nueva
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                  className="hidden"
-                />
-              </label>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">PNG, JPG, WEBP hasta 5MB</p>
-          </div>
-        )}
+        <Dropzone
+          onFilesDrop={(files) => {
+            const file = files[0];
+            if (file) {
+              setSelectedImage(file);
+              setSelectedFileItem(null);
+              setRemoveCurrentImage(false);
+              const reader = new FileReader();
+              reader.onload = () => {
+                setImagePreview(reader.result as string);
+              };
+              reader.readAsDataURL(file);
+            }
+          }}
+          preview={imagePreview}
+          onRemove={removeImage}
+          onLibraryClick={() => setShowImagePicker(true)}
+          description="Click o arrastra una imagen aquí para subirla"
+        />
 
-        {imagePreview && (
-          <div className="mt-2 flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowImagePicker(true)}
-            >
-              Cambiar imagen
-            </Button>
-            <label className="cursor-pointer">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-              >
-                Subir nueva
-              </Button>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="hidden"
-              />
-            </label>
-          </div>
-        )}
       </motion.div>
 
       {/* Basic Information */}

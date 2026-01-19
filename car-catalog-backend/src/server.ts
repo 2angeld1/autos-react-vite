@@ -8,6 +8,8 @@ import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 
 // Import routes
 import apiRoutes from './routes';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './config/swagger';
 
 // Load environment variables
 dotenv.config();
@@ -64,6 +66,7 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api', apiRoutes);
 
 // 404 handler

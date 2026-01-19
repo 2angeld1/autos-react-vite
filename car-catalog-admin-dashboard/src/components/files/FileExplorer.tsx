@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Folder,
   File,
@@ -24,6 +24,7 @@ import {
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Modal from '@/components/common/Modal';
+import { Dropzone } from '@/components/common';
 import { filesService } from '@/services/files';
 import type { FileItem, Breadcrumb, FolderTreeItem } from '@/types/file';
 import { formatRelativeTime } from '@/utils/formatters';
@@ -74,7 +75,6 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
   // Upload state
   const [uploadFiles, setUploadFiles] = useState<File[]>([]);
   const [uploading, setUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Fetch files
   const fetchFiles = useCallback(async () => {
@@ -587,25 +587,13 @@ const FileExplorer: React.FC<FileExplorerProps> = ({
         title="Upload Files"
       >
         <div className="space-y-4">
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center cursor-pointer hover:border-blue-500 transition-colors"
-          >
-            <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">Click to select files or drag and drop</p>
-            <p className="text-sm text-gray-400 mt-2">Images and PDFs up to 10MB</p>
-          </div>
-          
-          <input
-            ref={fileInputRef}
-            type="file"
-            multiple
-            accept="image/*,application/pdf"
-            onChange={(e) => {
-              const files = Array.from(e.target.files || []);
-              setUploadFiles(files);
+          <Dropzone
+            onFilesDrop={(files) => {
+              setUploadFiles(prev => [...prev, ...files]);
             }}
-            className="hidden"
+            multiple={true}
+            accept="image/*,application/pdf"
+            description="Haz clic o arrastra archivos aquí para prepararlos para la subida"
           />
 
           {uploadFiles.length > 0 && (

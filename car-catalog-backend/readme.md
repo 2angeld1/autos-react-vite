@@ -1,186 +1,87 @@
-# Backend - Catálogo de Autos
+# 🚀 Car Catalog API (VeloDrive Core)
 
-API REST construida con Node.js, Express, TypeScript y Mongoose (MongoDB).
+Back-end robusto y escalable desarrollado para la plataforma VeloDrive. Construido con **Node.js**, **Express**, **TypeScript** y **MongoDB**, siguiendo una arquitectura por capas para garantizar mantenibilidad y escalabilidad.
 
-## 🚀 Características
+## ✨ Características Principales
 
-- Autenticación JWT
-- Gestión de usuarios y roles
-- Catálogo de autos con filtros avanzados
-- Sistema de archivos para imágenes
-   - Uso de MongoDB con Mongoose
-- Desplegado en Render
+*   **Autenticación Segura:** JWT (JSON Web Tokens) con gestión de roles (Admin/User).
+*   **Gestión Multimedia:** Carga de imágenes optimizada compatible con almacenamiento local y en la nube (Cloudinary ready).
+*   **Arquitectura Limpia:** Separación de responsabilidades mediante patrón _Controller-Service-Repository_.
+*   **Validación de Datos:** Uso estricto de `express-validator` para integridad de datos.
+*   **Documentación API:** Integrada con **Swagger/OpenAPI**.
+*   **Base de Datos NoSQL:** Esquemas flexibles y potentes con Mongoose.
 
-## 📋 Prerrequisitos
+## 🛠️ Stack Tecnológico
 
-- Node.js 18+
-- PostgreSQL (local o en la nube)
-- npm o yarn
+*   **Runtime:** Node.js v18+
+*   **Framework:** Express.js
+*   **Lenguaje:** TypeScript 5.0
+*   **Base de Datos:** MongoDB (via Mongoose)
+*   **Documentación:** Swagger UI Express
+*   **Seguridad:** Helmet, CORS, Bcrypt
 
-## 🛠️ Instalación
+## 📚 Documentación de API
 
-1. Clona el repositorio:
-```bash
-git clone <tu-repo>
-cd car-catalog-backend
+Una vez iniciado el servidor, puedes acceder a la documentación interactiva completa en:
+
+```
+http://localhost:5000/api-docs
 ```
 
-2. Instala dependencias:
-```bash
-npm install
-```
+Aquí podrás probar todos los endpoints (Auth, Cars, Users, Uploads) directamente desde el navegador.
 
-3. Configura las variables de entorno:
-```bash
-cp .env.example .env
-```
+## 🚀 Instalación y Uso
 
-Edita el archivo `.env` con tus configuraciones.
+1.  **Clonar repositorio:**
+    ```bash
+    git clone <repo-url>
+    cd car-catalog-backend
+    ```
 
-## ⚙️ Variables de Entorno
+2.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-| Variable | Descripción | Ejemplo |
-|----------|-------------|---------|
-| `NODE_ENV` | Entorno de ejecución | `development` |
-| `PORT` | Puerto del servidor | `5000` |
-| `DATABASE_URL` | URL de conexión PostgreSQL | `postgresql://user:pass@host/db` |
-| `JWT_SECRET` | Clave secreta para JWT | `tu-clave-secreta` |
-| `JWT_EXPIRES_IN` | Expiración del token | `7d` |
-| `FRONTEND_URL` | URL del frontend desplegado | `https://tu-frontend.vercel.app` |
+3.  **Configurar entorno:**
+    Crea un archivo `.env` basado en `.env.example`:
+    ```env
+    PORT=5000
+    MONGODB_URI=mongodb+srv://...
+    JWT_SECRET=super_secret_key
+    FRONTEND_URL=http://localhost:5173
+    ```
 
-## 🗄️ Base de Datos
+4.  **Iniciar servidor (Desarrollo):**
+    ```bash
+    npm run dev
+    ```
 
-### Configuración de MongoDB / Mongoose
+5.  **Poblar base de datos (Seed):**
+    ```bash
+    npm run seed
+    ```
 
-1. Crea un clúster en MongoDB Atlas (o usa una instancia local).
-
-2. Añade la conexión a las variables de entorno en `.env`:
-```bash
-MONGODB_URI=mongodb+srv://<user>:<pass>@cluster0.mongodb.net/your_db?retryWrites=true&w=majority
-```
-
-3. Instala dependencias (si no lo has hecho):
-```bash
-npm install
-```
-
-No se requiere un paso de "migrate" como con Prisma; los modelos se crean/actualizan mediante Mongoose.
-
-### Migración de datos (opcional)
-
-Si tienes datos en MongoDB que quieres migrar:
-```bash
-npm run migrate:cars
-```
-
-## 🚀 Ejecución
-
-### Desarrollo
-```bash
-npm run dev
-```
-
-### Producción
-```bash
-npm run build
-npm start
-```
-
-## 📡 API Endpoints
-
-### Autenticación
-- `POST /api/auth/login` - Iniciar sesión
-- `POST /api/auth/register` - Registrarse
-- `GET /api/auth/profile` - Obtener perfil
-
-### Autos
-- `GET /api/cars` - Listar autos (con filtros)
-- `GET /api/cars/:id` - Obtener auto por ID
-- `POST /api/cars` - Crear auto (admin)
-- `PUT /api/cars/:id` - Actualizar auto (admin)
-- `DELETE /api/cars/:id` - Eliminar auto (admin)
-
-### Usuarios (Admin)
-- `GET /api/users` - Listar usuarios
-- `PUT /api/users/:id` - Actualizar usuario
-- `DELETE /api/users/:id` - Eliminar usuario
-
-### Archivos
-- `POST /api/files/upload` - Subir imagen
-- `GET /api/files/:filename` - Obtener imagen
-
-## 🚀 Despliegue en Render
-
-1. **Crear cuenta en Render**: Ve a [render.com](https://render.com)
-
-2. **Conectar repositorio**: Conecta tu repositorio de GitHub
-
-3. **Configurar servicio**:
-   - **Environment**: `Node`
-   - **Build Command**: `npm install && npm run build`
-   - **Start Command**: `npm start`
-
-4. **Variables de entorno**: Agrega todas las variables del `.env`
-
-5. **Base de datos**: Crea una PostgreSQL database en Render y conecta
-
-6. **Desplegar**: Render construirá y desplegará automáticamente
-
-## 🔗 Conexión con Frontend
-
-### Dashboard Admin (Vercel)
-- URL: `https://tu-dashboard.vercel.app`
-- API Base: `https://tu-backend.onrender.com/api`
-
-### Frontend Principal (Vercel)
-- URL: `https://tu-frontend.vercel.app`
-- API Base: `https://tu-backend.onrender.com/api`
-
-## 📝 Scripts Disponibles
+## 📂 Estructura del Proyecto
 
 ```bash
-npm run dev          # Desarrollo con ts-node
-npm run build        # Compilar TypeScript
-npm start            # Ejecutar en producción
-npm run seed         # Poblar base de datos (Mongoose/Atlas)
-npm run test         # Ejecutar tests
+src/
+├── config/         # Configuraciones (DB, Swagger, Env)
+├── controllers/    # Lógica de entrada/salida (Request/Response)
+├── middleware/     # Auth, Validaciones, Error Handling
+├── models/         # Esquemas de Mongoose
+├── routes/         # Definición de endpoints
+├── services/       # Lógica de negocio pura
+├── types/          # Definiciones de TypeScript
+└── utils/          # Helpers y utilidades
 ```
 
 ## 🧪 Testing
 
+El proyecto está preparado para pruebas unitarias e integración.
 ```bash
 npm test
 ```
 
-## 📁 Estructura del Proyecto
-
-```
-backend/
-├── src/
-│   ├── controllers/    # Controladores de rutas
-│   ├── middleware/     # Middleware personalizado
-│   ├── models/         # Modelos de Prisma (opcional)
-│   ├── routes/         # Definición de rutas
-│   ├── services/       # Lógica de negocio
-│   ├── types/          # Tipos TypeScript
-│   ├── utils/          # Utilidades
-│   ├── config/         # Configuración
-│   └── server.ts       # Punto de entrada
-├── prisma/
-│   ├── schema.prisma   # Esquema de base de datos
-│   └── migrations/     # Migraciones
-├── uploads/            # Archivos subidos
-└── logs/              # Logs de aplicación
-```
-
-## 🤝 Contribución
-
-1. Fork el proyecto
-2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
-3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
-4. Push a la rama (`git push origin feature/AmazingFeature`)
-5. Abre un Pull Request
-
-## 📄 Licencia
-
-Este proyecto está bajo la Licencia MIT.
+---
+Desarrollado con ❤️ por [Tu Nombre/Usuario]

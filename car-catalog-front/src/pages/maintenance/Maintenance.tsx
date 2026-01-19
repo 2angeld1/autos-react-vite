@@ -1,8 +1,22 @@
-import React from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const Maintenance: React.FC = () => {
+  const handleSchedule = () => {
+    toast.success('¡Solicitud de cita enviada! Te contactaremos pronto.', {
+      duration: 4000,
+      position: 'bottom-right',
+      style: {
+        background: '#1F2937',
+        color: '#fff',
+        border: '1px solid #3B82F6',
+      },
+      icon: '📅',
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 pt-20">
+      <Toaster />
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl font-bold text-white mb-8 flex items-center gap-3">
           <span className="p-2 bg-green-500/20 rounded-lg text-green-400">
@@ -62,7 +76,10 @@ const Maintenance: React.FC = () => {
               </div>
 
               <div className="flex gap-4 mt-6">
-                <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg shadow-blue-600/20">
+                <button
+                  onClick={handleSchedule}
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
+                >
                   Agendar Cita
                 </button>
                 <button className="bg-transparent hover:bg-gray-700 text-white font-semibold py-2 px-6 rounded-lg border border-gray-600 transition-colors">

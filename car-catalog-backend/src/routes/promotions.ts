@@ -7,6 +7,9 @@ const router = Router();
 const upload = multer({ dest: 'uploads/temp/' });
 
 // --- PUBLIC ROUTES ---
+// Get active promotions for banners
+router.get('/active', PromotionController.getActivePromotions);
+
 // Validate a promotion code (for checkout)
 router.post('/validate', PromotionController.validateCode);
 

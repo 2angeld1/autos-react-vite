@@ -7,7 +7,6 @@ import {
   Palette, 
   Globe, 
   Save,
-  Camera,
   Mail,
   Lock,
   Smartphone
@@ -19,6 +18,7 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
+import { Dropzone } from '@/components/common';
 import toast from 'react-hot-toast';
 import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
@@ -54,17 +54,6 @@ const ProfileSettings: React.FC = () => {
     },
   });
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue('avatar', file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setAvatarPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
 
   const onSubmit = async (data: any) => {
     try {
@@ -85,34 +74,26 @@ const ProfileSettings: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Avatar Upload */}
         <div className="flex items-center space-x-6">
-          <div className="relative">
-            <div className="h-20 w-20 rounded-full overflow-hidden bg-gray-200">
-              {avatarPreview || user?.avatar ? (
-                <img
-                  src={avatarPreview || user?.avatar}
-                  alt="Avatar"
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                <div className="h-full w-full flex items-center justify-center">
-                  <User className="h-8 w-8 text-gray-400" />
-                </div>
-              )}
-            </div>
-            <label
-              htmlFor="avatar"
-              className="absolute inset-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center rounded-full opacity-0 hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              <Camera className="h-5 w-5 text-white" />
-              <input
-                id="avatar"
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                className="hidden"
-              />
-            </label>
-          </div>
+          <Dropzone
+            onFilesDrop={(files) => {
+              const file = files[0];
+              if (file) {
+                setValue('avatar', file, { shouldDirty: true });
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setAvatarPreview(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+            preview={avatarPreview || user?.avatar}
+            onRemove={() => {
+              setValue('avatar', null, { shouldDirty: true });
+              setAvatarPreview(null);
+            }}
+            className="h-24 w-24 !p-0 !rounded-full overflow-hidden"
+            description="Subir foto"
+          />
           <div>
             <p className="text-sm font-medium text-gray-900">Profile Photo</p>
             <p className="text-sm text-gray-500">

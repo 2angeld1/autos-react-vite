@@ -8,6 +8,7 @@ export { default as Loading } from './Loading';
 export { default as Pagination } from './Pagination';
 export { default as Table } from './Table';
 export { default as DataTable } from './DataTable';
+export { default as Dropzone } from './Dropzone';
 
 // Re-export types
 export type { ButtonProps } from './Button';

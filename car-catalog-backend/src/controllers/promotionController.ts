@@ -41,7 +41,22 @@ export class PromotionController {
     res.json({ success: true, data: promotion });
   });
 
-  // Validate promotion code (public endpoint for checkout)
+
+
+  // Get active promotions (public endpoint for frontend banners)
+  static getActivePromotions = asyncHandler(async (req: Request, res: Response) => {
+    const now = new Date();
+
+    // Find promotions that are active/scheduled AND valid by date
+    const promotions = await Promotion.find({
+      status: { $in: ['active', 'scheduled'] },
+      startDate: { $lte: now },
+      endDate: { $gte: now }
+    }).sort({ startDate: 1 });
+
+    res.json({ success: true, data: promotions });
+  });
+
   static validateCode = asyncHandler(async (req: Request, res: Response) => {
     const { code, purchaseAmount } = req.body;
     
@@ -111,13 +126,16 @@ export class PromotionController {
   static createPromotion = asyncHandler(async (req: AuthRequest, res: Response) => {
     const promotionData = req.body;
     
-    // Handle image upload
+    // Handle image upload (file) or imageUrl (from file manager)
     if (req.file) {
       const result = await CloudinaryService.uploadImage(req.file.path, 'autos/promotions');
       promotionData.image = result.secure_url;
       promotionData.cloudinaryId = result.public_id;
       promotionData.cloudinaryUrl = result.secure_url;
       if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    } else if (promotionData.imageUrl) {
+      promotionData.image = promotionData.imageUrl;
+      delete promotionData.imageUrl;
     }
     
     promotionData.createdBy = req.user?.id;
@@ -134,13 +152,16 @@ export class PromotionController {
     const { id } = req.params;
     const updateData = req.body;
     
-    // Handle image upload
+    // Handle image upload (file) or imageUrl (from file manager)
     if (req.file) {
       const result = await CloudinaryService.uploadImage(req.file.path, 'autos/promotions');
       updateData.image = result.secure_url;
       updateData.cloudinaryId = result.public_id;
       updateData.cloudinaryUrl = result.secure_url;
       if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    } else if (updateData.imageUrl) {
+      updateData.image = updateData.imageUrl;
+      delete updateData.imageUrl;
     }
     
     const promotion = await Promotion.findByIdAndUpdate(id, updateData, { new: true });

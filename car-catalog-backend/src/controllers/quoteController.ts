@@ -3,7 +3,9 @@ import PDFDocument from 'pdfkit';
 import axios from 'axios';
 import { EmailService } from '../services/emailService';
 import Car from '../models/Car';
+import Quote from '../models/Quote';
 
+// Crear una nueva cotización
 export const createQuote = async (req: Request, res: Response) => {
     try {
         const { carId, customerName, email, phone, downPayment, term } = req.body;
@@ -15,7 +17,19 @@ export const createQuote = async (req: Request, res: Response) => {
             return res.status(404).json({ message: 'Vehículo no encontrado' });
         }
 
-        // 2. Descargar imagen del auto si existe
+        // 2. Guardar el Lead en la Base de Datos
+        const newQuote = new Quote({
+            car: car._id,
+            customerName,
+            email,
+            phone,
+            downPayment,
+            term,
+            status: 'pending'
+        });
+        await newQuote.save();
+
+        // 3. Descargar imagen del auto si existe
         let imageBuffer: Buffer | null = null;
         try {
             if (car.image && (car.image.startsWith('http') || car.image.startsWith('https'))) {
@@ -26,7 +40,7 @@ export const createQuote = async (req: Request, res: Response) => {
             console.warn('Could not download car image for PDF:', error);
         }
 
-        // 3. Generar el PDF en memoria
+        // 4. Generar el PDF en memoria
         const doc = new PDFDocument({ margin: 50 });
         const buffers: Buffer[] = [];
 
@@ -42,7 +56,8 @@ export const createQuote = async (req: Request, res: Response) => {
         
         doc.fontSize(10)
            .font('Helvetica')
-           .text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, { align: 'center' });
+            .text(`Folio: ${newQuote._id.toString().slice(-6).toUpperCase()}`, { align: 'right' });
+        doc.text(`Fecha de emisión: ${new Date().toLocaleDateString()}`, { align: 'center' });
            
         doc.moveDown();
         doc.lineWidth(2).moveTo(50, doc.y).lineTo(550, doc.y).strokeColor('#EA580C').stroke();
@@ -50,14 +65,12 @@ export const createQuote = async (req: Request, res: Response) => {
 
         // Imagen del Auto
         if (imageBuffer) {
-            // Centrar imagen
             const imgWidth = 400;
             const x = (doc.page.width - imgWidth) / 2;
             doc.image(imageBuffer, x, doc.y, { width: imgWidth });
-            doc.moveDown(14); // Espacio suficiente para la imagen
+            doc.moveDown(14);
         }
 
-        // Vehículo
         const startY = doc.y;
         
         doc.fillColor('#000000').fontSize(18).font('Helvetica-Bold')
@@ -68,12 +81,10 @@ export const createQuote = async (req: Request, res: Response) => {
         
         doc.moveDown();
 
-        // Especificaciones y Datos del Cliente (en columnas)
         const col1X = 50;
         const col2X = 300;
         const currentY = doc.y;
 
-        // Columna 1: Especificaciones
         doc.fontSize(12).font('Helvetica-Bold').fillColor('#333333').text('Especificaciones', col1X, currentY);
         doc.moveDown(0.5);
         doc.font('Helvetica').fontSize(10);
@@ -87,7 +98,6 @@ export const createQuote = async (req: Request, res: Response) => {
             doc.font('Helvetica-Oblique').text(car.description.substring(0, 100) + '...', { width: 220 });
         }
 
-        // Columna 2: Datos del Cliente
         doc.fontSize(12).font('Helvetica-Bold').fillColor('#333333').text('Datos del Cliente', col2X, currentY);
         doc.moveDown(0.5);
         doc.font('Helvetica').fontSize(10);
@@ -96,35 +106,30 @@ export const createQuote = async (req: Request, res: Response) => {
         doc.text(`Teléfono: ${phone}`, col2X);
         
         doc.moveDown(2);
-        
-        // Espacio para alinear abajo de las columnas
+
         doc.y = Math.max(doc.y, currentY + 120); 
 
-        // Características (Features)
         if (car.features && car.features.length > 0) {
             doc.fontSize(12).font('Helvetica-Bold').fillColor('#333333').text('Características Destacadas');
             doc.moveDown(0.5);
             doc.font('Helvetica').fontSize(10);
-            
-            // Listar features en 2 columnas si son muchos
             const featuresText = car.features.join(', ');
             doc.text(featuresText, { align: 'justify' });
             doc.moveDown();
         }
 
-        // Tabla Financiera
         doc.moveDown();
         doc.rect(50, doc.y, 500, 110).fill('#F3F4F6').stroke();
         
-        const tableStartY = doc.y - 100; // Ajuste manual porque rect no mueve cursor
-        doc.fillColor('#000000'); // Reset color
+        const tableStartY = doc.y - 100;
+        doc.fillColor('#000000');
         
         doc.fontSize(14).font('Helvetica-Bold').text('Propuesta de Financiamiento', 70, tableStartY + 15);
         
         const price = car.price || 0;
         const downPaymentAmount = (price * (downPayment || 20)) / 100;
         const financedAmount = price - downPaymentAmount;
-        const interestRate = 0.15; // 15% anual fijo para ejemplo
+        const interestRate = 0.15;
         const monthlyInterest = interestRate / 12;
         const months = term || 48;
         const monthlyPayment = (financedAmount * monthlyInterest) / (1 - Math.pow(1 + monthlyInterest, -months));
@@ -141,27 +146,23 @@ export const createQuote = async (req: Request, res: Response) => {
         doc.font('Helvetica-Bold').text(`Monto a Financiar:`, 70, tableStartY + 75);
         doc.text(`$${financedAmount.toLocaleString()}`, 200, tableStartY + 75, { align: 'right', width: 100 });
 
-        // Resultado Mensualidad (lado derecho destacado)
         doc.fontSize(12).text('Mensualidad Estimada', 350, tableStartY + 40);
         doc.fontSize(24).fillColor('#EA580C').text(`$${monthlyPayment.toLocaleString(undefined, {maximumFractionDigits: 0})}`, 350, tableStartY + 60);
         doc.fontSize(10).fillColor('#666666').text(`a ${months} meses`, 350, tableStartY + 85);
 
-        // Footer
-        doc.y = 700; // Posicion absoluta al final
-        doc.fontSize(8).fillColor('#999999').text('Esta cotización es de carácter informativo y no representa una oferta vinculante. Sujeto a aprobación de crédito. Precios y tasas pueden cambiar sin previo aviso.', 50, 700, { align: 'center', width: 500 });
+        doc.y = 700;
+        doc.fontSize(8).fillColor('#999999').text('Esta cotización es de carácter informativo y no representa una oferta vinculante.', 50, 700, { align: 'center', width: 500 });
         doc.text('VeloDrive - El placer de conducir.', { align: 'center' });
 
-        // Finalizar PDF
         doc.end();
 
-        // Esperar buffer
         await new Promise<void>((resolve) => {
             doc.on('end', () => resolve());
         });
 
         const pdfData = Buffer.concat(buffers);
 
-        // 4. Enviar correo
+        // 5. Enviar correo
         await EmailService.sendEmail({
             to: email,
             subject: `Cotización Oficial: ${car.make} ${car.carModel} (${car.year})`,
@@ -184,7 +185,6 @@ export const createQuote = async (req: Request, res: Response) => {
   .car-specs { font-size: 14px; color: #71717a; }
   .attachment-box { background-color: #fff7ed; border-left: 4px solid #f97316; padding: 15px 20px; margin: 25px 0; color: #9a3412; font-size: 14px; }
   .footer { background-color: #f4f4f5; padding: 30px; text-align: center; font-size: 12px; color: #a1a1aa; border-top: 1px solid #e4e4e7; }
-  .button { display: inline-block; background-color: #f97316; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold; margin-top: 20px; }
 </style>
 </head>
 <body>
@@ -192,38 +192,23 @@ export const createQuote = async (req: Request, res: Response) => {
     <div class="header">
       <div class="brand">VELO<span>DRIVE</span></div>
     </div>
-    
     <div class="content">
       <div class="greeting">Hola ${customerName},</div>
-      
-      <p>Gracias por tu interés en nuestros vehículos exclusivos. Hemos recibido tu solicitud y preparado una cotización personalizada especialmente para ti.</p>
-      
+      <p>Gracias por tu interés. Hemos recibido tu solicitud. Folio: <strong>${newQuote._id.toString().slice(-6).toUpperCase()}</strong>.</p>
       <div class="car-summary">
         <div class="car-details">
           <h3>${car.year} ${car.make} ${car.model}</h3>
           <div class="car-price">$${car.price.toLocaleString()}</div>
-          <div class="car-specs">
-            ${car.transmission === 'a' ? 'Automática' : 'Manual'} • ${car.fuel_type.charAt(0).toUpperCase() + car.fuel_type.slice(1)} • ${car.cylinders} Cilindros
-          </div>
         </div>
       </div>
-
       <div class="attachment-box">
         <strong>📎 Cotización PDF Adjunta:</strong><br>
-        Encontrarás un archivo PDF adjunto a este correo con el desglose financiero completo, opciones de pago y especificaciones técnicas detalladas.
+        Revisa los detalles completos en el archivo adjunto.
       </div>
-
-      <p>Uno de nuestros asesores expertos se pondrá en contacto contigo al número <strong>${phone}</strong> en las próximas horas para discutir las opciones de financiamiento y agendar una prueba de manejo.</p>
-      
-      <p style="margin-top: 30px;">Estamos aquí para ayudarte a encontrar el auto de tus sueños.</p>
-      
-      <p style="margin-top: 40px; font-weight: 600;">Atentamente,<br>El equipo de VeloDrive</p>
+      <p>Un asesor experto te contactará al <strong>${phone}</strong>.</p>
     </div>
-    
     <div class="footer">
-      <p>© ${new Date().getFullYear()} VeloDrive Inc. Todos los derechos reservados.</p>
-      <p>Este correo fue enviado a ${email} como respuesta a una solicitud de cotización.</p>
-      <p>VeloDrive • Avenida Principal 123 • Ciudad de México</p>
+      <p>© ${new Date().getFullYear()} VeloDrive Inc.</p>
     </div>
   </div>
 </body>
@@ -237,17 +222,53 @@ export const createQuote = async (req: Request, res: Response) => {
                 }
             ]
         });
-        
-        // Copia Admin
+
         await EmailService.sendAdminNotification(
-            'Nuevo Lead Generado', 
-            `Cliente: ${customerName}<br>Email: ${email}<br>Auto: ${car.fullName}<br>Valor: $${car.price}`
+            'Nuevo Lead Generado 🚀',
+            `Nuevo lead capturado:<br>
+             Cliente: <strong>${customerName}</strong><br>
+             Email: ${email}<br>
+             Teléfono: ${phone}<br>
+             Auto: ${car.fullName}<br>
+             ID Cotización: ${newQuote._id}`
         );
 
-        res.status(200).json({ message: 'Cotización enviada con éxito' });
+        res.status(200).json({ message: 'Cotización enviada con éxito', quoteId: newQuote._id });
 
     } catch (error) {
         console.error('Error creating quote:', error);
         res.status(500).json({ message: 'Error generando la cotización' });
+    }
+};
+
+// Obtener todas las cotizaciones (Admin)
+export const getQuotes = async (req: Request, res: Response) => {
+    try {
+        const quotes = await Quote.find()
+            .populate('car', 'make carModel year image price')
+            .sort({ createdAt: -1 });
+        res.json(quotes);
+    } catch (error) {
+        res.status(500).json({ message: 'Error fetching quotes' });
+    }
+};
+
+// Actualizar estado de una cotización
+export const updateQuoteStatus = async (req: Request, res: Response) => {
+    try {
+        const { id } = req.params;
+        const { status, notes } = req.body;
+
+        const quote = await Quote.findByIdAndUpdate(
+            id,
+            { status, notes },
+            { new: true }
+        );
+
+        if (!quote) return res.status(404).json({ message: 'Cotización no encontrada' });
+
+        res.json(quote);
+    } catch (error) {
+        res.status(500).json({ message: 'Error updating quote' });
     }
 };

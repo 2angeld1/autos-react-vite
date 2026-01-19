@@ -53,9 +53,18 @@ export interface DashboardStats {
   totalUsers: number;
   activeCars: number;
   activeUsers: number;
+  totalQuotes: number;
+  pendingQuotes: number;
+  inventoryValue: number;
   recentCars: Car[];
+  recentUsers?: User[];
+  charts?: {
+    carsByMake: { _id: string; count: number }[];
+    quotesByMonth: { _id: string; count: number }[];
+  };
 }
 
 export { apiClient } from './api';
 export { authService } from './auth';
 export type { LoginResponse } from './auth';
+export * from './quotes';

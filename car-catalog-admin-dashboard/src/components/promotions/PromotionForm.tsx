@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Percent, Plus, Check, Calendar, Tag, DollarSign, Clock, Image as ImageIcon } from 'lucide-react';
+import { Percent, Check, Calendar, Tag, DollarSign, Clock } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import { Dropzone } from '@/components/common';
+import { ImagePicker } from '@/components/files';
 import { Promotion } from '@/services/promotions';
+import { FileItem } from '@/types';
+import { filesService } from '@/services/files';
 
 interface PromotionFormProps {
   promotion?: Promotion;
@@ -29,6 +33,8 @@ interface PromotionFormData {
 const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onClose, loading }) => {
   const [imagePreview, setImagePreview] = useState<string | null>(promotion?.image || null);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [selectedFileItem, setSelectedFileItem] = useState<FileItem | null>(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
 
   const formatDate = (dateStr?: string) => {
     if (!dateStr) return '';
@@ -59,16 +65,11 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onCl
 
   const promoType = watch('type');
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+
+  const handleImagePickerSelect = (file: FileItem) => {
+    setSelectedFileItem(file);
+    setImageFile(null);
+    setImagePreview(filesService.getFileUrl(file));
   };
 
   const onFormSubmit = async (data: PromotionFormData) => {
@@ -76,9 +77,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onCl
     Object.entries(data).forEach(([key, value]) => {
       formData.append(key, value.toString());
     });
+
     if (imageFile) {
       formData.append('image', imageFile);
+    } else if (selectedFileItem) {
+      formData.append('imageUrl', filesService.getFileUrl(selectedFileItem));
     }
+
     await onSubmit(formData);
   };
 
@@ -88,26 +93,32 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onCl
 
       <form id="promotion-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
         {/* Banner Image */}
-        <div className="flex items-center gap-6">
-          <div className="relative group">
-            <div className="w-40 h-24 bg-gray-100 rounded-xl flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 group-hover:border-orange-500 transition-colors">
-              {imagePreview ? (
-                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-              ) : (
-                <ImageIcon className="h-8 w-8 text-gray-400" />
-              )}
-            </div>
-            <label className="absolute inset-0 cursor-pointer opacity-0 group-hover:opacity-100 bg-black/10 rounded-xl transition-opacity flex items-center justify-center">
-              <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
-              <div className="bg-white p-2 rounded-full shadow-lg">
-                <Plus className="h-4 w-4 text-gray-600" />
-              </div>
-            </label>
-          </div>
-          <div className="flex-1">
-            <h3 className="font-semibold text-gray-900">Promotion Banner</h3>
-            <p className="text-sm text-gray-500 mt-1">Optional banner image for the promotion.</p>
-          </div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">Promotion Banner</label>
+          <Dropzone
+            onFilesDrop={(files) => {
+              const file = files[0];
+              if (file) {
+                setImageFile(file);
+                setSelectedFileItem(null);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                  setImagePreview(reader.result as string);
+                };
+                reader.readAsDataURL(file);
+              }
+            }}
+            preview={imagePreview}
+            onRemove={() => {
+              setImageFile(null);
+              setSelectedFileItem(null);
+              setImagePreview(null);
+            }}
+            onLibraryClick={() => setShowImagePicker(true)}
+            description="Arrastra el banner de la promoción aquí"
+            className="w-full"
+          />
+          <p className="text-xs text-gray-500 mt-1">Optional banner image for the promotion.</p>
         </div>
 
         {/* Basic Info */}
@@ -226,6 +237,13 @@ const PromotionForm: React.FC<PromotionFormProps> = ({ promotion, onSubmit, onCl
           {promotion ? 'Update Promotion' : 'Create Promotion'}
         </Button>
       </div>
+      <ImagePicker
+        isOpen={showImagePicker}
+        onClose={() => setShowImagePicker(false)}
+        onSelect={handleImagePickerSelect}
+        currentImage={imagePreview}
+        title="Seleccionar Banner de Promoción"
+      />
     </div>
   );
 };

@@ -1,170 +1,55 @@
-### Paso 1: Configurar el entorno
+# 📊 VeloDrive - Admin Dashboard
 
-1. **Instalar Node.js**: Asegúrate de tener Node.js instalado en tu máquina. Puedes descargarlo desde [nodejs.org](https://nodejs.org/).
+Panel de administración integral para la gestión de la plataforma VeloDrive. Permite a los administradores controlar inventario, usuarios, promociones y visualizar métricas clave del negocio en tiempo real.
 
-2. **Crear un nuevo proyecto con Vite**:
-   Abre una terminal y ejecuta el siguiente comando para crear un nuevo proyecto de React con Vite:
+## 🌟 Funcionalidades Clave
 
-   ```bash
-   npm create vite@latest admin-dashboard --template react
-   ```
+*   **Dashboard Interactivo:** 
+    *   Visualización de KPIs (Total Autos, Valor Inventario, Leads).
+    *   Gráficos de rendimiento y stock.
+*   **Gestión de Inventario (CRUD):** 
+    *   Creación, edición y eliminación de vehículos.
+    *   Subida de imágenes con **Drag & Drop** y previsualización.
+*   **Gestión de Promociones:** Control de banners y ofertas activas en el frontend.
+*   **Sistema de Archivos:** Explorador de archivos multimedia integrado.
+*   **Seguridad:** Rutas protegidas y gestión de sesiones de administrador.
 
-   Esto creará una nueva carpeta llamada `admin-dashboard` con una plantilla básica de React.
+## 🛠️ Stack Tecnológico
 
-3. **Navegar al directorio del proyecto**:
+*   **Core:** React 18, TypeScript, Vite
+*   **UI/UX:** TailwindCSS, Lucide Icons
+*   **Gráficos:** Recharts / Chart.js
+*   **Formularios:** React Hook Form
+*   **Gestión de Archivos:** React Dropzone
+*   **HTTP Client:** Axios (con interceptores para Auth)
 
-   ```bash
-   cd admin-dashboard
-   ```
+## 🚀 Puesta en Marcha
 
-4. **Instalar dependencias**:
+1.  **Instalar dependencias:**
+    ```bash
+    npm install
+    ```
 
-   ```bash
-   npm install
-   ```
+2.  **Configurar conexión:**
+    Asegúrate de que el `.env` apunte a tu API local o de producción:
+    ```env
+    VITE_API_URL=http://localhost:5000/api
+    ```
 
-### Paso 2: Estructura del proyecto
+3.  **Iniciar panel:**
+    ```bash
+    npm run dev
+    ```
 
-Organiza la estructura de tu proyecto de la siguiente manera:
+## 📂 Organización de Código
 
-```
-admin-dashboard/
-├── public/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   ├── services/
-│   ├── styles/
-│   ├── App.jsx
-│   ├── main.jsx
-├── index.html
-├── package.json
-└── vite.config.js
-```
+El dashboard está estructurado para facilitar la escalabilidad:
 
-### Paso 3: Instalar dependencias adicionales
+*   `src/pages`: Vistas por módulo (Dashboard, Cars, Users, Settings).
+*   `src/components/common`: Componentes base (Botones, Inputs, Modales).
+*   `src/components/dashboard`: Componentes específicos de métricas (StatsCard, Charts).
+*   `src/layouts`: Layouts principales (Sidebar, Header).
+*   `src/services`: Servicios de API tipados.
 
-Para el desarrollo del dashboard, es posible que necesites algunas bibliotecas adicionales:
-
-1. **React Router** para la navegación:
-
-   ```bash
-   npm install react-router-dom
-   ```
-
-2. **Axios** para realizar solicitudes HTTP:
-
-   ```bash
-   npm install axios
-   ```
-
-3. **Styled Components** o **CSS Modules** para estilos (opcional):
-
-   ```bash
-   npm install styled-components
-   ```
-
-### Paso 4: Crear componentes y páginas
-
-1. **Crear un componente de navegación** en `src/components/Navbar.jsx`:
-
-   ```jsx
-   import React from 'react';
-   import { Link } from 'react-router-dom';
-
-   const Navbar = () => {
-     return (
-       <nav>
-         <ul>
-           <li><Link to="/">Dashboard</Link></li>
-           <li><Link to="/cars">Cars</Link></li>
-           <li><Link to="/users">Users</Link></li>
-           <li><Link to="/images">Images</Link></li>
-         </ul>
-       </nav>
-     );
-   };
-
-   export default Navbar;
-   ```
-
-2. **Crear páginas** en `src/pages/` como `Dashboard.jsx`, `Cars.jsx`, `Users.jsx`, `Images.jsx`, etc.
-
-3. **Configurar las rutas** en `src/App.jsx`:
-
-   ```jsx
-   import React from 'react';
-   import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-   import Navbar from './components/Navbar';
-   import Dashboard from './pages/Dashboard';
-   import Cars from './pages/Cars';
-   import Users from './pages/Users';
-   import Images from './pages/Images';
-
-   const App = () => {
-     return (
-       <Router>
-         <Navbar />
-         <Routes>
-           <Route path="/" element={<Dashboard />} />
-           <Route path="/cars" element={<Cars />} />
-           <Route path="/users" element={<Users />} />
-           <Route path="/images" element={<Images />} />
-         </Routes>
-       </Router>
-     );
-   };
-
-   export default App;
-   ```
-
-### Paso 5: Estilos
-
-Puedes agregar estilos en `src/styles/` o utilizar **Styled Components** para estilizar tus componentes.
-
-### Paso 6: Ejecutar el proyecto
-
-Finalmente, ejecuta el proyecto con el siguiente comando:
-
-```bash
-npm run dev
-```
-
-Esto iniciará el servidor de desarrollo y podrás acceder a tu dashboard de administración en `http://localhost:5173`.
-
-### Paso 7: Conectar con el backend
-
-Para conectar tu frontend con el backend, puedes utilizar Axios para realizar solicitudes a las rutas de tu API. Asegúrate de manejar la autenticación y la autorización según sea necesario.
-
-## 🚀 Despliegue
-
-### Despliegue en Vercel
-
-1. **Crear un repositorio en GitHub**:
-   - Sube el código del dashboard a un repositorio de GitHub
-
-2. **Conectar con Vercel**:
-   - Ve a [vercel.com](https://vercel.com) y crea una cuenta
-   - Haz clic en "New Project"
-   - Conecta tu repositorio de GitHub
-
-3. **Configurar el proyecto**:
-   - **Root Directory**: Deja vacío o especifica la ruta si está en un subdirectorio
-   - **Build Command**: `npm run build`
-   - **Output Directory**: `dist`
-
-4. **Variables de entorno**:
-   Agrega estas variables en la configuración de Vercel:
-   ```
-   VITE_API_BASE_URL=https://tu-backend-en-render.onrender.com/api
-   VITE_API_TIMEOUT=30000
-   VITE_APP_VERSION=1.0.0
-   ```
-
-5. **Desplegar**:
-   - Haz clic en "Deploy"
-   - Vercel construirá y desplegará automáticamente tu aplicación
-
-### Conclusión
-
-Siguiendo estos pasos, habrás creado un nuevo proyecto para el dashboard de administración del backend utilizando React y Vite. Puedes expandirlo según tus necesidades, añadiendo más componentes, páginas y funcionalidades.
+---
+Desarrollado con ❤️ por [Tu Nombre/Usuario]

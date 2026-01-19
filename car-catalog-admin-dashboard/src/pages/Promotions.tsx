@@ -187,16 +187,25 @@ const Promotions: React.FC = () => {
               <div className="p-5 border-b border-gray-100">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center gap-3">
-                    <div className={`p-3 rounded-xl ${
-                      promo.type === 'percentage' 
-                        ? 'bg-gradient-to-br from-orange-100 to-orange-200' 
-                        : 'bg-gradient-to-br from-green-100 to-green-200'
-                    }`}>
-                      {promo.type === 'percentage' 
-                        ? <Percent className="h-6 w-6 text-orange-600" />
-                        : <DollarSign className="h-6 w-6 text-green-600" />
-                      }
-                    </div>
+                    {promo.image ? (
+                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-gray-200">
+                        <img
+                          src={promo.image}
+                          alt={promo.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                        <div className={`p-3 rounded-xl ${promo.type === 'percentage'
+                            ? 'bg-gradient-to-br from-orange-100 to-orange-200'
+                            : 'bg-gradient-to-br from-green-100 to-green-200'
+                          }`}>
+                          {promo.type === 'percentage'
+                            ? <Percent className="h-6 w-6 text-orange-600" />
+                            : <DollarSign className="h-6 w-6 text-green-600" />
+                          }
+                        </div>
+                    )}
                     <div>
                       <h3 className="font-bold text-gray-900">{promo.name}</h3>
                       <p className="text-sm text-gray-500">{promo.description || 'No description'}</p>

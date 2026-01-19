@@ -31,10 +31,9 @@ backendApi.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid
+      // Token expired or invalid - just clear it but don't redirect on public site
       localStorage.removeItem('access_token');
       localStorage.removeItem('user');
-      window.location.href = '/login';
     }
     return Promise.reject(error);
   }

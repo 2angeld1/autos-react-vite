@@ -1,8 +1,4 @@
-// Dashboard components exports
-// Dashboard components exports (only exporting available components)
 export { default as StatsCard } from './StatsCard';
 export { default as RecentActivity } from './RecentActivity';
-
-// Re-export types
-export type { StatsCardProps } from './StatsCard';
-export type { Activity as ActivityItem, RecentActivityProps } from './RecentActivity';
+export { default as LeadsChart } from './LeadsChart';
+export { default as InventoryChart } from './InventoryChart';

@@ -10,10 +10,13 @@ import NotFound from '../pages/NotFound';
 import Promotions from '../pages/promotions/Promotions';
 import Maintenance from '../pages/maintenance/Maintenance';
 
+import { Toaster } from 'react-hot-toast';
+
 const App: React.FC = () => {
   return (
     <Router>
       <div className="has-navbar-fixed-top">
+        <Toaster position="top-right" />
         <Header />
         <main>
           <Routes>

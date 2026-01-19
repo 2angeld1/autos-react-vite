@@ -505,6 +505,7 @@
     inset 0 -2px 0 rgba(187, 134, 252, 0.1);
   transform-style: preserve-3d;
   perspective: 1000px;
+  margin-top: 25px;
 }
 
 .luxury-car-showcase:hover {
