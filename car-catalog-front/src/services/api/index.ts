@@ -6,13 +6,7 @@ import {
   fetchSimilarCars,
   fetchMakes,
   fetchModelsByMake,
-  fetchCarStats,
-  // Legacy exports
-  filterModernCars,
-  enhanceCarWithImage,
-  clearCarCache,
-  clearAllCaches,
-  getCacheStats
+  fetchCarStats
 } from './carService';
 
 // Import backend API client and services
@@ -31,11 +25,5 @@ export {
   fetchSimilarCars,
   fetchMakes,
   fetchModelsByMake,
-  fetchCarStats,
-  // Legacy (deprecated)
-  filterModernCars,
-  enhanceCarWithImage,
-  clearCarCache,
-  clearAllCaches,
-  getCacheStats
+  fetchCarStats
 };

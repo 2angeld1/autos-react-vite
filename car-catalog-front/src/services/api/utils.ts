@@ -1,5 +1,4 @@
 import { PLACEHOLDER_IMAGE_BASE } from './config';
-import { isReliableImageUrl } from './cache';
 import { getDefaultCarImage } from './carBrands';
 
 // ✅ Tipos simples para reemplazar any
@@ -16,7 +15,10 @@ export const getGuaranteedImage = (make: string | undefined, model: string | und
   const safeMake = make || 'unknown';
   const brandFallback = getDefaultCarImage(safeMake);
 
-  if (!isReliableImageUrl(brandFallback)) {
+  // Simple check for valid URL instead of imported helper
+  const isReliable = brandFallback && brandFallback.startsWith('http');
+
+  if (!isReliable) {
     const carText = encodeURIComponent(`${make || 'Car'} ${model || ''}`);
     return `${PLACEHOLDER_IMAGE_BASE}800x450/1a1a1a/ffffff?text=${carText}`;
   }

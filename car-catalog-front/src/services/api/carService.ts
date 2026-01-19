@@ -306,38 +306,4 @@ export const fetchCarStats = async (): Promise<any> => {
   }
 };
 
-// ============================================
-// Legacy exports for backward compatibility
-// ============================================
 
-/**
- * @deprecated Use fetchCars instead
- */
-export const filterModernCars = (cars: Car[]): Car[] => cars;
-
-/**
- * @deprecated No longer needed - backend handles image URLs
- */
-export const enhanceCarWithImage = async (car: Car): Promise<Car> => car;
-
-/**
- * @deprecated Cache is now handled by the browser/backend
- */
-export const clearCarCache = (): void => {
-  console.log('Cache cleared (no-op - handled by browser)');
-};
-
-/**
- * @deprecated Cache is now handled by the browser/backend
- */
-export const clearAllCaches = (): void => {
-  console.log('All caches cleared (no-op - handled by browser)');
-};
-
-/**
- * @deprecated No longer tracking cache stats
- */
-export const getCacheStats = () => ({
-  carCacheSize: 0,
-  hasCache: false
-});
