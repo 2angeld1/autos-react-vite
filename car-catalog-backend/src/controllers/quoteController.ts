@@ -10,8 +10,8 @@ export const createQuote = async (req: Request, res: Response) => {
     try {
         const { carId, customerName, email, phone, downPayment, term } = req.body;
 
-        // 1. Obtener detalles del auto
-        const car = await Car.findById(carId);
+        // 1. Obtener detalles del auto (usando campo 'id' personalizado, no _id)
+        const car = await Car.findOne({ id: carId });
 
         if (!car) {
             return res.status(404).json({ message: 'Vehículo no encontrado' });
@@ -162,11 +162,13 @@ export const createQuote = async (req: Request, res: Response) => {
 
         const pdfData = Buffer.concat(buffers);
 
-        // 5. Enviar correo
-        await EmailService.sendEmail({
-            to: email,
-            subject: `Cotización Oficial: ${car.make} ${car.carModel} (${car.year})`,
-            html: `
+        // 5. Enviar correo (no bloqueante - si falla, la cotización ya está guardada)
+        let emailSent = false;
+        try {
+            await EmailService.sendEmail({
+                to: email,
+                subject: `Cotización Oficial: ${car.make} ${car.carModel} (${car.year})`,
+                html: `
 <!DOCTYPE html>
 <html>
 <head>
@@ -197,7 +199,7 @@ export const createQuote = async (req: Request, res: Response) => {
       <p>Gracias por tu interés. Hemos recibido tu solicitud. Folio: <strong>${newQuote._id.toString().slice(-6).toUpperCase()}</strong>.</p>
       <div class="car-summary">
         <div class="car-details">
-          <h3>${car.year} ${car.make} ${car.model}</h3>
+          <h3>${car.year} ${car.make} ${car.carModel}</h3>
           <div class="car-price">$${car.price.toLocaleString()}</div>
         </div>
       </div>
@@ -213,27 +215,42 @@ export const createQuote = async (req: Request, res: Response) => {
   </div>
 </body>
 </html>
-            `,
-            attachments: [
-                {
-                    filename: `Cotizacion_${car.make}_${car.carModel}.pdf`,
-                    content: pdfData,
-                    contentType: 'application/pdf'
-                }
-            ]
+                `,
+                attachments: [
+                    {
+                        filename: `Cotizacion_${car.make}_${car.carModel}.pdf`,
+                        content: pdfData,
+                        contentType: 'application/pdf'
+                    }
+                ]
+            });
+            emailSent = true;
+        } catch (emailError) {
+            console.error('Error sending quote email (quote was still saved):', emailError);
+        }
+
+        // Notificación al admin (también no bloqueante)
+        try {
+            await EmailService.sendAdminNotification(
+                'Nuevo Lead Generado 🚀',
+                `Nuevo lead capturado:<br>
+                 Cliente: <strong>${customerName}</strong><br>
+                 Email: ${email}<br>
+                 Teléfono: ${phone}<br>
+                 Auto: ${car.fullName}<br>
+                 ID Cotización: ${newQuote._id}`
+            );
+        } catch (adminEmailError) {
+            console.error('Error sending admin notification:', adminEmailError);
+        }
+
+        res.status(200).json({
+            message: emailSent
+                ? 'Cotización enviada con éxito'
+                : 'Cotización registrada. Te contactaremos pronto.',
+            quoteId: newQuote._id,
+            emailSent
         });
-
-        await EmailService.sendAdminNotification(
-            'Nuevo Lead Generado 🚀',
-            `Nuevo lead capturado:<br>
-             Cliente: <strong>${customerName}</strong><br>
-             Email: ${email}<br>
-             Teléfono: ${phone}<br>
-             Auto: ${car.fullName}<br>
-             ID Cotización: ${newQuote._id}`
-        );
-
-        res.status(200).json({ message: 'Cotización enviada con éxito', quoteId: newQuote._id });
 
     } catch (error) {
         console.error('Error creating quote:', error);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import { Car } from '@/types';
 import { quoteService } from '../services/api';
 
@@ -38,7 +39,7 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose, car }) => {
             setStep(2);
         } catch (error) {
             console.error('Error al solicitar cotización:', error);
-            alert('Hubo un error al procesar tu solicitud. Por favor intenta de nuevo.');
+            toast.error('Hubo un error al procesar tu solicitud. Por favor intenta de nuevo.');
         } finally {
             setLoading(false);
         }
