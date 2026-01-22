@@ -9,7 +9,7 @@ export const GOOGLE_SEARCH_URL: string | undefined = import.meta.env.VITE_GOOGLE
 
 // ✅ Backend API Configuration
 export const BACKEND_API_BASE_URL = import.meta.env.VITE_BACKEND_API_BASE_URL || import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-export const BACKEND_API_TIMEOUT = parseInt(import.meta.env.VITE_BACKEND_API_TIMEOUT) || 30000;
+export const BACKEND_API_TIMEOUT = parseInt(import.meta.env.VITE_BACKEND_API_TIMEOUT) || 120000;
 
 // Constantes
 export const PLACEHOLDER_IMAGE_BASE: string = 'https://placehold.co/';
@@ -21,7 +21,7 @@ export const RELIABLE_DOMAINS = [
   // ✅ Dominios de Google Images
   'googleusercontent.com',
   'gstatic.com',
-  'lh3.googleusercontent.com', 
+  'lh3.googleusercontent.com',
   'lh4.googleusercontent.com',
   'lh5.googleusercontent.com',
   'lh6.googleusercontent.com',
@@ -107,7 +107,7 @@ export const buildGoogleSearchUrl = (searchTerm: string): string | null => {
   if (!GOOGLE_SEARCH_URL || !GOOGLE_API_KEY || !GOOGLE_SEARCH_ENGINE_ID) {
     return null;
   }
-  
+
   const params = new URLSearchParams({
     key: GOOGLE_API_KEY,
     cx: GOOGLE_SEARCH_ENGINE_ID,
@@ -116,15 +116,15 @@ export const buildGoogleSearchUrl = (searchTerm: string): string | null => {
     num: '10',
     safe: 'active'
   });
-  
+
   return `${GOOGLE_SEARCH_URL}?${params.toString()}`;
 };
 
 export const generatePlaceholderUrl = (
-  width = 800, 
-  height = 450, 
-  text = 'Auto', 
-  bgColor = '1a1a1a', 
+  width = 800,
+  height = 450,
+  text = 'Auto',
+  bgColor = '1a1a1a',
   textColor = 'ffffff'
 ): string => {
   const encodedText = encodeURIComponent(text);
@@ -138,13 +138,13 @@ export const checkApiConfiguration = (): {
   warnings: string[];
 } => {
   const warnings: string[] = [];
-  
+
   const carApi = !!(CAR_API_KEY && CAR_API_URL);
   const googleApi = !!(GOOGLE_API_KEY && GOOGLE_SEARCH_ENGINE_ID && GOOGLE_SEARCH_URL);
-  
+
   if (!carApi) warnings.push('Car API no configurada');
   if (!googleApi) warnings.push('Google API no configurada');
-  
+
   return { carApi, googleApi, warnings };
 };
 
@@ -191,7 +191,7 @@ export const getEnvironmentConfig = () => ({
 });
 
 export const isReliableDomain = (domain: string): boolean => {
-  return RELIABLE_DOMAINS.some(reliableDomain => 
+  return RELIABLE_DOMAINS.some(reliableDomain =>
     domain.toLowerCase().includes(reliableDomain.toLowerCase())
   );
 };
