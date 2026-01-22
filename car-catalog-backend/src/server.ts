@@ -26,7 +26,9 @@ const allowedOrigins = new Set([
   'http://localhost:3000',
   FRONTEND_URL,
   'https://autos-react-dashboard.vercel.app',
-  'https://autos-react-front.vercel.app'
+  'https://autos-react-front.vercel.app',
+  'https://velodrive.vercel.app',
+  'https://velodrive-dashboard.vercel.app'
 ].filter(Boolean));
 
 app.use(cors({
@@ -49,8 +51,8 @@ app.use('/uploads/files', express.static(path.join(UPLOADS_DIR, 'files')));
 
 // Health check for root
 app.get('/', (req, res) => {
-  res.json({ 
-    message: 'VeloDrive API is running', 
+  res.json({
+    message: 'VeloDrive API is running',
     status: 'OK',
     timestamp: new Date().toISOString()
   });
@@ -79,7 +81,7 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await connectWithRetry();
-    
+
     app.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
       logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
