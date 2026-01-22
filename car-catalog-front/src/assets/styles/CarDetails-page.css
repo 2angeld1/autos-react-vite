@@ -23,6 +23,8 @@
 
 .interest-box {
     border: 1px solid var(--accent-color) !important;
+    background-color: #1a1a1a !important;
+        box-shadow: none !important;
 }
 
 .quote-button {

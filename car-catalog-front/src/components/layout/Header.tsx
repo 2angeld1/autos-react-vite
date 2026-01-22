@@ -26,16 +26,11 @@ const Header: React.FC = () => {
         <nav className={`navbar is-fixed-top ${scrolled ? 'is-scrolled' : 'is-transparent'}`} role="navigation" aria-label="main navigation">
             <div className="container">
                 <div className="navbar-brand">
-                    <Link className="navbar-item brand-logo" to="/" style={{ padding: '0.5rem' }}>
+                    <Link className="navbar-item brand-logo nav-brand-link" to="/">
                         <img
                             src="/logo-transparent.png"
                             alt="VeloDrive"
-                            style={{
-                                height: '40px',
-                                width: 'auto',
-                                maxHeight: 'none',
-                                objectFit: 'contain'
-                            }}
+                            className="nav-logo"
                         />
                     </Link>
 
@@ -55,39 +50,32 @@ const Header: React.FC = () => {
                 <div className={`navbar-menu ${isActive ? 'is-active' : ''}`}>
                     <div className="navbar-end">
                         <NavLink className="navbar-item nav-link-hover" to="/" end>
-                            <FontAwesomeIcon icon={faHome} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            <FontAwesomeIcon icon={faHome} className="mr-2 nav-icon" />
                             Inicio
                         </NavLink>
                         <NavLink className="navbar-item nav-link-hover" to="/favorites">
-                            <FontAwesomeIcon icon={faHeart} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            <FontAwesomeIcon icon={faHeart} className="mr-2 nav-icon" />
                             Favoritos
                         </NavLink>
                         <NavLink className="navbar-item nav-link-hover" to="/about">
-                            <FontAwesomeIcon icon={faInfoCircle} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            <FontAwesomeIcon icon={faInfoCircle} className="mr-2 nav-icon" />
                             Nosotros
                         </NavLink>
                         <NavLink className="navbar-item nav-link-hover" to="/promotions">
-                            <FontAwesomeIcon icon={faTags} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            <FontAwesomeIcon icon={faTags} className="mr-2 nav-icon" />
                             Promociones
                         </NavLink>
                         <NavLink className="navbar-item nav-link-hover" to="/maintenance">
-                            <FontAwesomeIcon icon={faWrench} className="mr-2" style={{ fontSize: '0.85rem' }} />
+                            <FontAwesomeIcon icon={faWrench} className="mr-2 nav-icon" />
                             Mantenimiento
                         </NavLink>
                         <div className="navbar-item">
                             <div className="buttons">
                                 <a
                                     href={import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:3001'}
-                                    className="button is-accent"
+                                    className="button is-accent nav-admin-btn"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    style={{
-                                        // Usa la clase .is-accent (probablemente morado/rojizo)
-                                        border: 'none',
-                                        fontWeight: '600',
-                                        letterSpacing: '0.02em',
-                                        transition: 'all 0.3s ease'
-                                    }}
                                 >
                                     <span className="icon">
                                         <FontAwesomeIcon icon={faUser} />

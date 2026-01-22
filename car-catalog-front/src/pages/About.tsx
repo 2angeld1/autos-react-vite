@@ -2,25 +2,8 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import '../assets/styles/About.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-    faRocket,
-    faShieldAlt,
-    faHandshake,
-    faAward,
-    faUsers,
-    faCar,
-    faGlobe,
-    faEnvelope,
-    faPhone,
-    faMapMarkerAlt,
-    faInfoCircle
-} from '@fortawesome/free-solid-svg-icons';
-import {
-    faTwitter,
-    faFacebook,
-    faInstagram,
-    faLinkedin
-} from '@fortawesome/free-brands-svg-icons';
+import { faRocket, faShieldAlt, faHandshake, faAward, faUsers, faCar, faGlobe, faEnvelope, faPhone, faMapMarkerAlt, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faTwitter, faFacebook, faInstagram, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { slideUp, staggerContainer, scaleIn, fadeIn } from '../animations/variants'; // Added import
 
 const About: React.FC = () => {

@@ -12,6 +12,8 @@ import Maintenance from '../pages/maintenance/Maintenance';
 
 import { Toaster } from 'react-hot-toast';
 
+import ThemeSwitcher from './common/ThemeSwitcher';
+
 const App: React.FC = () => {
   return (
     <Router>
@@ -30,6 +32,7 @@ const App: React.FC = () => {
           </Routes>
         </main>
         <Footer />
+        <ThemeSwitcher />
       </div>
     </Router>
   );

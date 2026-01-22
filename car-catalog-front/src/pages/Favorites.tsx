@@ -110,21 +110,7 @@ const Favorites: React.FC = () => {
         </AnimatePresence>
       </div>
 
-      <style>{`
-                .has-text-accent {
-                    color: #f97316 !important;
-                }
-                .button.is-accent {
-                    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-                    border: none;
-                    color: white;
-                    box-shadow: 0 4px 15px rgba(249, 115, 22, 0.4);
-                }
-                .tag.is-accent {
-                    background: #f97316;
-                    color: white;
-                }
-            `}</style>
+
     </motion.div>
   );
 };

@@ -49,15 +49,14 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
     };
 
     return (
-        <div className="card has-background-dark-surface animated-card" style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+        <div className="card has-background-dark-surface animated-card featured-card">
             {/* Cabecera de la tarjeta con imagen */}
             <div className="card-image">
                 {imgError ? (
                     <div 
-                        className="image is-16by9 has-text-centered is-flex is-justify-content-center is-align-items-center"
+                        className="image is-16by9 has-text-centered is-flex is-justify-content-center is-align-items-center featured-card-fallback"
                         style={{ 
-                            backgroundColor: getBrandColor(car.make), 
-                            borderRadius: '8px 8px 0 0'
+                            backgroundColor: getBrandColor(car.make)
                         }}
                     >
                         <div>
@@ -73,7 +72,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
                         <img 
                             src={car.image} 
                             alt={`${car.make} ${car.model}`}
-                            style={{ borderRadius: '8px 8px 0 0', objectFit: 'cover' }} 
+                                className="featured-card-img"
                             onError={handleImageError}
                         />
                     </figure>
@@ -86,7 +85,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
             </div>
             
             {/* Contenido de la tarjeta */}
-            <div className="card-content" style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
+            <div className="card-content featured-card-content">
                 <div className="media mb-3">
                     <div className="media-content">
                         <h3 className="title is-5 has-text-white mb-1">{car.make} {car.model}</h3>
@@ -102,7 +101,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
                 </div>
                 
                 {/* Características principales sin rendimiento */}
-                <div className="car-features mb-4" style={{ flexGrow: 1 }}>
+                <div className="car-features mb-4 featured-specs-container">
                     <div className="columns is-mobile is-multiline">
                         <div className="column is-6">
                             <div className="feature-item">
@@ -144,14 +143,7 @@ const FeaturedCar: React.FC<FeaturedCarProps> = ({ car }) => {
                 {/* Botón de acción */}
                 <Link
                     to={`/car/${car.id}`}
-                    className="button is-fullwidth"
-                    style={{
-                        backgroundColor: '#ff3860',
-                        color: '#1a1a1a',
-                        fontWeight: 'normal',
-                        border: 'none',
-                        transition: 'all 0.3s ease'
-                    }}
+                    className="button is-fullwidth view-details"
                 >
                     <span>Ver detalles</span>
                     <span className="icon">

@@ -1,0 +1,38 @@
+/* Featured Card Styles */
+
+.featured-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.featured-card-fallback, .featured-card-img {
+    border-radius: 8px 8px 0 0;
+}
+
+.featured-card-img {
+    object-fit: cover;
+}
+
+.featured-card-content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.featured-specs-container {
+    flex-grow: 1;
+}
+
+.view-details {
+    background-color: var(--accent-color, #ff3860) !important;
+    color: #1a1a1a !important;
+    font-weight: normal !important;
+    border: none !important;
+    transition: all 0.3s ease !important;
+}
+
+.view-details:hover {
+    filter: brightness(1.1);
+    color: white !important;
+}

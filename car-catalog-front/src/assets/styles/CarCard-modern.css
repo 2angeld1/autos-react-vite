@@ -1,0 +1,93 @@
+/* Modern Car Card Styles */
+
+.car-card-container {
+    display: flex;
+}
+
+.modern-car-card {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #1f2937; /* bg-gray-800 */
+    border: 1px solid #374151; /* border-gray-700 */
+    color: white;
+}
+
+.card-fallback-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-weight: bold;
+    color: white;
+}
+
+.modern-card-content {
+    flex-grow: 1;
+    background-color: transparent;
+}
+
+.modern-media-content {
+    min-height: 4.5rem;
+}
+
+.modern-card-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1rem;
+    background-color: transparent;
+}
+
+
+.detail-link-btn {
+    border-radius: 8px !important;
+    background-color: var(--accent-color, #ff3860) !important;
+    color: white !important;
+    border: none !important;
+    font-weight: bold !important;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2) !important;
+}
+
+.detail-link-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+}
+
+/* Reemplazos de clases Tailwind simuladas */
+.text-purple-400 {
+    color: #ffffff !important;
+    font-size: 1.5rem !important;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.text-gray-400 {
+    color: #9ca3af !important;
+}
+
+/* Tag colors - slightly muted for elegance */
+.modern-card-content .tag {
+    font-size: 0.85rem !important;
+    padding: 0.5em 1em !important;
+    border-radius: 4px !important;
+    font-weight: 600 !important;
+}
+
+.bg-blue-600 {
+    background-color: rgba(37, 99, 235, 0.2) !important;
+    color: #60a5fa !important; /* blue-400 text */
+    border: 1px solid rgba(37, 99, 235, 0.3) !important;
+}
+
+.bg-green-600 {
+    background-color: rgba(22, 163, 74, 0.2) !important;
+    color: #4ade80 !important; /* green-400 text */
+    border: 1px solid rgba(22, 163, 74, 0.3) !important;
+}
+
+.bg-yellow-600 {
+    background-color: rgba(202, 138, 4, 0.2) !important;
+    color: #facc15 !important; /* yellow-400 text */
+    border: 1px solid rgba(202, 138, 4, 0.3) !important;
+}

@@ -310,3 +310,28 @@
         font-size: 2.5rem !important;
     }
 }
+
+/* Helper classes to remove inline styles */
+.financing-label {
+    letter-spacing: 1px;
+    opacity: 0.8;
+}
+
+.financing-row {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.monthly-payment {
+    color: var(--accent-color, #ff3860);
+}
+
+.btn-outline-custom {
+    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+    color: #ddd !important;
+}
+
+.btn-outline-custom:hover {
+    border-color: #fff !important;
+    color: #fff !important;
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}

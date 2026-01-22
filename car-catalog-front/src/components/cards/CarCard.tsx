@@ -42,21 +42,20 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
 
     return (
         <motion.div
-            className="is-6-tablet"
-            style={{ display: 'flex' }}
+            className="column is-12-mobile is-6-tablet is-4-desktop car-card-container"
             variants={cardHover}
             initial="rest"
             whileHover="hover"
             layout
         >
-            <motion.div className="card car-card bg-gray-800 border-gray-700 text-white" style={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%', borderRadius: '12px', overflow: 'hidden' }}>
+            <motion.div className="card car-card modern-car-card">
                 <div className="card-image">
                     {imgError ? (
                         <div
-                            className="image is-4by3 has-text-centered is-flex is-justify-content-center is-align-items-center has-text-white has-text-weight-bold"
+                            className="image is-4by3 card-fallback-image has-size-4"
                             style={{ backgroundColor: getBrandColor(car.make) }}
                         >
-                            <span className="is-size-4">{car.make} {car.model}</span>
+                            <span>{car.make} {car.model}</span>
                         </div>
                     ) : (
                         <figure className="image is-4by3">
@@ -76,9 +75,9 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         </figure>
                     )}
                 </div>
-                <div className="card-content" style={{ flexGrow: 1, backgroundColor: 'transparent' }}>
+                <div className="card-content modern-card-content">
                     <div className="media mb-4">
-                        <div className="media-content" style={{ minHeight: '4.5rem' }}>
+                        <div className="media-content modern-media-content">
                             <p className="title is-4 text-white mb-1">{car.make} <br /> {car.model}</p>
                             <p className="subtitle is-6 text-gray-400">{car.year}</p>
                         </div>
@@ -110,13 +109,10 @@ const CarCard: React.FC<CarCardProps> = ({ car }) => {
                         )}
                     </div>
                 </div>
-                <footer className="card-footer" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', padding: '1rem', backgroundColor: 'transparent' }}>
+                <footer className="card-footer modern-card-footer">
                     <Link
                         to={`/car/${car.id}`}
-                        className="button is-fullwidth bg-purple-600 hover:bg-purple-700 text-white border-transparent font-bold transition-all"
-                        style={{
-                            borderRadius: '8px'
-                        }}
+                        className="button is-fullwidth detail-link-btn transition-all"
                     >
                         <span className="icon">
                             <FontAwesomeIcon icon={faInfoCircle} />

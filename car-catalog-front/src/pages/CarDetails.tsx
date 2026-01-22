@@ -215,11 +215,6 @@ const CarDetails: React.FC = () => {
                     </Link>
                 </div>
             </div>
-            
-            {/* Help Button */}
-            <div className="help-button animate-pulse">
-                <i className="fas fa-comments"></i>
-            </div>
 
             {/* Quote Modal */}
             {car && (

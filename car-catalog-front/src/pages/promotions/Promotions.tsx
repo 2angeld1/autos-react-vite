@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { promotionService, Promotion } from '../../services/api/promotionService';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '../../animations/variants';
-import { Tag, Sparkles, Loader2, Copy, CheckCircle2 } from 'lucide-react';
+import { Tag, Sparkles, Loader2, Copy, CheckCircle2, X, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 const Promotions: React.FC = () => {
   const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
   useEffect(() => {
@@ -25,7 +26,8 @@ const Promotions: React.FC = () => {
     fetchPromotions();
   }, []);
 
-  const handleCopyCode = (code: string) => {
+  const handleCopyCode = (e: React.MouseEvent, code: string) => {
+    e.stopPropagation(); // Evitar abrir/cerrar el modal si se clica solo en copiar
     navigator.clipboard.writeText(code);
     setCopiedCode(code);
     toast.success('Código copiado al portapapeles');
@@ -42,7 +44,7 @@ const Promotions: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 text-red-500 animate-spin mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 animate-spin mx-auto mb-4" style={{ color: 'var(--accent-color)' }} />
           <p className="text-gray-400">Cargando ofertas especiales...</p>
         </div>
       </div>
@@ -59,14 +61,20 @@ const Promotions: React.FC = () => {
           variants={staggerContainer}
           className="text-center mb-16"
         >
-          <motion.div variants={scaleIn} className="inline-block p-3 bg-red-500/10 rounded-2xl mb-4">
-            <Sparkles className="w-8 h-8 text-red-400" />
+          <motion.div variants={scaleIn} className="inline-block p-3 rounded-2xl mb-4" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.1)' }}>
+            <Sparkles className="w-8 h-8" style={{ color: 'var(--accent-color)' }} />
           </motion.div>
           <motion.h1
             variants={slideUp}
             className="text-4xl md:text-5xl font-bold text-white mb-4"
           >
-            Ofertas & <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-500">Promociones</span>
+            Ofertas & <span style={{
+              background: 'linear-gradient(to right, var(--accent-color), var(--secondary-accent, var(--accent-color)))',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+              color: 'transparent'
+            }}>Promociones</span>
           </motion.h1>
           <motion.p
             variants={fadeIn}
@@ -87,95 +95,154 @@ const Promotions: React.FC = () => {
             <p className="text-gray-500 mt-2">Vuelve pronto para descubrir nuevas ofertas.</p>
           </motion.div>
         ) : (
-          <div className="featured-cars-grid">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {promotions.map((promo) => (
-              <div key={promo._id} className="travel-card animate-fadeIn">
-                {/* Imagen de fondo */}
-                <div className="travel-card-image-wrapper">
-                  <img
+              <motion.div
+                layoutId={`card-${promo._id}`}
+                key={promo._id}
+                onClick={() => setSelectedId(promo._id as string)}
+                className="bg-gray-800 rounded-2xl overflow-hidden cursor-pointer shadow-lg hover:shadow-2xl transition-shadow border border-gray-700 relative group"
+                whileHover={{ y: -5 }}
+              >
+                <div className="relative h-48 overflow-hidden">
+                  <motion.img
+                    layoutId={`image-${promo._id}`}
                     src={getImageUrl(promo.image)}
                     alt={promo.name}
-                    className="travel-card-image"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&q=80&w=800';
-                    }}
-                    loading="lazy"
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                   />
-                  <div className="travel-card-overlay"></div>
-                </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-900 to-transparent opacity-60"></div>
 
-                {/* Badge de descuento */}
-                <div className="travel-card-top">
-                  <span
-                    style={{
-                      background: 'linear-gradient(135deg, #ff6b35, #f7931e)',
-                      color: 'white',
-                      fontWeight: 'bold',
-                      fontSize: '1.1rem',
-                      padding: '0.5rem 1rem',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 15px rgba(255, 107, 53, 0.4)'
-                    }}
+                  {/* Badge descuento */}
+                  <motion.div
+                    layoutId={`badge-${promo._id}`}
+                    className="absolute top-4 right-4 px-3 py-1 rounded-lg font-bold text-white shadow-lg"
+                    style={{ backgroundColor: 'var(--accent-color)' }}
                   >
                     {promo.type === 'percentage' ? `${promo.value}% OFF` : `$${promo.value} OFF`}
-                  </span>
+                  </motion.div>
                 </div>
 
-                {/* Contenido */}
-                <div className="travel-card-content">
-                  <span className="travel-card-subtitle">
-                    Válido hasta {new Date(promo.endDate).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
-                  </span>
-                  <h3 className="travel-card-title">{promo.name}</h3>
-                  <div className="travel-card-meta">
-                    <span
-                      className="travel-rating"
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => handleCopyCode(promo.code)}
-                    >
-                      {copiedCode === promo.code ? (
-                        <><CheckCircle2 className="inline w-4 h-4 mr-1" style={{ color: '#4ade80' }} /> Copiado</>
-                      ) : (
-                        <><Copy className="inline w-4 h-4 mr-1" /> {promo.code}</>
-                      )}
+                <div className="p-6">
+                  <motion.h3 layoutId={`title-${promo._id}`} className="text-xl font-bold text-white mb-2">{promo.name}</motion.h3>
+                  <motion.p layoutId={`desc-${promo._id}`} className="text-gray-400 text-sm mb-4 line-clamp-2">{promo.description}</motion.p>
+
+                  <div className="flex justify-between items-center mt-4">
+                    <span className="text-xs text-gray-500 bg-gray-700/50 px-2 py-1 rounded">
+                      Expira: {new Date(promo.endDate).toLocaleDateString()}
                     </span>
-                    {promo.minPurchase && promo.minPurchase > 0 && (
-                      <span className="travel-reviews">
-                        Min: ${promo.minPurchase.toLocaleString()}
-                      </span>
-                    )}
+                    <button className="text-sm font-medium hover:underline flex items-center" style={{ color: 'var(--accent-color)' }}>
+                      <Info className="w-4 h-4 mr-1" /> Detalles
+                    </button>
                   </div>
                 </div>
-
-                {/* Barra de acción inferior */}
-                <button
-                  onClick={() => handleCopyCode(promo.code)}
-                  className="travel-card-bottom-action"
-                  style={{
-                    width: '100%',
-                    border: 'none',
-                    cursor: 'pointer',
-                    minWidth: '200px',
-                    justifyContent: 'space-between',
-                    paddingLeft: '1.5rem',
-                    paddingRight: '1rem'
-                  }}
-                >
-                  <span className="action-text" style={{ whiteSpace: 'nowrap', overflow: 'visible' }}>
-                    Copiar código
-                  </span>
-                  <div className="action-icon-circle">
-                    {copiedCode === promo.code ? (
-                      <CheckCircle2 className="w-4 h-4" />
-                    ) : (
-                      <Copy className="w-4 h-4" />
-                    )}
-                  </div>
-                </button>
-              </div>
+              </motion.div>
             ))}
           </div>
         )}
+
+        {/* Modal de Expansión */}
+        <AnimatePresence>
+          {selectedId && (
+            <motion.div
+              layoutId={selectedId}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setSelectedId(null)}
+            >
+              <motion.div
+                layoutId={`card-${selectedId}`}
+                className="bg-gray-900 w-full max-w-2xl rounded-3xl overflow-hidden shadow-2xl border border-gray-700 relative"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {(() => {
+                  const promo = promotions.find(p => p._id === selectedId);
+                  if (!promo) return null;
+
+                  return (
+                    <>
+                      <div className="relative h-64 md:h-80">
+                        <motion.img
+                          layoutId={`image-${selectedId}`}
+                          src={getImageUrl(promo.image)}
+                          alt={promo.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-transparent to-transparent"></div>
+                        <motion.div
+                          layoutId={`badge-${selectedId}`}
+                          className="absolute top-4 right-14 px-4 py-2 rounded-xl font-bold text-white text-lg shadow-lg z-10"
+                          style={{ backgroundColor: 'var(--accent-color)' }}
+                        >
+                          {promo.type === 'percentage' ? `${promo.value}% OFF` : `$${promo.value} OFF`}
+                          </motion.div>
+                          <button
+                            onClick={() => setSelectedId(null)}
+                            className="absolute top-4 right-4 p-2 bg-black/50 hover:bg-black/70 rounded-full text-white transition-colors z-20"
+                          >
+                            <X className="w-6 h-6" />
+                          </button>
+                        </div>
+
+                        <div className="p-8">
+                          <motion.h3 layoutId={`title-${selectedId}`} className="text-3xl font-bold text-white mb-4">{promo.name}</motion.h3>
+
+                          <div className="prose prose-invert mb-8">
+                            <motion.p layoutId={`desc-${selectedId}`} className="text-gray-300 text-lg leading-relaxed">{promo.description}</motion.p>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                              <p className="text-gray-500 text-sm mb-1">Código Promocional</p>
+                              <div
+                                className="flex items-center justify-between bg-gray-900 p-3 rounded-lg border border-dashed border-gray-600 cursor-pointer hover:border-gray-500 transition-colors"
+                                onClick={(e) => handleCopyCode(e, promo.code)}
+                              >
+                                <code className="text-xl font-mono font-bold text-white">{promo.code}</code>
+                                {copiedCode === promo.code ? (
+                                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                ) : (
+                                  <Copy className="w-5 h-5 text-gray-400" />
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="bg-gray-800/50 p-4 rounded-xl border border-gray-700">
+                              <p className="text-gray-500 text-sm mb-2">Detalles Adicionales</p>
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-gray-400">Válido hasta:</span>
+                                  <span className="text-white font-medium">{new Date(promo.endDate).toLocaleDateString()}</span>
+                                </div>
+                                {promo.minPurchase && (
+                                  <div className="flex justify-between text-sm">
+                                    <span className="text-gray-400">Compra mínima:</span>
+                                    <span className="text-white font-medium">${promo.minPurchase.toLocaleString()}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+
+                          <motion.button
+                            className="w-full py-4 rounded-xl font-bold text-white text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]"
+                            style={{ 
+                                      background: 'linear-gradient(135deg, var(--accent-color) 0%, var(--secondary-accent, var(--accent-color)) 100%)',
+                                    }}
+                            onClick={(e) => handleCopyCode(e, promo.code)}
+                          >
+                            ¡Quiero esta promoción!
+                          </motion.button>
+                        </div>
+                    </>
+                  );
+                })()}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

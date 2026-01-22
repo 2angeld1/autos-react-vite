@@ -10,7 +10,7 @@ interface QuoteBoxProps {
 // Caja de solicitar cotización
 export const QuoteBox: React.FC<QuoteBoxProps> = ({ car, onQuoteClick }) => {
     return (
-        <div className="box mt-4 interest-box" style={{ backgroundColor: '#1a1a1a', border: '1px solid #2a2a2a', boxShadow: 'none' }}>
+        <div className="box mt-4 interest-box">
             <h4 className="title is-5 has-text-centered has-text-white mb-4">
                 ¿Te interesa este auto?
             </h4>

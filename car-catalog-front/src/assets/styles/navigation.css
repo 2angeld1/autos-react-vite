@@ -85,3 +85,25 @@
 .navbar.is-scrolled .button.is-accent {
   background-color: var(--accent-color);
 }
+/* Helper classes for Header inline styles */
+.nav-brand-link {
+  padding: 0.5rem !important;
+}
+
+.nav-logo {
+  height: 40px;
+  width: auto;
+  max-height: none;
+  object-fit: contain;
+}
+
+.nav-icon {
+  font-size: 0.85rem !important;
+}
+
+.nav-admin-btn {
+  border: none !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.02em !important;
+  transition: all 0.3s ease !important;
+}

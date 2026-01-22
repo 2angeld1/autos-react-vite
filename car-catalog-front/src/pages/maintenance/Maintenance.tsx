@@ -1,4 +1,6 @@
 import toast, { Toaster } from 'react-hot-toast';
+import { motion } from 'framer-motion';
+import { slideUp, staggerContainer, fadeIn, scaleIn } from '../../animations/variants';
 
 const Maintenance: React.FC = () => {
   const handleSchedule = () => {
@@ -8,7 +10,7 @@ const Maintenance: React.FC = () => {
       style: {
         background: '#1F2937',
         color: '#fff',
-        border: '1px solid #3B82F6',
+        border: '1px solid var(--accent-color)',
       },
       icon: '📅',
     });
@@ -17,26 +19,48 @@ const Maintenance: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-900 pt-20">
       <Toaster />
-      <div className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-white mb-8 flex items-center gap-3">
-          <span className="p-2 bg-green-500/20 rounded-lg text-green-400">
+      <motion.div
+        className="container mx-auto px-4 py-8"
+        initial="hidden"
+        animate="visible"
+        variants={staggerContainer}
+      >
+        <motion.h1
+          className="text-4xl font-bold text-white mb-8 flex items-center gap-3"
+          variants={slideUp}
+        >
+          <span className="p-2 rounded-lg" style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.2)', color: 'var(--accent-color)' }}>
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </span>
           Mantenimiento Programado
-        </h1>
+        </motion.h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
           {/* Status Card - Upcoming Service */}
-          <div className="bg-gradient-to-br from-blue-900/50 to-gray-800 rounded-xl p-8 border border-blue-500/30 shadow-lg lg:col-span-2">
+          <motion.div
+            className="bg-gray-800 rounded-xl p-8 shadow-lg lg:col-span-2"
+            style={{
+              background: 'linear-gradient(to bottom right, rgba(var(--accent-rgb), 0.1), #1f2937)',
+              border: '1px solid rgba(var(--accent-rgb), 0.3)'
+            }}
+            variants={scaleIn}
+          >
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
               <div>
                 <h3 className="text-2xl font-bold text-white mb-2">Próximo Servicio</h3>
-                <p className="text-blue-200">Toyota Highlander 2021</p>
+                <p className="text-gray-300">Toyota Highlander 2021</p>
               </div>
-              <div className="mt-4 md:mt-0 px-4 py-2 bg-blue-500/20 text-blue-300 rounded-full text-sm font-bold border border-blue-500/30">
+              <div
+                className="mt-4 md:mt-0 px-4 py-2 rounded-full text-sm font-bold border"
+                style={{
+                  backgroundColor: 'rgba(var(--accent-rgb), 0.1)',
+                  color: 'var(--accent-color)',
+                  borderColor: 'rgba(var(--accent-rgb), 0.3)'
+                }}
+              >
                 En 15 días o 500 km
               </div>
             </div>
@@ -45,18 +69,27 @@ const Maintenance: React.FC = () => {
               <div className="relative pt-1">
                 <div className="flex mb-2 items-center justify-between">
                   <div>
-                    <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-200 bg-blue-900">
+                    <span
+                      className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full"
+                      style={{ backgroundColor: 'rgba(var(--accent-rgb), 0.2)', color: 'var(--accent-color)' }}
+                    >
                       Estado de Aceite
                     </span>
                   </div>
                   <div className="text-right">
-                    <span className="text-xs font-semibold inline-block text-blue-200">
+                    <span className="text-xs font-semibold inline-block" style={{ color: 'var(--accent-color)' }}>
                       85%
                     </span>
                   </div>
                 </div>
-                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-900/40">
-                  <div style={{ width: "85%" }} className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500"></div>
+                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-gray-700">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: "85%" }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center"
+                    style={{ backgroundColor: 'var(--accent-color)' }}
+                  ></motion.div>
                 </div>
               </div>
 
@@ -78,7 +111,11 @@ const Maintenance: React.FC = () => {
               <div className="flex gap-4 mt-6">
                 <button
                   onClick={handleSchedule}
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors shadow-lg shadow-blue-600/20"
+                  className="font-bold py-2 px-6 rounded-lg transition-all shadow-lg hover:scale-105 active:scale-95 transform duration-200 text-white"
+                  style={{
+                    backgroundColor: 'var(--accent-color)',
+                    boxShadow: '0 4px 14px rgba(var(--accent-rgb), 0.4)'
+                  }}
                 >
                   Agendar Cita
                 </button>
@@ -87,10 +124,13 @@ const Maintenance: React.FC = () => {
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Quick Actions Card */}
-          <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between">
+          <motion.div
+            className="bg-gray-800 rounded-xl p-6 border border-gray-700 flex flex-col justify-between"
+            variants={slideUp}
+          >
             <div>
               <h3 className="text-xl font-bold text-white mb-6">Acciones Rápidas</h3>
               <div className="space-y-4">
@@ -126,20 +166,26 @@ const Maintenance: React.FC = () => {
               </div>
             </div>
             
-            <div className="mt-8 bg-gray-900/50 rounded-lg p-4 border border-dashed border-gray-600">
+            <motion.div
+              className="mt-8 bg-gray-900/50 rounded-lg p-4 border border-dashed border-gray-600"
+              whileHover={{ scale: 1.02 }}
+            >
               <p className="text-gray-400 text-sm text-center">
                 ¿Necesitas ayuda urgente? <br />
-                Llama al <a href="tel:5551234567" className="text-blue-400 hover:underline font-bold">555-123-4567</a>
+                Llama al <a href="tel:5551234567" className="hover:underline font-bold" style={{ color: 'var(--accent-color)' }}>555-123-4567</a>
               </p>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
 
         {/* Maintenance History */}
-        <div className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden">
+        <motion.div
+          className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden"
+          variants={fadeIn}
+        >
           <div className="p-6 border-b border-gray-700 flex justify-between items-center">
             <h3 className="text-xl font-bold text-white">Historial Reciente</h3>
-            <button className="text-blue-400 hover:text-blue-300 text-sm font-medium">Ver Todo</button>
+            <button className="hover:underline text-sm font-medium" style={{ color: 'var(--accent-color)' }}>Ver Todo</button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -161,7 +207,14 @@ const Maintenance: React.FC = () => {
                   <td className="px-6 py-4">45,000 km</td>
                   <td className="px-6 py-4">$85.00</td>
                   <td className="px-6 py-4">
-                    <span className="bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/20">
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold border"
+                      style={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        color: '#4ade80',
+                        borderColor: 'rgba(34, 197, 94, 0.2)'
+                      }}
+                    >
                       Completado
                     </span>
                   </td>
@@ -173,7 +226,14 @@ const Maintenance: React.FC = () => {
                   <td className="px-6 py-4">32,000 km</td>
                   <td className="px-6 py-4">$120.00</td>
                   <td className="px-6 py-4">
-                    <span className="bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/20">
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold border"
+                      style={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        color: '#4ade80',
+                        borderColor: 'rgba(34, 197, 94, 0.2)'
+                      }}
+                    >
                       Completado
                     </span>
                   </td>
@@ -185,7 +245,14 @@ const Maintenance: React.FC = () => {
                   <td className="px-6 py-4">40,000 km</td>
                   <td className="px-6 py-4">$95.00</td>
                   <td className="px-6 py-4">
-                    <span className="bg-green-500/10 text-green-400 px-3 py-1 rounded-full text-xs font-bold border border-green-500/20">
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-bold border"
+                      style={{
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        color: '#4ade80',
+                        borderColor: 'rgba(34, 197, 94, 0.2)'
+                      }}
+                    >
                       Completado
                     </span>
                   </td>
@@ -193,8 +260,8 @@ const Maintenance: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };

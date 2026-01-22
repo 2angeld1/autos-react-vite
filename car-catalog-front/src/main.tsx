@@ -5,10 +5,14 @@ import { CarProvider } from './context/CarContext';
 import './index.css';
 import './assets/styles/main.css';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <CarProvider>
-      <App />
-    </CarProvider>
+    <ThemeProvider>
+      <CarProvider>
+        <App />
+      </CarProvider>
+    </ThemeProvider>
   </React.StrictMode>,
 );

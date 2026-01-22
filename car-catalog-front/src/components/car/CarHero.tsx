@@ -118,14 +118,14 @@ const CarHero: React.FC<CarHeroProps> = ({
 
                                 {car.price && (
                                     <div className="financing-preview mb-4">
-                                        <p className="is-size-7 has-text-grey is-uppercase mb-3" style={{ letterSpacing: '1px', opacity: 0.8 }}>Financiamiento estimado</p>
-                                        <div className="is-flex is-justify-content-space-between is-align-items-flex-end pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                        <p className="is-size-7 has-text-grey is-uppercase mb-3 financing-label">Financiamiento estimado</p>
+                                        <div className="is-flex is-justify-content-space-between is-align-items-flex-end pb-2 financing-row">
                                             <span className="has-text-grey-light is-size-7">Enganche (20%)</span>
                                             <span className="has-text-white has-text-weight-medium">${(car.price * 0.20).toLocaleString()}</span>
                                         </div>
                                         <div className="is-flex is-justify-content-space-between is-align-items-flex-end pt-2">
                                             <span className="has-text-grey-light is-size-7">48 Mensualidades</span>
-                                            <span className="has-text-primary has-text-weight-bold is-size-5" style={{ color: 'var(--accent-color)' }}>${Math.round(car.price * 0.80 / 48).toLocaleString()}</span>
+                                            <span className="has-text-primary has-text-weight-bold is-size-5 monthly-payment">${Math.round(car.price * 0.80 / 48).toLocaleString()}</span>
                                         </div>
                                     </div>
                                 )}
@@ -135,7 +135,7 @@ const CarHero: React.FC<CarHeroProps> = ({
                                         <span className="icon"><i className="fas fa-envelope"></i></span>
                                         <span>Solicitar Información</span>
                                     </a>
-                                    <a href="#financing" className="button is-outlined is-light is-fullwidth is-small" style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#ddd' }}>
+                                    <a href="#financing" className="button is-outlined is-light is-fullwidth is-small btn-outline-custom">
                                         <span className="icon"><i className="fas fa-calculator"></i></span>
                                         <span>Calcular mensualidad</span>
                                     </a>

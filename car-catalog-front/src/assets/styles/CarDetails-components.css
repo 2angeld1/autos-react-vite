@@ -280,3 +280,28 @@
     padding-right: 1.5rem;
 }
 
+/* --- Premium Description Styles --- */
+.verified-badge {
+    box-shadow: 0 4px 10px rgba(72, 199, 116, 0.3);
+}
+
+.description-card-premium {
+    background: linear-gradient(145deg, #1e1e1e 0%, #151515 100%);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+}
+
+.quick-stats-container {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stats-title {
+    letter-spacing: 1px;
+}
+
+.stats-separator {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}

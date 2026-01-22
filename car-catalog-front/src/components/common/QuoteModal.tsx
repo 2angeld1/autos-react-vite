@@ -49,11 +49,11 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose, car }) => {
 
     return (
         <div className={`modal ${isOpen ? 'is-active' : ''}`}>
-            <div className="modal-background" onClick={onClose} style={{backdropFilter: 'blur(5px)'}}></div>
-            <div className="modal-card" style={{maxWidth: '500px', width: '90%', borderRadius: '16px', overflow: 'hidden'}}>
+            <div className="modal-background modal-blur-bg" onClick={onClose}></div>
+            <div className="modal-card quote-modal-card">
                 {step === 1 ? (
                     <>
-                        <header className="modal-card-head has-background-grey-darker" style={{borderBottom: '1px solid #444'}}>
+                        <header className="modal-card-head has-background-grey-darker modal-header-bordered">
                             <p className="modal-card-title has-text-white is-size-5">
                                 <span className="icon mr-2 has-text-accent">
                                     <i className="fas fa-file-invoice-dollar"></i>
@@ -64,9 +64,9 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose, car }) => {
                         </header>
                         
                         <section className="modal-card-body has-background-grey-darker has-text-white">
-                            <div className="is-flex is-align-items-center mb-5 p-3" style={{background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
-                                <figure className="image is-64x64 mr-3" style={{borderRadius: '6px', overflow: 'hidden'}}>
-                                    <img src={car.image} alt={car.model} style={{height: '100%', objectFit: 'cover'}} />
+                            <div className="is-flex is-align-items-center mb-5 p-3 car-summary-box">
+                                <figure className="image is-64x64 mr-3 car-thumb-figure">
+                                    <img src={car.image} alt={car.model} className="car-thumb-img" />
                                 </figure>
                                 <div style={{flex: 1}}>
                                     <p className="has-text-weight-bold is-size-6">{car.year} {car.make} {car.model}</p>
@@ -172,14 +172,7 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose, car }) => {
                                 </div>
 
                                 <button 
-                                    className={`button is-primary is-fullwidth mt-4 ${loading ? 'is-loading' : ''}`}
-                                    style={{
-                                        background: 'linear-gradient(45deg, #FF3860, #FF6B6B)',
-                                        border: 'none',
-                                        fontWeight: 'bold',
-                                        height: '3rem',
-                                        boxShadow: '0 4px 15px rgba(255, 56, 96, 0.4)'
-                                    }}
+                                    className={`button is-primary is-fullwidth mt-4 quote-submit-btn ${loading ? 'is-loading' : ''}`}
                                 >
                                     <span className="icon">
                                         <i className="fas fa-paper-plane"></i>
@@ -191,7 +184,7 @@ const QuoteModal: React.FC<QuoteModalProps> = ({ isOpen, onClose, car }) => {
                     </>
                 ) : (
                     <section className="modal-card-body has-background-grey-darker has-text-white has-text-centered py-6">
-                        <div className="icon is-large has-text-success mb-4" style={{fontSize: '4rem'}}>
+                            <div className="icon is-large has-text-success mb-4 success-check-icon">
                             <i className="fas fa-check-circle"></i>
                         </div>
                         <h3 className="title is-4 has-text-white">¡Cotización Enviada!</h3>
