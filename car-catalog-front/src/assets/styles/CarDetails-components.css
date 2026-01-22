@@ -1,0 +1,282 @@
+/* ========================================
+   CAR DETAILS COMPONENTS STYLES
+   Modern, Flat & Minimalist Design for
+   Description, Tabs, and Specs
+   ======================================== */
+
+/* --- Car Description --- */
+.description-container {
+    color: #e0e0e0;
+    line-height: 1.6;
+}
+
+.description-text {
+    font-size: 1.1rem;
+    color: #bbbbbb;
+    margin-bottom: 2rem;
+}
+
+/* Redesigned Highlights (Flat) */
+.desc-highlight-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.desc-highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #1a1a1a; /* Flat dark bg */
+    border-radius: 8px;
+    border: 1px solid #2a2a2a; /* Subtle border */
+    transition: background-color 0.2s ease;
+}
+
+.desc-highlight-item:hover {
+    background-color: #222;
+}
+
+.desc-highlight-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(var(--accent-rgb, 0, 209, 178), 0.1);
+    border-radius: 6px;
+    color: var(--accent-color, #00d1b2);
+    font-size: 1.2rem;
+}
+
+.desc-highlight-content p.label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #777;
+    margin-bottom: 0.1rem;
+}
+
+.desc-highlight-content p.value {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #fff;
+}
+
+
+/* --- Modern Tabs --- */
+.detail-tabs .tabs {
+    margin-bottom: 0 !important;
+}
+
+.detail-tabs .tabs ul {
+    border-bottom: 1px solid #333;
+    gap: 2rem;
+}
+
+.detail-tabs .tabs li {
+    margin-bottom: -1px; /* Overlap border */
+}
+
+.detail-tabs .tabs a {
+    border: none !important;
+    background: transparent !important;
+    color: #888;
+    padding: 1rem 0;
+    transition: color 0.2s ease;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.detail-tabs .tabs a:hover {
+    color: #ccc;
+}
+
+.detail-tabs .tabs li.is-active a {
+    color: var(--accent-color, #00d1b2);
+    border-bottom: 2px solid var(--accent-color, #00d1b2) !important;
+    font-weight: 600;
+}
+
+/* Remove boxed style defaults overrides */
+.detail-tabs .tabs.is-boxed a {
+    border-radius: 0;
+}
+
+.tab-content {
+    background-color: #151515; /* Slightly lighter than main bg */
+    padding: 2rem;
+    border-radius: 0 0 8px 8px;
+    border: 1px solid #2a2a2a;
+    border-top: none;
+}
+
+
+/* --- Car Specs (Flat) --- */
+.specs-container-pro {
+    padding: 1rem 0;
+}
+
+.spec-group {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid #2a2a2a;
+}
+
+.group-header {
+    background-color: #222;
+    padding: 0.75rem 1rem;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: #ddd;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.group-header i {
+    color: var(--accent-color, #00d1b2);
+    opacity: 0.8;
+}
+
+.spec-items-grid {
+    padding: 1rem;
+    display: grid;
+    gap: 1rem;
+}
+
+.spec-item-pro {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #252525;
+}
+
+.spec-item-pro:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.spec-item-pro .label-pro {
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.spec-item-pro .value-pro {
+    color: #fff;
+    font-weight: 500;
+    text-align: right;
+}
+
+/* --- Car Features (Flat) --- */
+.feature-card {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    border: 1px solid #2a2a2a;
+    height: 100%;
+    overflow: hidden;
+}
+
+.feature-header {
+    background-color: #222;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid #2a2a2a;
+}
+
+.feature-header h5 {
+    color: #fff;
+    font-weight: 600;
+    margin: 0;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.feature-header .icon-wrapper {
+    color: var(--accent-color, #00d1b2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.feature-content-body {
+    padding: 1.5rem;
+}
+
+.feature-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.feature-list li {
+    position: relative;
+    padding-left: 1.5rem;
+    margin-bottom: 0.75rem;
+    color: #bbb;
+    font-size: 0.95rem;
+}
+
+.feature-list li:last-child {
+    margin-bottom: 0;
+}
+
+.feature-list li::before {
+    content: '\f00c'; /* FontAwesome Check */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    left: 0;
+    top: 2px;
+    color: var(--accent-color, #00d1b2);
+    font-size: 0.8rem;
+}
+
+/* Responsive */
+@media screen and (max-width: 768px) {
+    .desc-highlight-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .detail-tabs .tabs ul {
+        gap: 1rem;
+    }
+    
+    .detail-tabs .tabs a {
+        font-size: 0.9rem;
+    }
+}
+
+/* --- Car Reviews (Flat) --- */
+.review-item {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    border: 1px solid #2a2a2a;
+    transition: transform 0.2s ease;
+}
+
+.review-item:hover {
+    background-color: #222;
+}
+
+.review-item .image img {
+    border: 2px solid #333;
+}
+
+.rounded-pill {
+    border-radius: 50px;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+

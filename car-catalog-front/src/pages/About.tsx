@@ -1,5 +1,6 @@
 import React from 'react';
-import { motion } from 'framer-motion'; // Added import
+import { motion } from 'framer-motion';
+import '../assets/styles/About.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faRocket,
@@ -88,17 +89,13 @@ const About: React.FC = () => {
                 <div className="hero-body">
                     <div className="container has-text-centered">
                         <motion.div variants={scaleIn}>
-                            <h1 className="title is-1 has-text-white mb-6" style={{
-                                fontSize: '6rem',
-                                textShadow: '0 4px 60px rgba(249, 115, 22, 0.4)'
-                            }}>
-                                <FontAwesomeIcon icon={faInfoCircle} style={{ color: '#f97316' }} />
+                            <h1 className="title is-1 has-text-white mb-6 about-title-icon">
+                                <FontAwesomeIcon icon={faInfoCircle} className="text-orange" />
                             </h1>
                         </motion.div>
                         <motion.p
                             variants={slideUp}
-                            className="subtitle is-4 has-text-white-bis"
-                            style={{ maxWidth: '700px', margin: '0 auto' }}
+                            className="subtitle is-4 has-text-white-bis about-subtitle"
                         >
                             Tu destino premium para encontrar el vehículo perfecto. 
                             Combinamos tecnología de vanguardia con pasión por los automóviles.
@@ -108,7 +105,7 @@ const About: React.FC = () => {
             </motion.section>
 
             {/* Stats Section */}
-            <section className="section" style={{ marginTop: '-80px', position: 'relative', zIndex: 10 }}>
+            <section className="section stats-section-container">
                 <div className="container">
                     <motion.div
                         className="columns is-multiline"
@@ -119,18 +116,11 @@ const About: React.FC = () => {
                     >
                         {stats.map((stat, index) => (
                             <div key={index} className="column is-3-desktop is-6-tablet">
-                                <div className="box has-text-centered stat-card" style={{
-                                    background: 'linear-gradient(145deg, #1a1a2e 0%, #16213e 100%)',
-                                    border: '1px solid rgba(249, 115, 22, 0.3)',
-                                    borderRadius: '16px',
-                                    padding: '2rem'
-                                }}>
+                                <div className="box has-text-centered stat-card">
                                     <span className="icon is-large has-text-warning mb-3">
                                         <FontAwesomeIcon icon={stat.icon} size="2x" />
                                     </span>
-                                    <p className="title is-2 has-text-white mb-2" style={{
-                                        fontFamily: "'Orbitron', sans-serif"
-                                    }}>
+                                    <p className="title is-2 has-text-white mb-2 stat-value">
                                         {stat.value}
                                     </p>
                                     <p className="has-text-grey-light">{stat.label}</p>
@@ -154,30 +144,25 @@ const About: React.FC = () => {
                     <div className="columns is-vcentered">
                         <motion.div variants={slideUp} className="column is-6">
                             <h2 className="title is-2 has-text-white mb-4">
-                                Nuestra <span style={{ color: '#f97316' }}>Misión</span>
+                                Nuestra <span className="text-orange">Misión</span>
                             </h2>
-                            <p className="has-text-grey-light mb-4" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+                            <p className="has-text-grey-light mb-4 mission-text">
                                 En VeloDrive, creemos que encontrar tu próximo vehículo debería ser una experiencia 
                                 emocionante, no estresante. Por eso hemos creado una plataforma que combina la mayor 
                                 selección de vehículos con herramientas inteligentes de búsqueda.
                             </p>
-                            <p className="has-text-grey-light" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+                            <p className="has-text-grey-light mission-text">
                                 Nuestro compromiso es conectar a compradores con vendedores de manera transparente, 
                                 ofreciendo información detallada y verificada de cada vehículo para que puedas 
                                 tomar decisiones informadas.
                             </p>
                         </motion.div>
                         <motion.div variants={scaleIn} className="column is-6">
-                            <div style={{
-                                background: 'linear-gradient(135deg, rgba(249, 115, 22, 0.1) 0%, rgba(234, 88, 12, 0.05) 100%)',
-                                borderRadius: '24px',
-                                padding: '3rem',
-                                border: '1px solid rgba(249, 115, 22, 0.2)'
-                            }}>
+                            <div className="mission-image-container">
                                 <img 
                                     src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?w=600&h=400&fit=crop"
                                     alt="Luxury Car"
-                                    style={{ borderRadius: '16px', width: '100%' }}
+                                    className="mission-image"
                                 />
                             </div>
                         </motion.div>
@@ -191,38 +176,22 @@ const About: React.FC = () => {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={staggerContainer}
-                className="section"
-                style={{ background: '#0f0f23' }}
+                className="section values-section"
             >
                 <div className="container">
                     <motion.div variants={slideUp} className="has-text-centered mb-6">
                         <h2 className="title is-2 has-text-white">
-                            Nuestros <span style={{ color: '#f97316' }}>Valores</span>
+                            Nuestros <span className="text-orange">Valores</span>
                         </h2>
-                        <p className="has-text-grey-light" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                        <p className="has-text-grey-light values-subtitle">
                             Los principios que guían cada decisión que tomamos
                         </p>
                     </motion.div>
                     <div className="columns is-multiline">
                         {values.map((value, index) => (
                             <motion.div key={index} variants={fadeIn} className="column is-6-tablet is-3-desktop">
-                                <div className="box value-card" style={{
-                                    background: 'linear-gradient(145deg, #1a1a2e 0%, #0d0d1a 100%)',
-                                    border: '1px solid rgba(255,255,255,0.1)',
-                                    borderRadius: '16px',
-                                    padding: '2rem',
-                                    height: '100%',
-                                    transition: 'all 0.3s ease'
-                                }}>
-                                    <span className="icon is-large has-text-warning mb-4" style={{
-                                        background: 'rgba(249, 115, 22, 0.15)',
-                                        borderRadius: '12px',
-                                        width: '60px',
-                                        height: '60px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center'
-                                    }}>
+                                <div className="box value-card">
+                                    <span className="icon is-large has-text-warning mb-4 value-icon-wrapper">
                                         <FontAwesomeIcon icon={value.icon} size="lg" />
                                     </span>
                                     <h3 className="title is-5 has-text-white mb-3">{value.title}</h3>
@@ -240,33 +209,26 @@ const About: React.FC = () => {
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={staggerContainer}
-                className="section"
-                style={{ background: '#0a0a1a' }}
+                className="section team-section"
             >
                 <div className="container">
                     <motion.div variants={slideUp} className="has-text-centered mb-6">
                         <h2 className="title is-2 has-text-white">
-                            Nuestro <span style={{ color: '#f97316' }}>Equipo</span>
+                            Nuestro <span className="text-orange">Equipo</span>
                         </h2>
-                        <p className="has-text-grey-light" style={{ maxWidth: '600px', margin: '0 auto' }}>
+                        <p className="has-text-grey-light team-subtitle">
                             Profesionales apasionados por brindarte la mejor experiencia
                         </p>
                     </motion.div>
                     <div className="columns is-multiline is-centered">
                         {team.map((member, index) => (
                             <motion.div key={index} variants={fadeIn} className="column is-6-tablet is-3-desktop">
-                                <div className="has-text-centered team-card" style={{
-                                    padding: '2rem'
-                                }}>
-                                    <figure className="image mb-4" style={{ margin: '0 auto', maxWidth: '150px' }}>
+                                <div className="has-text-centered team-card">
+                                    <figure className="image mb-4 team-image-wrapper">
                                         <img 
                                             src={member.image} 
                                             alt={member.name}
-                                            style={{
-                                                borderRadius: '50%',
-                                                border: '3px solid #f97316',
-                                                boxShadow: '0 8px 30px rgba(249, 115, 22, 0.3)'
-                                            }}
+                                            className="team-image"
                                         />
                                     </figure>
                                     <h3 className="title is-5 has-text-white mb-1">{member.name}</h3>
@@ -279,117 +241,68 @@ const About: React.FC = () => {
             </motion.section>
 
             {/* Contact Section */}
-            <section className="section" style={{ 
-                background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-                borderTop: '1px solid rgba(249, 115, 22, 0.2)'
-            }}>
+            <section className="section contact-section">
                 <div className="container">
                     <div className="columns is-vcentered">
                         <div className="column is-6">
                             <h2 className="title is-2 has-text-white mb-4">
-                                ¿Tienes <span style={{ color: '#f97316' }}>Preguntas</span>?
+                                ¿Tienes <span className="text-orange">Preguntas</span>?
                             </h2>
-                            <p className="has-text-grey-light mb-5" style={{ fontSize: '1.1rem' }}>
+                            <p className="has-text-grey-light mb-5 contact-text">
                                 Estamos aquí para ayudarte. Contáctanos y te responderemos lo antes posible.
                             </p>
                             <div className="content">
                                 <p className="has-text-white mb-3">
-                                    <FontAwesomeIcon icon={faEnvelope} className="mr-3" style={{ color: '#f97316' }} />
+                                    <FontAwesomeIcon icon={faEnvelope} className="mr-3 text-orange" />
                                     contacto@velodrive.com
                                 </p>
                                 <p className="has-text-white mb-3">
-                                    <FontAwesomeIcon icon={faPhone} className="mr-3" style={{ color: '#f97316' }} />
+                                    <FontAwesomeIcon icon={faPhone} className="mr-3 text-orange" />
                                     +1 (555) 123-4567
                                 </p>
                                 <p className="has-text-white mb-4">
-                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3" style={{ color: '#f97316' }} />
+                                    <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-3 text-orange" />
                                     123 Auto Drive, Miami, FL 33101
                                 </p>
                             </div>
                             <div className="buttons">
-                                <a href="#" className="button is-medium" style={{
-                                    background: 'transparent',
-                                    border: '2px solid #f97316',
-                                    color: '#f97316',
-                                    borderRadius: '8px'
-                                }}>
+                                <a href="#" className="button is-medium social-button">
                                     <FontAwesomeIcon icon={faTwitter} />
                                 </a>
-                                <a href="#" className="button is-medium" style={{
-                                    background: 'transparent',
-                                    border: '2px solid #f97316',
-                                    color: '#f97316',
-                                    borderRadius: '8px'
-                                }}>
+                                <a href="#" className="button is-medium social-button">
                                     <FontAwesomeIcon icon={faFacebook} />
                                 </a>
-                                <a href="#" className="button is-medium" style={{
-                                    background: 'transparent',
-                                    border: '2px solid #f97316',
-                                    color: '#f97316',
-                                    borderRadius: '8px'
-                                }}>
+                                <a href="#" className="button is-medium social-button">
                                     <FontAwesomeIcon icon={faInstagram} />
                                 </a>
-                                <a href="#" className="button is-medium" style={{
-                                    background: 'transparent',
-                                    border: '2px solid #f97316',
-                                    color: '#f97316',
-                                    borderRadius: '8px'
-                                }}>
+                                <a href="#" className="button is-medium social-button">
                                     <FontAwesomeIcon icon={faLinkedin} />
                                 </a>
                             </div>
                         </div>
                         <div className="column is-6">
-                            <div className="box" style={{
-                                background: 'rgba(255,255,255,0.03)',
-                                border: '1px solid rgba(255,255,255,0.1)',
-                                borderRadius: '16px',
-                                padding: '2rem'
-                            }}>
+                            <div className="box contact-form-box">
                                 <div className="field">
                                     <label className="label has-text-white">Nombre</label>
                                     <div className="control">
-                                        <input className="input" type="text" placeholder="Tu nombre" style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            color: 'white'
-                                        }} />
+                                        <input className="input contact-input" type="text" placeholder="Tu nombre" />
                                     </div>
                                 </div>
                                 <div className="field">
                                     <label className="label has-text-white">Email</label>
                                     <div className="control">
-                                        <input className="input" type="email" placeholder="tu@email.com" style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            color: 'white'
-                                        }} />
+                                        <input className="input contact-input" type="email" placeholder="tu@email.com" />
                                     </div>
                                 </div>
                                 <div className="field">
                                     <label className="label has-text-white">Mensaje</label>
                                     <div className="control">
-                                        <textarea className="textarea" placeholder="¿En qué podemos ayudarte?" style={{
-                                            background: 'rgba(255,255,255,0.05)',
-                                            border: '1px solid rgba(255,255,255,0.2)',
-                                            color: 'white',
-                                            minHeight: '120px'
-                                        }}></textarea>
+                                        <textarea className="textarea contact-textarea" placeholder="¿En qué podemos ayudarte?"></textarea>
                                     </div>
                                 </div>
                                 <div className="field">
                                     <div className="control">
-                                        <button className="button is-fullwidth" style={{
-                                            background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
-                                            border: 'none',
-                                            color: 'white',
-                                            fontWeight: '600',
-                                            padding: '1.5rem',
-                                            borderRadius: '8px',
-                                            boxShadow: '0 4px 20px rgba(249, 115, 22, 0.4)'
-                                        }}>
+                                        <button className="button is-fullwidth submit-button">
                                             Enviar Mensaje
                                         </button>
                                     </div>
@@ -400,44 +313,6 @@ const About: React.FC = () => {
                 </div>
             </section>
 
-            <style>{`
-                .about-page .has-bg-gradient {
-                    background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
-                    position: relative;
-                    overflow: hidden;
-                }
-                
-                .about-page .has-bg-gradient::before {
-                    content: '';
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: radial-gradient(circle at 30% 20%, rgba(249, 115, 22, 0.15) 0%, transparent 50%),
-                                radial-gradient(circle at 70% 80%, rgba(234, 88, 12, 0.1) 0%, transparent 50%);
-                }
-                
-                .about-page .stat-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 10px 40px rgba(249, 115, 22, 0.2);
-                }
-                
-                .about-page .value-card:hover {
-                    transform: translateY(-5px);
-                    border-color: rgba(249, 115, 22, 0.5) !important;
-                    box-shadow: 0 10px 40px rgba(249, 115, 22, 0.15);
-                }
-                
-                .about-page .team-card:hover img {
-                    transform: scale(1.05);
-                    box-shadow: 0 12px 40px rgba(249, 115, 22, 0.4);
-                }
-                
-                .about-page .team-card img {
-                    transition: all 0.3s ease;
-                }
-            `}</style>
         </div>
     );
 };

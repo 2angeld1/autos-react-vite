@@ -1,8 +1,8 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { useCarImage } from '../hooks/useCarImage';
-import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
-import DotPattern from './DotPattern';
+import { useCarImage } from '../../hooks/useCarImage';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '../../animations/variants';
+import DotPattern from '../layout/DotPattern';
 import PromotionsBanner from './PromotionsBanner';
 
 const HeroSection: React.FC = () => {

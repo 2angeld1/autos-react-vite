@@ -1,0 +1,47 @@
+.car-detail-hero-section {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-attachment: fixed;
+    min-height: 100vh;
+    width: 100%;
+    position: relative;
+    background-image: var(--hero-bg-image);
+}
+
+.gallery-image-figure {
+    position: relative !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+}
+
+.main-gallery-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+.interest-box {
+    border: 1px solid var(--accent-color) !important;
+}
+
+.quote-button {
+    border: none !important;
+    font-weight: bold !important;
+    box-shadow: 0 4px 15px var(--accent-color) !important;
+}
+
+.similar-car-figure {
+    position: relative !important;
+}
+
+.similar-car-image {
+    object-fit: cover !important;
+}
+
+.image-fallback-badge {
+    position: absolute !important;
+    top: 10px !important;
+    right: 10px !important;
+    z-index: 5 !important;
+}

@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import './SafeCarImage.css';
 
 interface SafeCarImageProps {
     src: string;
@@ -117,14 +118,8 @@ const SafeCarImage: React.FC<SafeCarImageProps> = ({
         
         return (
             <div 
-                className={`has-text-centered is-flex is-align-items-center is-justify-content-center ${className || ''}`}
-                style={{ 
-                    ...style,
-                    backgroundColor,
-                    minHeight: '300px',
-                    borderRadius: '8px',
-                    border: '2px solid rgba(255,255,255,0.1)'
-                }}
+                className={`has-text-centered is-flex is-align-items-center is-justify-content-center safe-image-placeholder ${className || ''}`}
+                style={{ '--placeholder-bg-color': backgroundColor, ...style } as React.CSSProperties}
             >
                 <div className="has-text-white">
                     <span className="icon is-large mb-3">
@@ -171,12 +166,7 @@ const SafeCarImage: React.FC<SafeCarImageProps> = ({
             {/* ✅ Indicador discreto si estamos usando fallback */}
             {isUsingFallback && !hasError && (
                 <div 
-                    className="position-absolute"
-                    style={{
-                        bottom: '10px',
-                        right: '10px',
-                        zIndex: 5
-                    }}
+                    className="position-absolute safe-image-tag-container"
                 >
                     <span className="tag is-warning is-small">
                         <span className="icon">

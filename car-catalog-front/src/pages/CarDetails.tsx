@@ -5,15 +5,19 @@ import { fetchCarById } from '../services/api';
 import { useCarContext } from '../context/CarContext';
 import { useCarImage } from '../hooks/useCarImage';
 import type { Car } from '@/types';
-import SafeCarImage from '../components/SafeCarImage';
-import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
+import { fadeIn, slideUp } from '../animations/variants';
 
 // Components
+import CarHero from '../components/car/CarHero';
+import CarGallery from '../components/car/CarGallery';
 import CarTabs from '../components/car/CarTabs';
-import QuoteModal from '../components/QuoteModal';
+import CarDescription from '../components/car/CarDescription';
+import CarSimilar from '../components/car/CarSimilar';
+import SidebarComponents from '../components/car/SidebarComponents';
+import QuoteModal from '../components/common/QuoteModal';
+import '../assets/styles/CarDetails-page.css';
 
 const CarDetails: React.FC = () => {
-    // ... previous logic ...
     const { id } = useParams<{ id: string }>();
     const { cars, toggleFavorite, isFavorite } = useCarContext();
     const [car, setCar] = useState<Car | null>(null);
@@ -24,7 +28,7 @@ const CarDetails: React.FC = () => {
     const [bgLoading, setBgLoading] = useState<boolean>(true);
     const [isQuoteOpen, setIsQuoteOpen] = useState(false);
 
-    // ✅ SIEMPRE llamar el hook en el mismo orden, incluso si car es null
+    // Siempre llamar el hook en el mismo orden, incluso si car es null
     const carForHook = car || { 
         id: 'loading', 
         make: 'Loading', 
@@ -43,7 +47,7 @@ const CarDetails: React.FC = () => {
                 setLoading(true);
                 setBgLoading(true);
                 
-                const data = await fetchCarById(id); // No forzar el tipo aquí
+                const data = await fetchCarById(id);
                 
                 if (!data) {
                     setError('Auto no encontrado');
@@ -51,7 +55,7 @@ const CarDetails: React.FC = () => {
                     return;
                 }
                 
-                setCar(data); // Ahora TypeScript sabe que data no es null
+                setCar(data);
                 setError(null);
     
                 // Find similar cars
@@ -77,13 +81,12 @@ const CarDetails: React.FC = () => {
         window.scrollTo(0, 0);
     }, [id, cars]);
 
-    // ✅ useEffect para background - usar imagen del backend
+    // useEffect para background - usar imagen del backend
     useEffect(() => {
         if (!car || car.id === 'loading') {
             return;
         }
 
-        // Usar la imagen del auto desde el backend
         const imageUrl = car.image || carImageHook.imageSrc;
         
         if (imageUrl) {
@@ -92,6 +95,7 @@ const CarDetails: React.FC = () => {
         setBgLoading(false);
     }, [car, carImageHook.imageSrc]);
 
+    // Loading state
     if (loading) return (
         <div className="container has-text-centered section animated">
             <div className="loader-wrapper">
@@ -105,6 +109,7 @@ const CarDetails: React.FC = () => {
         </div>
     );
 
+    // Error state
     if (error) return (
         <div className="container section animated">
             <div className="notification is-danger is-light has-text-centered">
@@ -122,7 +127,7 @@ const CarDetails: React.FC = () => {
         </div>
     );
 
-    // ✅ Solo verificar si car es null, pero el hook ya se llamó arriba
+    // Not found state
     if (!car || car.id === 'loading') return (
         <div className="container section animated">
             <div className="notification is-warning is-light has-text-centered">
@@ -140,7 +145,6 @@ const CarDetails: React.FC = () => {
         </div>
     );
 
-
     const backgroundImageUrl = bgImage || carImageHook.imageSrc;
 
     return (
@@ -150,263 +154,45 @@ const CarDetails: React.FC = () => {
             variants={fadeIn}
             className="has-background-dark"
         >
-            <section 
-                className={`car-detail-hero minimalist-hero ${bgLoading ? 'loading' : ''}`} 
-                style={{ 
-                    backgroundImage: `url("${backgroundImageUrl}")`,
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center center',
-                    backgroundSize: 'cover',
-                    backgroundAttachment: 'fixed', // Efecto parallax sutil
-                    minHeight: '100vh', // Asegurar altura completa
-                    width: '100%',
-                    position: 'relative' // Aseguramos posicionamiento para el overlay
-                }}
-            >
-                <div className="container pt-6 pb-6">
-                    <motion.nav variants={fadeIn} className="breadcrumb has-bullet-separator is-centered" aria-label="breadcrumbs">
-                        <ul>
-                            <li>
-                                <Link to="/" className="has-text-white-bis">
-                                    <span className="icon">
-                                        <i className="fas fa-home"></i>
-                                    </span>
-                                    <span>Inicio</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link to="/" className="has-text-white-bis">
-                                    <span className="icon">
-                                        <i className="fas fa-car"></i>
-                                    </span>
-                                    <span>Catálogo</span>
-                                </Link>
-                            </li>
-                            <li className="is-active">
-                                <a href="#" className="has-text-accent">{car.make} {car.model}</a>
-                            </li>
-                        </ul>
-                    </motion.nav>
-                
-                    <motion.div variants={staggerContainer} className="columns is-vcentered mt-5">
-                        <div className="column is-7">
-                            <motion.h1 variants={slideUp} className="title is-1 has-text-white">{car.make} {car.model}</motion.h1>
-                            <motion.h2 variants={slideUp} className="subtitle is-3 has-text-accent">{car.year}</motion.h2>
-                            
-                            <motion.div variants={staggerContainer} className="car-highlights horizontal mt-5 mb-5">
-                                <motion.div variants={scaleIn} className="highlight-item">
-                                    <span className="icon has-text-accent">
-                                        <i className="fas fa-gas-pump"></i>
-                                    </span>
-                                    <div>
-                                        <p className="has-text-grey">Combustible</p>
-                                        <p className="has-text-white has-text-weight-bold">{car.fuel_type}</p>
-                                    </div>
-                                </motion.div>
-                                
-                                <motion.div variants={scaleIn} className="highlight-item">
-                                    <span className="icon has-text-accent">
-                                        <i className="fas fa-cog"></i>
-                                    </span>
-                                    <div>
-                                        <p className="has-text-grey">Transmisión</p>
-                                        <p className="has-text-white has-text-weight-bold">
-                                            {car.transmission === 'a' ? 'Automática' : 'Manual'}
-                                        </p>
-                                    </div>
-                                </motion.div>
-                                
-                                {car.cylinders && (
-                                    <motion.div variants={scaleIn} className="highlight-item">
-                                        <span className="icon has-text-accent">
-                                            <i className="fas fa-compress-arrows-alt"></i>
-                                        </span>
-                                        <div>
-                                            <p className="has-text-grey">Cilindros</p>
-                                            <p className="has-text-white has-text-weight-bold">{car.cylinders}</p>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </motion.div>
-                            
-                            <motion.div variants={slideUp} className="buttons are-medium">
-                                <button 
-                                    className={`button ${isFavorite(car.id) ? 'is-danger' : 'is-outlined is-light'}`}
-                                    onClick={() => toggleFavorite(car.id)}
-                                >
-                                    <span className="icon">
-                                        <i className="fas fa-heart"></i>
-                                    </span>
-                                    <span>{isFavorite(car.id) ? 'En Favoritos' : 'Añadir a Favoritos'}</span>
-                                </button>
-                                
-                                <button className="button is-outlined is-light">
-                                    <span className="icon">
-                                        <i className="fas fa-share-alt"></i>
-                                    </span>
-                                    <span>Compartir</span>
-                                </button>
-                                
-                                <a href="#contact" className="button is-accent">
-                                    <span className="icon">
-                                        <i className="fas fa-phone"></i>
-                                    </span>
-                                    <span>Contactar</span>
-                                </a>
-                            </motion.div>
-                        </div>
-                        
-                        <motion.div variants={scaleIn} className="column is-5">
-                            <div className="price-card glowing-border">
-                                <div className="price-card-content has-text-centered">
-                                    <p className="is-size-4 has-text-white has-text-weight-light">Precio de Lista</p>
-                                    <p className="is-size-1 has-text-accent has-text-weight-bold mb-3">
-                                        ${car.price?.toLocaleString() || 'Consultar'}
-                                    </p>
-                                    <p className="has-text-white-bis mb-4">Financiamiento Disponible</p>
-                                    
-                                    {car.price && (
-                                        <div className="financing-preview mb-4">
-                                            <div className="columns is-mobile">
-                                                <div className="column has-text-centered">
-                                                    <p className="has-text-grey-light">Enganche</p>
-                                                    <p className="has-text-white has-text-weight-bold">
-                                                        ${(car.price * 0.20).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                                <div className="column has-text-centered">
-                                                    <p className="has-text-grey-light">Pago Mensual</p>
-                                                    <p className="has-text-white has-text-weight-bold">
-                                                        ${Math.round(car.price * 0.80 / 48).toLocaleString()}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    <div className="buttons is-centered">
-                                        <a href="#financing" className="button is-secondary-accent is-fullwidth">
-                                            <span className="icon">
-                                                <i className="fas fa-calculator"></i>
-                                            </span>
-                                            <span>Calcular Financiamiento</span>
-                                        </a>
-                                        <a href="#contact" className="button is-outlined is-light is-fullwidth">
-                                            <span className="icon">
-                                                <i className="fas fa-envelope"></i>
-                                            </span>
-                                            <span>Solicitar Información</span>
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                </div>
-            </section>
-            
+            {/* Hero Section */}
+            <CarHero
+                car={car}
+                backgroundImageUrl={backgroundImageUrl}
+                bgLoading={bgLoading}
+                isFavorite={isFavorite}
+                toggleFavorite={toggleFavorite}
+            />
+
+            {/* Main Content */}
             <div className="container p-4">                
                 <div className="columns">
+                    {/* Left Column - Main Content */}
                     <div className="column is-8">
-                        <motion.div
-                            initial="hidden"
-                            whileInView="visible"
-                            viewport={{ once: true }}
-                            variants={fadeIn}
-                            className="detail-section detail-gallery"
-                        >
-                            <motion.div
-                                className="gallery-container"
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true, amount: 0.3 }}
-                                variants={fadeIn}
-                            >
-                                <figure className="image is-16by9 is-clickable" style={{ position: 'relative', borderRadius: '12px', overflow: 'hidden' }}>
-                                    <SafeCarImage
-                                        car={car}
-                                        src={car.image}
-                                        alt={`${car.make} ${car.model} ${car.year}`}
-                                        className="main-gallery-image"
-                                        style={{
-                                            width: '100%',
-                                            height: '100%',
-                                            objectFit: 'cover'
-                                        }}
-                                    />
+                        {/* Gallery Section */}
+                        <CarGallery
+                            car={car}
+                            imageError={carImageHook.imageError}
+                        />
 
-                                    {carImageHook.imageError && (
-                                        <div className="image-fallback-indicator">
-                                            <span className="tag is-warning is-small">
-                                                <span className="icon">
-                                                    <i className="fas fa-exclamation-triangle"></i>
-                                                </span>
-                                                <span>Imagen alternativa</span>
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {!carImageHook.imageError && (
-                                        <div className="image-quality-badge">
-                                            <span className="tag is-success is-small">
-                                                <span className="icon">
-                                                    <i className="fas fa-check"></i>
-                                                </span>
-                                                <span>Original</span>
-                                            </span>
-                                        </div>
-                                    )}
-                                </figure>
-                            </motion.div>
-                            
-                            <div className="mt-5">
-                                <h3 className="title is-4 mb-3 has-text-accent">
-                                    <span className="icon">
-                                        <i className="fas fa-info-circle"></i>
-                                    </span>
-                                    <span>Descripción</span>
-                                </h3>
-                                <p className="mb-4 has-text-white-bis has-text-centered">
-                                    {car.description || `Este ${car.make} ${car.model} ${car.year} combina estilo, rendimiento y eficiencia en un paquete excepcional.`}
-                                </p>
-                                <p className="has-text-grey-light is-italic has-text-centered">
-                                    Este vehículo se encuentra en excelentes condiciones, listo para entrega inmediata.
-                                </p>
-                            </div>
-                        </motion.div>
+                        {/* Description Section */}
+                        <div className="mt-5">
+                            <CarDescription car={car} />
+                        </div>
                         
+                        {/* Tabs Section */}
                         <div className="detail-section">
                             <CarTabs car={car} />
                         </div>
                         
-                        {similarCars.length > 0 && (
-                            <div className="detail-section">
-                                <h3 className="title is-4 has-text-accent mb-4">
-                                    <span className="icon">
-                                        <i className="fas fa-cars"></i>
-                                    </span>
-                                    <span>Vehículos Similares</span>
-                                </h3>
-                                <motion.div
-                                    className="columns is-multiline"
-                                    initial="hidden"
-                                    whileInView="visible"
-                                    viewport={{ once: true }}
-                                    variants={staggerContainer}
-                                >
-                                    {similarCars.map((similarCar) => (
-                                        <SimilarCarCard 
-                                            key={similarCar.id} 
-                                            car={similarCar} 
-                                            isFavorite={isFavorite}
-                                            toggleFavorite={toggleFavorite}
-                                        />
-                                    ))}
-                                </motion.div>
-                            </div>
-                        )}
+                        {/* Similar Cars Section */}
+                        <CarSimilar
+                            similarCars={similarCars}
+                            isFavorite={isFavorite}
+                            toggleFavorite={toggleFavorite}
+                        />
                     </div>
                     
+                    {/* Right Column - Sidebar */}
                     <motion.div
                         initial="hidden"
                         whileInView="visible"
@@ -414,215 +200,28 @@ const CarDetails: React.FC = () => {
                         variants={slideUp}
                         className="column is-4"
                     >
-                        <div className="sticky-sidebar">
-                            <div className="box">
-                                <h4 className="title is-5">
-                                    <span className="icon">
-                                        <i className="fas fa-clipboard-list"></i>
-                                    </span>
-                                    <span>Información del Vehículo</span>
-                                </h4>
-                                <div className="content">
-                                    <p>
-                                        <span className="icon car-spec-icon">
-                                            <i className="fas fa-industry"></i>
-                                        </span>
-                                        <strong>Marca:</strong> {car.make}
-                                    </p>
-                                    <p>
-                                        <span className="icon car-spec-icon">
-                                            <i className="fas fa-car"></i>
-                                        </span>
-                                        <strong>Modelo:</strong> {car.model}
-                                    </p>
-                                    <p>
-                                        <span className="icon car-spec-icon">
-                                            <i className="fas fa-calendar-alt"></i>
-                                        </span>
-                                        <strong>Año:</strong> {car.year}
-                                    </p>
-                                    <p>
-                                        <span className="icon car-spec-icon">
-                                            <i className="fas fa-gas-pump"></i>
-                                        </span>
-                                        <strong>Combustible:</strong> {car.fuel_type}
-                                    </p>
-                                    <p>
-                                        <span className="icon car-spec-icon">
-                                            <i className="fas fa-cog"></i>
-                                        </span>
-                                        <strong>Transmisión:</strong> {car.transmission === 'a' ? 'Automática' : 'Manual'}
-                                    </p>
-                                    {car.class && (
-                                        <p>
-                                            <span className="icon car-spec-icon">
-                                                <i className="fas fa-tags"></i>
-                                            </span>
-                                            <strong>Categoría:</strong> {car.class}
-                                        </p>
-                                    )}
-                                    {car.cylinders && (
-                                        <p>
-                                            <span className="icon car-spec-icon">
-                                                <i className="fas fa-compress-arrows-alt"></i>
-                                            </span>
-                                            <strong>Cilindros:</strong> {car.cylinders}
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                            
-                            <div className="box mt-4 has-background-grey-darker" style={{ border: '1px solid #7957d5' }}>
-                                <h4 className="title is-5 has-text-centered has-text-white mb-4">
-                                    ¿Te interesa este auto?
-                                </h4>
-                                <button
-                                    onClick={() => setIsQuoteOpen(true)}
-                                    className="button is-primary is-fullwidth is-large animate-pulse"
-                                    style={{
-                                        background: 'linear-gradient(45deg, #7957d5, #b86bff)',
-                                        border: 'none',
-                                        fontWeight: 'bold',
-                                        boxShadow: '0 4px 15px rgba(121, 87, 213, 0.4)'
-                                    }}
-                                >
-                                    <span className="icon">
-                                        <i className="fas fa-file-invoice-dollar"></i>
-                                    </span>
-                                    <span>Solicitar Cotización</span>
-                                </button>
-                                {car.price && (
-                                    <p className="has-text-centered mt-3 has-text-grey-light is-size-7">
-                                        Precio Total: ${car.price.toLocaleString()}
-                                    </p>
-                                )}
-                            </div>
-
-                            <div className="box mt-4" id="contact">
-                                <h4 className="title is-5">
-                                    <span className="icon">
-                                        <i className="fas fa-phone"></i>
-                                    </span>
-                                    <span>Contactar Vendedor</span>
-                                </h4>
-                                <div className="content">
-                                    <p className="has-text-grey-light mb-3">
-                                        ¿Interesado en este vehículo? Contáctanos para más información.
-                                    </p>
-                                    <div className="field">
-                                        <label className="label">Nombre</label>
-                                        <div className="control">
-                                            <input className="input" type="text" placeholder="Tu nombre" />
-                                        </div>
-                                    </div>
-                                    <div className="field">
-                                        <label className="label">Teléfono</label>
-                                        <div className="control">
-                                            <input className="input" type="tel" placeholder="Tu teléfono" />
-                                        </div>
-                                    </div>
-                                    <div className="field">
-                                        <label className="label">Mensaje</label>
-                                        <div className="control">
-                                            <textarea 
-                                                className="textarea" 
-                                                placeholder={`Hola, estoy interesado en el ${car.make} ${car.model} ${car.year}`}
-                                                rows={3}
-                                            ></textarea>
-                                        </div>
-                                    </div>
-                                    <div className="field">
-                                        <div className="control">
-                                            <button className="button is-accent is-fullwidth">
-                                                <span className="icon">
-                                                    <i className="fas fa-paper-plane"></i>
-                                                </span>
-                                                <span>Enviar Mensaje</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="box mt-4" id="financing">
-                                <h4 className="title is-5">
-                                    <span className="icon">
-                                        <i className="fas fa-calculator"></i>
-                                    </span>
-                                    <span>Calculadora de Financiamiento</span>
-                                </h4>
-                                <div className="content">
-                                    {car.price ? (
-                                        <>
-                                            <div className="field">
-                                                <label className="label">Precio del vehículo</label>
-                                                <div className="control">
-                                                    <input 
-                                                        className="input" 
-                                                        type="text" 
-                                                        value={`$${car.price.toLocaleString()}`} 
-                                                        readOnly 
-                                                    />
-                                                </div>
-                                            </div>
-                                            <div className="field">
-                                                <label className="label">Enganche (%)</label>
-                                                <div className="control">
-                                                    <input className="input" type="number" defaultValue="20" min="0" max="100" />
-                                                </div>
-                                            </div>
-                                            <div className="field">
-                                                <label className="label">Plazo (meses)</label>
-                                                <div className="control">
-                                                    <div className="select is-fullwidth">
-                                                        <select defaultValue="48">
-                                                            <option value="12">12 meses</option>
-                                                            <option value="24">24 meses</option>
-                                                            <option value="36">36 meses</option>
-                                                            <option value="48">48 meses</option>
-                                                            <option value="60">60 meses</option>
-                                                            <option value="72">72 meses</option>
-                                                        </select>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div className="field">
-                                                <div className="control">
-                                                    <button className="button is-secondary-accent is-fullwidth">
-                                                        <span className="icon">
-                                                            <i className="fas fa-chart-line"></i>
-                                                        </span>
-                                                        <span>Calcular Pagos</span>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <p className="has-text-grey-dark">
-                                            Contacta para información de precios y financiamiento.
-                                        </p>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
+                        <SidebarComponents
+                            car={car}
+                            onQuoteClick={() => setIsQuoteOpen(true)}
+                        />
                     </motion.div>
                 </div>
                 
+                {/* Back Button */}
                 <div className="buttons is-centered mt-6 mb-6">
                     <Link to="/" className="button is-medium is-outlined is-accent">
-                        <span className="icon">
-                            <i className="fas fa-arrow-left"></i>
-                        </span>
+                        <span className="icon"><i className="fas fa-arrow-left"></i></span>
                         <span>Volver al Catálogo</span>
                     </Link>
                 </div>
             </div>
             
+            {/* Help Button */}
             <div className="help-button animate-pulse">
                 <i className="fas fa-comments"></i>
             </div>
 
-            {/* Modal de Cotización */}
+            {/* Quote Modal */}
             {car && (
                 <QuoteModal
                     isOpen={isQuoteOpen}
@@ -631,102 +230,6 @@ const CarDetails: React.FC = () => {
                 />
             )}
         </motion.div>
-    );
-};
-
-const SimilarCarCard: React.FC<{
-    car: Car;
-    isFavorite: (id: string) => boolean;
-    toggleFavorite: (id: string) => void;
-}> = ({ car, isFavorite, toggleFavorite }) => {
-    const carImageHook = useCarImage({ car });
-    
-    return (
-        <div className="column is-6">
-            <div className="card">
-                <div className="card-image">
-                    <figure className="image is-16by9" style={{ position: 'relative' }}>
-                        <SafeCarImage
-                            car={car}
-                            src={car.image}
-                            alt={`${car.make} ${car.model}`}
-                            style={{ objectFit: 'cover' }}
-                        />
-                        
-                        {carImageHook.imageError && (
-                            <div className="image-fallback-indicator" style={{
-                                position: 'absolute',
-                                top: '10px',
-                                right: '10px',
-                                zIndex: 5
-                            }}>
-                                <span className="tag is-warning is-small">
-                                    <span className="icon">
-                                        <i className="fas fa-exclamation-triangle"></i>
-                                    </span>
-                                    <span>Alt</span>
-                                </span>
-                            </div>
-                        )}
-                    </figure>
-                </div>
-                <div className="card-content">
-                    <p className="title is-5 has-text-dark">
-                        {car.make} {car.model}
-                    </p>
-                    <p className="subtitle is-6 has-text-grey">
-                        {car.year}
-                    </p>
-                    {car.price && (
-                        <p className="has-text-primary has-text-weight-bold">
-                            ${car.price.toLocaleString()}
-                        </p>
-                    )}
-                    <div className="mt-3">
-                        <span className="tag is-light mr-2">
-                            <span className="icon is-small">
-                                <i className="fas fa-gas-pump"></i>
-                            </span>
-                            <span>{car.fuel_type}</span>
-                        </span>
-                        <span className="tag is-light">
-                            <span className="icon is-small">
-                                <i className="fas fa-cog"></i>
-                            </span>
-                            <span>
-                                {car.transmission === 'a' ? 'Auto' : 'Manual'}
-                            </span>
-                        </span>
-                    </div>
-                </div>
-                <footer className="card-footer">
-                    <Link 
-                        to={`/car/${car.id}`} 
-                        className="card-footer-item has-text-primary"
-                    >
-                        <span className="icon">
-                            <i className="fas fa-eye"></i>
-                        </span>
-                        <span>Ver detalles</span>
-                    </Link>
-                    <button 
-                        className={`card-footer-item has-text-link ${
-                            isFavorite(car.id) ? 'has-text-danger' : ''
-                        }`}
-                        onClick={() => toggleFavorite(car.id)}
-                    >
-                        <span className="icon">
-                            <i className={`fas fa-heart ${
-                                isFavorite(car.id) ? '' : 'far'
-                            }`}></i>
-                        </span>
-                        <span>
-                            {isFavorite(car.id) ? 'Favorito' : 'Agregar'}
-                        </span>
-                    </button>
-                </footer>
-            </div>
-        </div>
     );
 };
 

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CarSpecs from './CarSpecs';
 import CarFeatures from './CarFeatures';
-import CarFinance from './CarFinance';
+import CarReviews from './CarReviews';
 import type { Car } from '@/types';
 
 interface CarTabsProps {
@@ -19,8 +19,8 @@ const CarTabs: React.FC<CarTabsProps> = ({ car }) => {
     };
 
     return (
-        <div className="detail-tabs">
-            <div className="tabs is-boxed is-fullwidth">
+        <div className="detail-tabs mt-4">
+            <div className="tabs">
                 <ul>
                     <li className={activeTab === 'specs' ? 'is-active' : ''}>
                         <a onClick={() => setActiveTab('specs')}>
@@ -34,10 +34,10 @@ const CarTabs: React.FC<CarTabsProps> = ({ car }) => {
                             <span>Características</span>
                         </a>
                     </li>
-                    <li className={activeTab === 'finance' ? 'is-active' : ''}>
-                        <a onClick={() => setActiveTab('finance')}>
-                            <span className="icon is-small"><i className="fas fa-calculator"></i></span>
-                            <span>Financiamiento</span>
+                    <li className={activeTab === 'reviews' ? 'is-active' : ''}>
+                        <a onClick={() => setActiveTab('reviews')}>
+                            <span className="icon is-small"><i className="fas fa-star"></i></span>
+                            <span>Opiniones</span>
                         </a>
                     </li>
                 </ul>
@@ -55,7 +55,7 @@ const CarTabs: React.FC<CarTabsProps> = ({ car }) => {
                     >
                         {activeTab === 'specs' && <CarSpecs car={car} />}
                         {activeTab === 'features' && <CarFeatures />}
-                        {activeTab === 'finance' && <CarFinance car={car} />}
+                        {activeTab === 'reviews' && <CarReviews />}
                     </motion.div>
                 </AnimatePresence>
             </div>

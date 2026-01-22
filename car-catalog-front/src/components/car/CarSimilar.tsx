@@ -1,39 +1,42 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-
-interface Car {
-    id: number;
-    make: string;
-    model: string;
-    year: number;
-    price: number;
-    image: string;
-}
+import { motion } from 'framer-motion';
+import { staggerContainer } from '../../animations/variants';
+import TravelCarCard from '../cards/TravelCarCard';
+import type { Car } from '@/types';
 
 interface CarSimilarProps {
     similarCars: Car[];
+    isFavorite: (id: string) => boolean;
+    toggleFavorite: (id: string) => void;
 }
 
 const CarSimilar: React.FC<CarSimilarProps> = ({ similarCars }) => {
+    if (similarCars.length === 0) return null;
+
     return (
-        <div className="detail-section">
-            <h3 className="title is-4 mb-4 has-text-accent">Vehículos similares</h3>
-            <div className="columns is-multiline">
-                {similarCars.map(similarCar => (
-                    <div className="column is-6" key={similarCar.id}>
-                        <Link to={`/car/${similarCar.id}`} className="similar-car-card">
-                            <div className="similar-car-image">
-                                <img src={similarCar.image} alt={`${similarCar.make} ${similarCar.model}`} />
-                            </div>
-                            <div className="similar-car-content">
-                                <h4 className="is-size-5 has-text-white">{`${similarCar.make} ${similarCar.model}`}</h4>
-                                <p className="has-text-grey-light">{similarCar.year}</p>
-                                <p className="has-text-accent has-text-weight-bold">${similarCar.price.toLocaleString()}</p>
-                            </div>
-                        </Link>
-                    </div>
+        <div className="detail-section mt-6">
+            <h3 className="title is-4 mb-5 has-text-white">
+                <span className="icon-text">
+                    <span className="icon has-text-accent mr-2">
+                        <i className="fas fa-layer-group"></i>
+                    </span>
+                    <span>También te podría interesar</span>
+                </span>
+            </h3>
+
+            <motion.div
+                className="columns is-multiline"
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true }}
+                variants={staggerContainer}
+            >
+                {similarCars.map((car) => (
+                    <motion.div key={car.id} className="column is-6-tablet is-6-desktop">
+                        <TravelCarCard car={car} />
+                    </motion.div>
                 ))}
-            </div>
+            </motion.div>
         </div>
     );
 };

@@ -48,8 +48,6 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
         }
     };
 
-    const availableMakes = ['Toyota', 'Kia', 'Tesla', 'Ford', 'Chevrolet']; // Ejemplo de marcas disponibles
-
     return (
         <form onSubmit={handleSubmit} className="search-filter-form">
             <div className="columns is-multiline">
@@ -141,19 +139,6 @@ const SearchFilter: React.FC<SearchFilterProps> = ({ onSearch }) => {
                         </div>
                     </div>
                 </div>
-            </div>
-            {/* ✅ ACTUALIZAR mensaje informativo */}
-            <div className="notification is-info is-light mt-3" style={{ fontSize: '0.85rem' }}>
-                <p>
-                    <strong>💡 Consejo:</strong> Puedes buscar cualquier marca de auto. 
-                    Si no está en nuestro catálogo local, buscaremos en la API externa.
-                </p>
-                <p className="mt-2">
-                    <strong>Marcas en catálogo local:</strong> {availableMakes.join(', ')}
-                </p>
-                <p className="mt-2">
-                    <strong>Otras marcas:</strong> Ford, BMW, Mercedes, Audi, Honda, Mazda, Subaru, etc.
-                </p>
             </div>
         </form>
     );

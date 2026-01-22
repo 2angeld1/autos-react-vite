@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { Car } from '@/types';
-import { quoteService } from '../services/api';
+import { quoteService } from '../../services/api';
 
 interface QuoteModalProps {
     isOpen: boolean;

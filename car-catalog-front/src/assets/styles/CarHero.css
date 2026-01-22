@@ -1,0 +1,312 @@
+/* ========================================
+   CAR HERO SECTION STYLES
+   Minimalist & Flat Design
+   ======================================== */
+
+/* Main Hero Section */
+.car-detail-hero-section {
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: cover;
+    background-attachment: fixed; /* Parallax effect enabled */
+    min-height: 70vh;
+    width: 100%;
+    position: relative;
+    background-image: var(--hero-bg-image);
+    padding-top: 140px; /* Space for the header */
+    padding-bottom: 4rem; /* Space at bottom to prevent clip */
+    height: auto; /* Let content dictate height */
+    min-height: 70vh; /* Minimum height but flexible */
+    overflow: visible; /* Ensure nothing is hidden */
+}
+
+.car-detail-hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75); /* Flat dark overlay */
+    z-index: 1;
+}
+
+.car-detail-hero-section > .container {
+    position: relative;
+    z-index: 10; /* Increased z-index */
+}
+
+/* Breadcrumb Styling */
+.car-detail-hero-section .breadcrumb {
+    margin-bottom: 2rem;
+}
+
+.car-detail-hero-section .breadcrumb a {
+    color: #b5b5b5;
+    transition: color 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.car-detail-hero-section .breadcrumb a:hover {
+    color: #ffffff;
+}
+
+.car-detail-hero-section .breadcrumb .is-active a {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.car-detail-hero-section .breadcrumb li::before {
+    color: #555555;
+}
+
+/* Title Styling */
+.car-detail-hero-section .title.is-1 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.car-detail-hero-section .subtitle.is-3 {
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #dddddd;
+    margin-top: 0;
+}
+
+/* Car Highlights */
+.car-highlights.horizontal {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.car-highlights .highlight-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    /* minimalist separator instead of box */
+    padding-right: 1.5rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.car-highlights .highlight-item:last-child {
+    border-right: none;
+}
+
+.car-highlights .highlight-item:hover {
+    transform: none; /* No movement on hover */
+}
+
+.car-highlights .highlight-item .icon {
+    font-size: 1.25rem;
+    width: auto;
+    height: auto;
+    background: transparent;
+    color: var(--accent-color, #00d1b2);
+}
+
+.car-highlights .highlight-item p.has-text-grey {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0;
+    color: #888888 !important;
+}
+
+.car-highlights .highlight-item p.has-text-weight-bold {
+    font-size: 1rem;
+    color: #ffffff;
+    font-weight: 500 !important;
+}
+
+/* Action Buttons */
+.car-detail-hero-section .buttons.are-medium {
+    margin-top: 2.5rem;
+}
+
+.car-detail-hero-section .buttons.are-medium .button {
+    border-radius: 4px; /* Slightly rounded, almost sharp */
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+    text-transform: none;
+    letter-spacing: normal;
+    font-size: 1rem;
+    border: none;
+    box-shadow: none !important;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-outlined.is-light {
+    background-color: transparent;
+    border: 1px solid #555;
+    color: #fff;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-outlined.is-light:hover {
+    background-color: #333;
+    border-color: #333;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-danger {
+    background-color: #ff3860;
+    color: white;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-danger:hover {
+    background-color: #e02e53;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-accent {
+    background-color: var(--accent-color, #00d1b2);
+    color: white;
+}
+
+.car-detail-hero-section .buttons.are-medium .button.is-accent:hover {
+    background-color: var(--primary-color, #00b89c);
+}
+
+/* Price Card - Redesigned as flat implementation */
+.price-card {
+    background-color: #1a1a1a;
+    border-radius: 8px;
+    padding: 2.5rem;
+    position: relative;
+    border: none;
+    box-shadow: none;
+}
+
+/* Remove glowing effects */
+.price-card::before {
+    display: none;
+}
+
+.price-card.glowing-border {
+    box-shadow: none;
+}
+
+.price-card-content .is-size-1 {
+    font-size: 3rem !important;
+    font-weight: 700 !important;
+    color: #ffffff;
+    background: none;
+    -webkit-text-fill-color: initial;
+    margin-bottom: 0.5rem;
+}
+
+.price-card-content .has-text-weight-light {
+    color: #888888;
+    font-weight: 400 !important;
+    font-size: 1.25rem !important;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.price-card-content .has-text-white-bis {
+    color: #aaaaaa !important;
+}
+
+/* Financing Preview - Flat */
+.financing-preview {
+    background-color: #252525;
+    border-radius: 6px;
+    padding: 1.5rem;
+    border: none;
+    margin-top: 1.5rem;
+}
+
+.financing-preview .has-text-grey-light {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #777777;
+}
+
+.financing-preview .has-text-weight-bold {
+    font-size: 1.25rem;
+    margin-top: 0.25rem;
+    color: #ffffff;
+}
+
+/* Price Card Buttons - Flat */
+.price-card .buttons .button {
+    border-radius: 4px;
+    font-weight: 500;
+    padding: 1.25rem;
+    border: none;
+    box-shadow: none !important;
+    transition: background-color 0.2s ease;
+}
+
+.price-card .button.is-secondary-accent {
+    background-color: #3273dc; /* Solid corporate blue */
+    color: white;
+}
+
+.price-card .button.is-secondary-accent:hover {
+    background-color: #2366d1;
+}
+
+.price-card .button.is-outlined.is-light {
+    background-color: transparent;
+    border: 1px solid #444;
+    color: #fff;
+}
+
+.price-card .button.is-outlined.is-light:hover {
+    background-color: #2a2a2a;
+    border-color: #444;
+}
+
+/* Responsive Adjustments */
+@media screen and (max-width: 1023px) {
+    .car-detail-hero-section {
+        min-height: auto;
+        padding: 4rem 0;
+    }
+
+    .car-detail-hero-section .title.is-1 {
+        font-size: 2.75rem;
+    }
+
+    .car-highlights .highlight-item {
+        border-right: none;
+        padding-right: 0;
+        margin-right: 1.5rem;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .car-detail-hero-section .title.is-1 {
+        font-size: 2.25rem;
+    }
+
+    .car-highlights.horizontal {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+    
+    .car-highlights .highlight-item {
+        border: none;
+        padding: 0;
+        margin: 0;
+        background: transparent;
+    }
+    
+    .price-card {
+        margin-top: 2rem;
+        padding: 1.5rem;
+    }
+    
+    .price-card-content .is-size-1 {
+        font-size: 2.5rem !important;
+    }
+}

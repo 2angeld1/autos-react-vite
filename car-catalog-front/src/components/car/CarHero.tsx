@@ -1,115 +1,149 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-
-interface Car {
-    id: number;
-    make: string;
-    model: string;
-    year: number;
-    class: string;
-    fuel_type: string;
-    transmission: string;
-    price: number;
-    image: string;
-}
+import { motion } from 'framer-motion';
+import { fadeIn, slideUp, staggerContainer, scaleIn } from '../../animations/variants';
+import type { Car } from '@/types';
+import '../../assets/styles/CarHero.css';
 
 interface CarHeroProps {
     car: Car;
-    isFavorite: (id: number) => boolean;
-    toggleFavorite: (id: number) => void;
+    backgroundImageUrl: string;
+    bgLoading?: boolean;
+    isFavorite: (id: string) => boolean;
+    toggleFavorite: (id: string) => void;
 }
 
-const CarHero: React.FC<CarHeroProps> = ({ car, isFavorite, toggleFavorite }) => {
-    const getBrandColor = (make: string): string => {
-        const brandColors: Record<string, string> = {
-            toyota: '#e50000',
-            kia: '#0033a0',
-            nissan: '#c3002f',
-            ford: '#003478',
-            chevrolet: '#d1a856',
-            bmw: '#0066b1',
-            audi: '#bb0a30',
-            mercedes: '#00adef'
-        };
-
-        return brandColors[make.toLowerCase()] || '#6b7280';
-    };
-
+const CarHero: React.FC<CarHeroProps> = ({
+    car,
+    backgroundImageUrl,
+    bgLoading = false,
+    isFavorite,
+    toggleFavorite
+}) => {
     return (
-        <section className="hero is-medium" style={{ 
-            background: `linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url(${car.image}) no-repeat center center`, 
-            backgroundSize: 'cover'
-        }}>
-            <div className="hero-body">
-                <div className="container">
-                    <nav className="custom-breadcrumb mb-6" aria-label="breadcrumbs">
-                        <ul>
-                            <li><Link to="/"><i className="fas fa-home"></i> Inicio</Link></li>
-                            <li><Link to="/">Catálogo</Link></li>
-                            <li className="is-active"><a href="#" aria-current="page">{car.make} {car.model}</a></li>
-                        </ul>
-                    </nav>
-                
-                    <div className="columns is-vcentered">
-                        <div className="column is-8">
-                            <h1 className="title is-1 has-text-white">{car.make} {car.model}</h1>
-                            <h2 className="subtitle is-3 has-text-white-bis mb-5">{car.year}</h2>
+        <section
+            className={`car-detail-hero minimalist-hero car-detail-hero-section ${bgLoading ? 'loading' : ''}`}
+            style={{ '--hero-bg-image': `url("${backgroundImageUrl}")` } as React.CSSProperties}
+        >
+            <div className="container pt-6 pb-6">
+                {/* Breadcrumb */}
+                <motion.nav variants={fadeIn} className="breadcrumb has-bullet-separator" aria-label="breadcrumbs">
+                    <ul>
+                        <li>
+                            <Link to="/" className="has-text-white-bis">
+                                <span className="icon"><i className="fas fa-home"></i></span>
+                                <span>Inicio</span>
+                            </Link>
+                        </li>
+                        <li>
+                            <Link to="/" className="has-text-white-bis">
+                                <span className="icon"><i className="fas fa-car"></i></span>
+                                <span>Catálogo</span>
+                            </Link>
+                        </li>
+                        <li className="is-active">
+                            <a href="#" className="has-text-accent">{car.make} {car.model}</a>
+                        </li>
+                    </ul>
+                </motion.nav>
+
+                <motion.div variants={staggerContainer} className="columns is-vcentered mt-5">
+                    {/* Left Column - Car Info */}
+                    <div className="column is-7">
+                        <motion.h1 variants={slideUp} className="title is-1 has-text-white">{car.make} {car.model}</motion.h1>
+                        <motion.h2 variants={slideUp} className="subtitle is-3 has-text-accent">{car.year}</motion.h2>
+
+                        {/* Highlights */}
+                        <motion.div variants={staggerContainer} className="car-highlights horizontal mt-5 mb-5">
+                            <motion.div variants={scaleIn} className="highlight-item">
+                                <span className="icon has-text-accent"><i className="fas fa-gas-pump"></i></span>
+                                <div>
+                                    <p className="has-text-grey">Combustible</p>
+                                    <p className="has-text-white has-text-weight-bold">{car.fuel_type}</p>
+                                </div>
+                            </motion.div>
+
+                            <motion.div variants={scaleIn} className="highlight-item">
+                                <span className="icon has-text-accent"><i className="fas fa-cog"></i></span>
+                                <div>
+                                    <p className="has-text-grey">Transmisión</p>
+                                    <p className="has-text-white has-text-weight-bold">
+                                        {car.transmission === 'a' ? 'Automática' : 'Manual'}
+                                    </p>
+                                </div>
+                            </motion.div>
                             
-                            <div className="tags are-medium mb-5">
-                                <span className="tag is-warning">{car.class}</span>
-                                <span 
-                                    className="tag" 
-                                    style={{ backgroundColor: getBrandColor(car.make), color: 'white' }}
-                                >
-                                    {car.make}
-                                </span>
-                                <span className="tag is-info">{car.fuel_type}</span>
-                                <span className="tag is-success">{car.transmission}</span>
-                            </div>
-                            
-                            <div className="buttons are-medium">
-                                <button 
-                                    className={`button ${isFavorite(car.id) ? 'is-danger' : 'is-outlined is-light'}`}
-                                    onClick={() => toggleFavorite(car.id)}
-                                >
-                                    <span className="icon">
-                                        <i className={`fas fa-heart`}></i>
-                                    </span>
-                                    <span>{isFavorite(car.id) ? 'En favoritos' : 'Agregar a favoritos'}</span>
-                                </button>
-                                
-                                <button className="button is-light">
-                                    <span className="icon">
-                                        <i className="fas fa-share-alt"></i>
-                                    </span>
-                                    <span>Compartir</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div className="column is-4">
-                            <div className="price-card">
-                                <div className="price-card-content has-text-centered">
-                                    <p className="is-size-3 has-text-white has-text-weight-light mb-2">Precio</p>
-                                    <p className="is-size-1 has-text-accent has-text-weight-bold mb-4">${car.price.toLocaleString()}</p>
-                                    <div className="buttons is-centered">
-                                        <a href="#contacto" className="button is-accent is-medium is-fullwidth">
-                                            <span className="icon">
-                                                <i className="fas fa-phone"></i>
-                                            </span>
-                                            <span>Contactar</span>
-                                        </a>
-                                        <a href="#financiamiento" className="button is-outlined is-light is-medium is-fullwidth">
-                                            <span className="icon">
-                                                <i className="fas fa-calculator"></i>
-                                            </span>
-                                            <span>Calcular financiamiento</span>
-                                        </a>
+                            {car.cylinders && (
+                                <motion.div variants={scaleIn} className="highlight-item">
+                                    <span className="icon has-text-accent"><i className="fas fa-compress-arrows-alt"></i></span>
+                                    <div>
+                                        <p className="has-text-grey">Cilindros</p>
+                                        <p className="has-text-white has-text-weight-bold">{car.cylinders}</p>
                                     </div>
+                                </motion.div>
+                            )}
+                        </motion.div>
+
+                        {/* Action Buttons */}
+                        <motion.div variants={slideUp} className="buttons are-medium">
+                            <button
+                                className={`button ${isFavorite(car.id) ? 'is-danger' : 'is-outlined is-light'}`}
+                                onClick={() => toggleFavorite(car.id)}
+                            >
+                                <span className="icon"><i className="fas fa-heart"></i></span>
+                                <span>{isFavorite(car.id) ? 'En Favoritos' : 'Añadir a Favoritos'}</span>
+                            </button>
+
+                            <button className="button is-outlined is-light">
+                                <span className="icon"><i className="fas fa-share-alt"></i></span>
+                                <span>Compartir</span>
+                            </button>
+
+                            <a href="#contact" className="button is-accent">
+                                <span className="icon"><i className="fas fa-phone"></i></span>
+                                <span>Contactar</span>
+                            </a>
+                        </motion.div>
+                    </div>
+
+                    {/* Right Column - Price Card */}
+                    <motion.div variants={scaleIn} className="column is-5">
+                        <div className="price-card glowing-border">
+                            <div className="price-card-content has-text-centered">
+                                <p className="is-size-4 has-text-white has-text-weight-light">Precio de Lista</p>
+                                <p className="is-size-1 has-text-accent has-text-weight-bold mb-3">
+                                    ${car.price?.toLocaleString() || 'Consultar'}
+                                </p>
+                                <p className="has-text-white-bis mb-4">Financiamiento Disponible</p>
+
+                                {car.price && (
+                                    <div className="financing-preview mb-4">
+                                        <p className="is-size-7 has-text-grey is-uppercase mb-3" style={{ letterSpacing: '1px', opacity: 0.8 }}>Financiamiento estimado</p>
+                                        <div className="is-flex is-justify-content-space-between is-align-items-flex-end pb-2" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                                            <span className="has-text-grey-light is-size-7">Enganche (20%)</span>
+                                            <span className="has-text-white has-text-weight-medium">${(car.price * 0.20).toLocaleString()}</span>
+                                        </div>
+                                        <div className="is-flex is-justify-content-space-between is-align-items-flex-end pt-2">
+                                            <span className="has-text-grey-light is-size-7">48 Mensualidades</span>
+                                            <span className="has-text-primary has-text-weight-bold is-size-5" style={{ color: 'var(--accent-color)' }}>${Math.round(car.price * 0.80 / 48).toLocaleString()}</span>
+                                        </div>
+                                    </div>
+                                )}
+
+                                <div className="buttons is-centered is-block">
+                                    <a href="#contact" className="button is-accent is-fullwidth mb-3">
+                                        <span className="icon"><i className="fas fa-envelope"></i></span>
+                                        <span>Solicitar Información</span>
+                                    </a>
+                                    <a href="#financing" className="button is-outlined is-light is-fullwidth is-small" style={{ border: '1px solid rgba(255,255,255,0.3)', color: '#ddd' }}>
+                                        <span className="icon"><i className="fas fa-calculator"></i></span>
+                                        <span>Calcular mensualidad</span>
+                                    </a>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
             </div>
         </section>
     );

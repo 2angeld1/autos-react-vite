@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { useCarContext } from '../context/CarContext';
-import ErrorBoundaryImage from './ErrorBoundaryImage';
+import { useCarContext } from '../../context/CarContext';
+import ErrorBoundaryImage from '../common/ErrorBoundaryImage';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHeart, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import type { Car } from '@/types';
-import { cardHover } from '../animations/variants';
+import { cardHover } from '../../animations/variants';
 
 interface CarCardProps {
     car: Car;

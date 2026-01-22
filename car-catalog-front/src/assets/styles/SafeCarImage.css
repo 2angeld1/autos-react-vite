@@ -1,0 +1,12 @@
+.safe-image-placeholder {
+    min-height: 300px !important;
+    border-radius: 8px !important;
+    border: 2px solid rgba(255,255,255,0.1) !important;
+    background-color: var(--placeholder-bg-color);
+}
+
+.safe-image-tag-container {
+    bottom: 10px !important;
+    right: 10px !important;
+    z-index: 5 !important;
+}

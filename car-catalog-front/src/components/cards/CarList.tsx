@@ -1,6 +1,6 @@
 import React from 'react';
 import CarCard from './CarCard';
-import { useCarContext } from '../context/CarContext';
+import { useCarContext } from '../../context/CarContext';
 import type { Car } from '@/types';
 
 const CarList: React.FC = () => {

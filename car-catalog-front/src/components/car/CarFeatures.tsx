@@ -9,72 +9,83 @@ const CarFeatures: React.FC = () => {
             animate="visible"
             variants={staggerContainer}
         >
-            <motion.h4 variants={slideUp} className="title is-4 mb-4 has-text-white">Características</motion.h4>
+            <motion.h4 variants={slideUp} className="title is-4 mb-4 has-text-white">Características Principales</motion.h4>
             <div className="columns is-multiline">
                 <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
-                        <div className="feature-icon">
-                            <i className="fas fa-car"></i>
+                        <div className="feature-header">
+                            <div className="icon-wrapper">
+                                <i className="fas fa-car"></i>
+                            </div>
+                            <h5>Exterior</h5>
                         </div>
-                        <div className="feature-content">
-                            <h5 className="title is-5">Exterior</h5>
+                        <div className="feature-content-body">
                             <ul className="feature-list">
-                                <li>Faros LED</li>
-                                <li>Rines de aleación</li>
-                                <li>Espejos laterales eléctricos</li>
-                                <li>Sunroof panorámico</li>
-                                <li>Sensores de estacionamiento</li>
+                                <li>Faros LED de alto rendimiento</li>
+                                <li>Rines de aleación ligera</li>
+                                <li>Espejos laterales eléctricos abatibles</li>
+                                <li>Sunroof panorámico con filtro UV</li>
+                                <li>Sensores de estacionamiento delanteros y traseros</li>
                             </ul>
                         </div>
                     </div>
                 </motion.div>
+
                 <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
-                        <div className="feature-icon">
-                            <i className="fas fa-couch"></i>
+                        <div className="feature-header">
+                            <div className="icon-wrapper">
+                                <i className="fas fa-couch"></i>
+                            </div>
+                            <h5>Interior</h5>
                         </div>
-                        <div className="feature-content">
-                            <h5 className="title is-5">Interior</h5>
+                        <div className="feature-content-body">
                             <ul className="feature-list">
-                                <li>Asientos de cuero</li>
-                                <li>Climatizador automático</li>
-                                <li>Sistema de infoentretenimiento</li>
-                                <li>Asientos calefactables</li>
-                                <li>Volante multifunción</li>
+                                <li>Asientos deportivos en cuero premium</li>
+                                <li>Climatizador automático bi-zona</li>
+                                <li>Iluminación ambiental personalizable</li>
+                                <li>Asientos delanteros calefactables</li>
+                                <li>Volante multifunción forrado en piel</li>
                             </ul>
                         </div>
                     </div>
                 </motion.div>
+
                 <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
-                        <div className="feature-icon">
-                            <i className="fas fa-shield-alt"></i>
+                        <div className="feature-header">
+                            <div className="icon-wrapper">
+                                <i className="fas fa-shield-alt"></i>
+                            </div>
+                            <h5>Seguridad</h5>
                         </div>
-                        <div className="feature-content">
-                            <h5 className="title is-5">Seguridad</h5>
+                        <div className="feature-content-body">
                             <ul className="feature-list">
-                                <li>Frenos ABS</li>
-                                <li>Control de estabilidad</li>
-                                <li>Airbags múltiples</li>
-                                <li>Cámara de reversa</li>
-                                <li>Sistema de monitoreo de punto ciego</li>
+                                <li>Sistema de frenos ABS + EBD</li>
+                                <li>Control electrónico de estabilidad (ESP)</li>
+                                <li>6 Airbags (Frontales, Laterales, Cortina)</li>
+                                <li>Cámara de visión trasera 360°</li>
+                                <li>Asistente de arranque en pendientes</li>
                             </ul>
                         </div>
                     </div>
                 </motion.div>
+
                 <motion.div variants={fadeIn} className="column is-6">
                     <div className="feature-card">
-                        <div className="feature-icon">
-                            <i className="fas fa-laptop"></i>
+                        <div className="feature-header">
+                            <div className="icon-wrapper">
+                                <i className="fas fa-laptop"></i>
+                            </div>
+                            <h5>Tecnología</h5>
                         </div>
-                        <div className="feature-content">
-                            <h5 className="title is-5">Tecnología</h5>
+                        <div className="feature-content-body">
                             <ul className="feature-list">
-                                <li>Conectividad Bluetooth</li>
-                                <li>Apple CarPlay / Android Auto</li>
-                                <li>Sistema de navegación GPS</li>
-                                <li>Cargador inalámbrico</li>
-                                <li>Sistema de audio premium</li>
+                                <li>Sistema de infoentretenimiento de 10"</li>
+                                <li>Conectividad Apple CarPlay y Android Auto</li>
+                                <li>Sistema de sonido Premium Surround</li>
+                                <li>Cargador inalámbrico para smartphone</li>
+                                <li>Cluster de instrumentos digital</li>
                             </ul>
                         </div>
                     </div>

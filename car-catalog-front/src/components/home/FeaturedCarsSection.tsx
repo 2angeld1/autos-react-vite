@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import SearchFilter from './SearchFilter';
-import TravelCarCard from './TravelCarCard';
+import SearchFilter from '../common/SearchFilter';
+import TravelCarCard from '../cards/TravelCarCard';
 import { Car, SearchFilters } from '@/types';
 
 interface FeaturedCarsSectionProps {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useCarContext } from '../context/CarContext';
-import { useCarImage } from '../hooks/useCarImage';
+import { useCarContext } from '../../context/CarContext';
+import { useCarImage } from '../../hooks/useCarImage';
 import type { Car } from '@/types';
 
 const FeaturedCars: React.FC = () => {

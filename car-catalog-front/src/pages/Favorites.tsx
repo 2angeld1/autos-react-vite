@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCarContext } from '@/context/CarContext';
-import CarCard from '@/components/CarCard';
+import CarCard from '@/components/cards/CarCard';
 import type { Car } from '@/types';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

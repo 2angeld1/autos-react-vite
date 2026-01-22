@@ -2,14 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCarContext } from '../context/CarContext';
-import Testimonials from '../components/Testimonials';
-import FeaturedCars from '../components/FeaturedCars';
+import Testimonials from '../components/home/Testimonials';
+import FeaturedCars from '../components/home/FeaturedCars';
 import { searchCars } from '../services/api';
 import type { Car, SearchFilters } from '@/types';
 import { useCarImage } from '../hooks/useCarImage';
-import FeaturedCarsSection from '../components/FeaturedCarsSection';
+import FeaturedCarsSection from '../components/home/FeaturedCarsSection';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
-import HeroSection from '../components/HeroSection';
+import HeroSection from '../components/home/HeroSection';
 
 const Home: React.FC = () => {
     const { cars: contextCars, loading: contextLoading } = useCarContext();
