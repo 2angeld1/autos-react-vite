@@ -174,10 +174,9 @@ export const useAuthStore = create<AuthState>()(
           try {
             const user = await authService.updateProfile(data);
             set({ user, loading: false });
-            toast.success('Profile updated successfully');
+            // Let the calling component handle the toast
           } catch (error: any) {
             set({ loading: false, error: error.message });
-            toast.error(error.message || 'Failed to update profile');
             throw error;
           }
         },

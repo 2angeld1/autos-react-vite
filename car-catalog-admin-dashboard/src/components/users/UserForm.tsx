@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Upload, X } from 'lucide-react';
-import { apiClient } from '@/services/api'; // Import apiClient directly
+import { apiClient } from '@/services/api';
+import { authService } from '@/services/auth';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Modal from '@/components/common/Modal';
@@ -23,6 +24,8 @@ interface UserFormProps {
   onSubmit: (data: FormData) => Promise<void>;
   loading?: boolean;
 }
+
+import toast from 'react-hot-toast';
 
 const UserForm: React.FC<UserFormProps> = ({
   user,
@@ -87,11 +90,11 @@ const UserForm: React.FC<UserFormProps> = ({
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 2 * 1024 * 1024) {
-        alert('File size must be less than 2MB');
+        toast.error('El tamaño del archivo debe ser menor a 2MB');
         return;
       }
       if (!file.type.startsWith('image/')) {
-        alert('Please select an image file');
+        toast.error('Por favor selecciona un archivo de imagen');
         return;
       }
       setSelectedAvatar(file);
@@ -163,23 +166,27 @@ const UserForm: React.FC<UserFormProps> = ({
     onClose();
   };
 
+
+  const currentUser = authService.getUser();
+  const showPasswordFields = !isEditing || (isEditing && currentUser?.id === user?.id);
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={handleClose}
-      title={user ? 'Edit User' : 'Add New User'}
+      title={user ? 'Editar Usuario' : 'Agregar Nuevo Usuario'}
       size="md"
       footer={
         <>
           <Button variant="outline" onClick={handleClose} disabled={loading || isUploading}>
-            Cancel
+            Cancelar
           </Button>
           <Button
             type="submit"
             loading={loading || isUploading}
             form="user-form"
           >
-            {user ? 'Update User' : 'Create User'}
+            {user ? 'Actualizar Usuario' : 'Crear Usuario'}
           </Button>
         </>
       }
@@ -188,7 +195,7 @@ const UserForm: React.FC<UserFormProps> = ({
         {/* Avatar Upload */}
         <div className="text-center">
           <label className="block text-sm font-medium text-gray-700 mb-3">
-            Profile Picture
+            Foto de Perfil
           </label>
           
           <div className="flex justify-center">
@@ -216,7 +223,7 @@ const UserForm: React.FC<UserFormProps> = ({
           
           <label className="mt-3 cursor-pointer inline-flex items-center px-3 py-2 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
             <Upload className="h-4 w-4 mr-2" />
-            {avatarPreview ? 'Change Picture' : 'Upload Picture'}
+            {avatarPreview ? 'Cambiar Foto' : 'Subir Foto'}
             <input
               type="file"
               accept="image/*"
@@ -224,46 +231,46 @@ const UserForm: React.FC<UserFormProps> = ({
               className="hidden"
             />
           </label>
-          <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 2MB</p>
+          <p className="text-xs text-gray-500 mt-1">PNG, JPG hasta 2MB</p>
         </div>
 
         {/* Basic Information */}
         <div className="space-y-4">
           <Input
-            label="Full Name"
+            label="Nombre Completo"
             {...register('name', { 
-              required: 'Name is required',
-              minLength: { value: 2, message: 'Name must be at least 2 characters' }
+              required: 'El nombre es obligatorio',
+              minLength: { value: 2, message: 'El nombre debe tener al menos 2 caracteres' }
             })}
             error={errors.name?.message}
-            placeholder="John Doe"
+            placeholder="Juan Pérez"
           />
 
           <Input
-            label="Email Address"
+            label="Correo Electrónico"
             type="email"
             {...register('email', { 
-              required: 'Email is required',
+              required: 'El correo es obligatorio',
               pattern: {
                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address'
+                message: 'Dirección de correo inválida'
               }
             })}
             error={errors.email?.message}
-            placeholder="john@example.com"
+            placeholder="juan@ejemplo.com"
           />
 
           {/* Role Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role
+              Rol
             </label>
             <select
-              {...register('role', { required: 'Role is required' })}
+              {...register('role', { required: 'El rol es obligatorio' })}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+              <option value="user">Usuario</option>
+              <option value="admin">Administrador</option>
             </select>
             {errors.role && (
               <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>
@@ -271,44 +278,45 @@ const UserForm: React.FC<UserFormProps> = ({
           </div>
 
           {/* Password Fields */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-medium text-gray-900">
-              {isEditing ? 'Change Password (Optional)' : 'Password (leave empty to auto-generate)'}
-            </h4>
-            
-            <div className="relative">
-              <Input
-                label="Password"
-                type="password"
-                {...register('password', {
-                  required: false,
-                  minLength: { 
-                    value: 6, 
-                    message: 'Password must be at least 6 characters' 
-                  }
-                })}
-                error={errors.password?.message}
-                placeholder={isEditing ? 'Leave blank to keep current password' : 'Leave blank to auto-generate password'}
-              />
-            </div>
+          {showPasswordFields && (
+            <div className="space-y-4">
+              <h4 className="text-sm font-medium text-gray-900">
+                {isEditing ? 'Cambiar Contraseña (Opcional)' : 'Contraseña (dejar vacío para autogenerar)'}
+              </h4>
 
-            {watchPassword && (
               <div className="relative">
                 <Input
-                  label="Confirm Password"
+                  label="Contraseña"
                   type="password"
-                  {...register('confirmPassword', {
-                    required: watchPassword ? 'Please confirm password' : false,
-                    validate: value => 
-                      value === watchPassword || 'Passwords do not match'
+                  {...register('password', {
+                    required: false,
+                    minLength: {
+                      value: 6,
+                      message: 'La contraseña debe tener al menos 6 caracteres'
+                    }
                   })}
-                  error={errors.confirmPassword?.message}
-                  placeholder="Confirm password"
+                  error={errors.password?.message}
+                  placeholder={isEditing ? 'Dejar en blanco para mantener la actual' : 'Dejar en blanco para autogenerar'}
                 />
               </div>
-            )}
-          </div>
 
+              {watchPassword && (
+                <div className="relative">
+                  <Input
+                    label="Confirmar Contraseña"
+                    type="password"
+                    {...register('confirmPassword', {
+                      required: watchPassword ? 'Por favor confirma la contraseña' : false,
+                      validate: value =>
+                        value === watchPassword || 'Las contraseñas no coinciden'
+                    })}
+                    error={errors.confirmPassword?.message}
+                    placeholder="Confirmar contraseña"
+                  />
+                </div>
+              )}
+            </div>
+          )}
           {/* Status */}
           <div className="flex items-center">
             <input
@@ -318,7 +326,7 @@ const UserForm: React.FC<UserFormProps> = ({
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded"
             />
             <label htmlFor="isActive" className="ml-2 block text-sm text-gray-900">
-              User account is active
+              La cuenta de usuario está activa
             </label>
           </div>
         </div>

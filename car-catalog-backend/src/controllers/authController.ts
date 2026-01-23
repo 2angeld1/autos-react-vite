@@ -121,7 +121,7 @@ export class AuthController {
    * Update user profile
    */
   static updateProfile = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
     const updateData: Record<string, string> = {};
 
     if (name) updateData.name = name;
@@ -143,6 +143,13 @@ export class AuthController {
       updateData.email = email.toLowerCase();
     }
 
+    // Handle password update if provided
+    if (password) {
+      const hashed = await hashPassword(password);
+      updateData.password = hashed;
+      logger.info(`Password update requested for user: ${req.user!.email}`);
+    }
+
     const user = await User.findByIdAndUpdate(
       req.user!.id, 
       updateData, 
@@ -157,12 +164,12 @@ export class AuthController {
       return;
     }
 
-    logger.info(`User profile updated: ${user.email}`);
+    logger.info(`User profile updated: ${user.email}${password ? ' (password changed)' : ''}`);
 
     res.status(200).json({
       success: true,
       data: sanitizeUser(user.toObject() as unknown as Record<string, unknown>),
-      message: 'Profile updated successfully'
+      message: password ? 'Profile and password updated successfully' : 'Profile updated successfully'
     });
   });
 

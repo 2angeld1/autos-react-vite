@@ -38,8 +38,11 @@ const settingsSections: SettingsSection[] = [
 
 // Profile Settings Component
 const ProfileSettings: React.FC = () => {
-  const { user, updateProfile, loading } = useAuthStore();
+  const { user, updateProfile, loading, logout } = useAuthStore();
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
+  const [showPasswordFields, setShowPasswordFields] = React.useState(false);
+  const countdownRef = React.useRef<number | null>(null);
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const {
@@ -47,13 +50,134 @@ const ProfileSettings: React.FC = () => {
     handleSubmit,
     formState: { errors, isDirty },
     setValue,
+    watch,
   } = useForm({
     defaultValues: {
       name: user?.name || '',
       email: user?.email || '',
       avatar: null as File | null,
+      password: '',
+      confirmPassword: '',
     },
   });
+
+  const watchPassword = watch('password');
+  const toastIdRef = React.useRef<string | null>(null);
+
+  // Start countdown function with toast
+  const startCountdown = React.useCallback(() => {
+    console.log('🚀 startCountdown called');
+    countdownRef.current = 10;
+
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    // Create persistent toast
+    toastIdRef.current = toast.custom(
+      (t) => (
+        <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
+          <div className="flex-1 w-0 p-4">
+            <div className="flex items-start">
+              <div className="flex-shrink-0 pt-0.5">
+                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                  <Lock className="h-5 w-5 text-green-600" />
+                </div>
+              </div>
+              <div className="ml-3 flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  Contraseña Actualizada
+                </p>
+                <p className="mt-1 text-sm text-gray-500">
+                  Cerrando sesión en <span className="font-bold text-primary-600">{countdownRef.current}</span> segundos...
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="flex border-l border-gray-200">
+            <button
+              onClick={() => {
+                toast.dismiss(t.id);
+                logout();
+              }}
+              className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-primary-600 hover:text-primary-500 focus:outline-none"
+            >
+              Cerrar Ahora
+            </button>
+          </div>
+        </div>
+      ),
+      { duration: Infinity, id: 'password-countdown' }
+    );
+
+    intervalRef.current = setInterval(() => {
+      if (countdownRef.current !== null && countdownRef.current > 0) {
+        countdownRef.current--;
+        console.log('⏱️ Countdown tick:', countdownRef.current);
+
+        // Update the toast with new countdown
+        if (toastIdRef.current) {
+          toast.custom(
+            (t) => (
+              <div className={`${t.visible ? 'animate-enter' : 'animate-leave'} max-w-md w-full bg-white shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5`}>
+                <div className="flex-1 w-0 p-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 pt-0.5">
+                      <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                        <Lock className="h-5 w-5 text-green-600" />
+                      </div>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900">
+                        Contraseña Actualizada
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500">
+                        Cerrando sesión en <span className="font-bold text-primary-600">{countdownRef.current}</span> segundos...
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex border-l border-gray-200">
+                  <button
+                    onClick={() => {
+                      toast.dismiss(t.id);
+                      logout();
+                    }}
+                    className="w-full border border-transparent rounded-none rounded-r-lg p-4 flex items-center justify-center text-sm font-medium text-primary-600 hover:text-primary-500 focus:outline-none"
+                  >
+                    Cerrar Ahora
+                  </button>
+                </div>
+              </div>
+            ),
+            { duration: Infinity, id: 'password-countdown' }
+          );
+        }
+
+        if (countdownRef.current <= 0) {
+          console.log('🚪 Logging out...');
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          toast.dismiss('password-countdown');
+          logout();
+        }
+      }
+    }, 1000);
+  }, [logout]);
+
+  // Cleanup interval on unmount
+  React.useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+      if (toastIdRef.current) {
+        toast.dismiss('password-countdown');
+      }
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -74,10 +198,43 @@ const ProfileSettings: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      await updateProfile(data);
-      toast.success('Profile updated successfully');
+      console.log('📝 onSubmit called with data:', data);
+      console.log('🔑 showPasswordFields:', showPasswordFields);
+
+      // Create payload only with necessary fields
+      const payload: any = {
+        name: data.name,
+        email: data.email,
+        avatar: data.avatar
+      };
+
+      const passwordChanged = !!(data.password && showPasswordFields);
+      console.log('🔐 passwordChanged:', passwordChanged);
+
+      // Only include password if provided
+      if (passwordChanged) {
+        payload.password = data.password;
+      }
+
+      console.log('📤 Calling updateProfile with payload:', payload);
+      await updateProfile(payload);
+      console.log('✅ updateProfile completed');
+
+      if (passwordChanged) {
+        console.log('🕐 Starting countdown...');
+        startCountdown();
+        setShowPasswordFields(false);
+      } else {
+        toast.success('Perfil actualizado correctamente');
+      }
+
+      // Clear password fields
+      setValue('password', '');
+      setValue('confirmPassword', '');
+
     } catch (error: any) {
-      toast.error(error.message || 'Failed to update profile');
+      console.error('❌ onSubmit error:', error);
+      toast.error(error.message || 'Error al actualizar perfil');
     }
   };
 
@@ -151,6 +308,75 @@ const ProfileSettings: React.FC = () => {
           error={errors.email?.message}
           startIcon={<Mail className="h-4 w-4" />}
         />
+
+        {/* Optional Password Change Fields */}
+        <div className="space-y-4 pt-4 border-t border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <h4 className="text-sm font-medium text-gray-900">Change Password</h4>
+              <p className="text-xs text-gray-500 mt-1">Update your password securely</p>
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setShowPasswordFields(!showPasswordFields);
+                if (!showPasswordFields) {
+                  // When opening, ensure fields are clear
+                  setValue('password', '');
+                  setValue('confirmPassword', '');
+                }
+              }}
+            >
+              {showPasswordFields ? 'Cancel' : 'Change Password'}
+            </Button>
+          </div>
+
+          <AnimatePresence>
+            {showPasswordFields && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-2">
+                  <Input
+                    label="New Password"
+                    type="password"
+                    {...register('password', {
+                      required: showPasswordFields ? 'New password is required' : false,
+                      minLength: {
+                        value: 6,
+                        message: 'Password must be at least 6 characters',
+                      },
+                    })}
+                    error={errors.password?.message}
+                    placeholder="Enter new password"
+                    startIcon={<Lock className="h-4 w-4" />}
+                  />
+
+                  <Input
+                    label="Confirm New Password"
+                    type="password"
+                    {...register('confirmPassword', {
+                      required: showPasswordFields ? 'Please confirm your password' : false,
+                      validate: (value) => {
+                        if (!showPasswordFields) return true;
+                        return value === watchPassword || 'Passwords do not match';
+                      }
+                    })}
+                    error={errors.confirmPassword?.message}
+                    placeholder="Confirm new password"
+                    startIcon={<Lock className="h-4 w-4" />}
+                  />
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
 
         {/* Role Display */}
         <div>
