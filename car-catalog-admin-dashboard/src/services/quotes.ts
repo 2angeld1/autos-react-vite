@@ -5,7 +5,7 @@ export interface Quote {
     car: {
         _id: string;
         make: string;
-        carModel: string;
+        model: string;
         year: number;
         price: number;
         image: string;

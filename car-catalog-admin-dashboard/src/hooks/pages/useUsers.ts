@@ -26,6 +26,8 @@ export const useUsers = () => {
   const [showToggleStatusModal, setShowToggleStatusModal] = useState(false);
   const [userToToggle, setUserToToggle] = useState<User | null>(null);
   const [generatedPassword, setGeneratedPassword] = useState<string | null>(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [userToView, setUserToView] = useState<User | null>(null);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
 
   // API hooks
@@ -86,6 +88,11 @@ export const useUsers = () => {
     setShowToggleStatusModal(true);
   };
 
+  const handleViewUser = (user: User) => {
+    setUserToView(user);
+    setShowViewModal(true);
+  };
+
   const generatePassword = (length = 12) => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+~`|}{[]:;?><,./-=';
     let result = '';
@@ -103,23 +110,24 @@ export const useUsers = () => {
     return result;
   };
 
-  const handleUserSubmit = async (formData: FormData) => {
+  const handleUserSubmit = async (payload: any) => {
     try {
       if (selectedUser) {
-        const response = await updateUser(`/admin/users/${selectedUser.id}`, formData);
+        const userId = selectedUser.id || selectedUser._id;
+        const response = await updateUser(`/admin/users/${userId}`, payload);
         if (response?.success) {
           toast.success(t('users.userUpdated'));
           refreshUsers();
         }
       } else {
         let generated: string | null = null;
-        const pw = formData.get('password');
+        const pw = payload.password;
         if (!pw || (typeof pw === 'string' && pw.trim() === '')) {
           generated = generatePassword(12);
-          formData.set('password', generated);
+          payload.password = generated;
         }
 
-        const response = await createUser('/admin/users', formData);
+        const response = await createUser('/admin/users', payload);
         if (response?.success) {
           toast.success(t('users.userCreated'));
           refreshUsers();
@@ -139,7 +147,8 @@ export const useUsers = () => {
     if (!userToDelete) return;
 
     try {
-      const response = await deleteUser(`/admin/users/${userToDelete.id}`);
+      const userId = userToDelete.id || userToDelete._id;
+      const response = await deleteUser(`/admin/users/${userId}`);
       if (response?.success) {
         toast.success(t('users.userDeleted'));
         setShowDeleteModal(false);
@@ -155,7 +164,8 @@ export const useUsers = () => {
     if (!userToToggle) return;
 
     try {
-      const response = await toggleUserStatus(`/admin/users/${userToToggle.id}/toggle-status`, {});
+      const userId = userToToggle.id || userToToggle._id;
+      const response = await toggleUserStatus(`/admin/users/${userId}/toggle-status`, {});
       if (response?.success) {
         toast.success(userToToggle.isActive ? t('users.userDeactivated') : t('users.userActivated'));
         setShowToggleStatusModal(false);
@@ -200,6 +210,8 @@ export const useUsers = () => {
       userToDelete,
       showToggleStatusModal,
       userToToggle,
+      showViewModal,
+      userToView,
       generatedPassword,
       showPasswordModal,
       usersData,
@@ -215,6 +227,7 @@ export const useUsers = () => {
       setShowUserForm: (val: boolean) => setShowUserForm(val),
       setShowDeleteModal: (val: boolean) => setShowDeleteModal(val),
       setShowToggleStatusModal: (val: boolean) => setShowToggleStatusModal(val),
+      setShowViewModal: (val: boolean) => setShowViewModal(val),
       setShowPasswordModal: (val: boolean) => setShowPasswordModal(val),
       setGeneratedPassword,
       setUserToDelete,
@@ -223,6 +236,7 @@ export const useUsers = () => {
       handleEditUser,
       handleDeleteUser,
       handleToggleUserStatus,
+      handleViewUser,
       handleUserSubmit,
       confirmDelete,
       confirmToggleStatus,

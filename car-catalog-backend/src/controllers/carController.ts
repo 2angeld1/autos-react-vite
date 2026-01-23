@@ -89,7 +89,7 @@ export class CarController {
     logger.info(`Getting car by id: ${trimmedId}`);
 
     // Obtener auto por ID
-    const car = await Car.findOne({ id: trimmedId }).lean({ virtuals: true });
+    const car = await Car.findOne({ id: trimmedId });
 
     if (!car) {
       res.status(404).json({
@@ -113,8 +113,7 @@ export class CarController {
 
     const featuredCars = await Car.find({ isAvailable: true })
       .sort({ createdAt: -1 })
-      .limit(parseInt(limit as string))
-      .lean();
+      .limit(parseInt(limit as string));
 
     res.status(200).json({
       success: true,
@@ -161,8 +160,7 @@ export class CarController {
         }
       ]
     })
-      .limit(parseInt(limit as string))
-      .lean();
+      .limit(parseInt(limit as string));
 
     res.status(200).json({
       success: true,
@@ -535,8 +533,7 @@ export class CarController {
       ]
     })
       .limit(parseInt(limit as string))
-      .select('id make carModel year price image') // Incluir carModel
-      .lean();
+      .select('id make carModel year price image'); // Incluir carModel
 
     res.status(200).json({
       success: true,

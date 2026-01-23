@@ -96,7 +96,7 @@ const Quotes: React.FC = () => {
                                             )}
                                             <div>
                                                 <div className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                                                    {quote.car ? `${quote.car.year} ${quote.car.make} ${quote.car.carModel}` : 'Vehículo Eliminado'}
+                                                    {quote.car ? `${quote.car.year} ${quote.car.make} ${quote.car.model}` : 'Vehículo Eliminado'}
                                                 </div>
                                                 <div className="text-xs text-orange-600 font-semibold">
                                                     ${quote.car?.price?.toLocaleString()}

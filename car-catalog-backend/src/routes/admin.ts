@@ -447,4 +447,25 @@ router.post('/users', [
   handleValidationErrors
 ], UserController.createUser);
 
+/**
+ * @route   PUT /api/admin/users/:id
+ * @desc    Update user (Admin only)
+ * @access  Private (Admin only)
+ */
+router.put('/users/:id', [
+  sanitizeInput,
+  body('name').optional().trim().isLength({ min: 2, max: 50 }),
+  body('email').optional().isEmail().normalizeEmail(),
+  body('password').optional().isLength({ min: 6 }),
+  body('role').optional().isIn(['user', 'admin']),
+  handleValidationErrors
+], UserController.updateUser);
+
+/**
+ * @route   DELETE /api/admin/users/:id
+ * @desc    Delete user (Admin only)
+ * @access  Private (Admin only)
+ */
+router.delete('/users/:id', UserController.deleteUser);
+
 export default router;

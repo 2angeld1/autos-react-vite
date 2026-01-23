@@ -1,10 +1,11 @@
 import React from 'react';
-import { Edit, Trash2, Eye, MoreHorizontal, Shield, ShieldOff } from 'lucide-react';
+import { Edit, Trash2, Eye, MoreHorizontal, Shield } from 'lucide-react';
 import Table, { Column } from '@/components/common/Table';
 import Button from '@/components/common/Button';
 import { User } from '@/types';
 import { formatDistanceToNow } from 'date-fns';
 import { clsx } from 'clsx';
+import { useAuth } from '@/hooks/useAuth';
 
 interface UserTableProps {
   users: User[];
@@ -12,7 +13,6 @@ interface UserTableProps {
   onEdit: (user: User) => void;
   onDelete: (user: User) => void;
   onView: (user: User) => void;
-  onToggleStatus: (user: User) => void;
   sortKey?: string;
   sortDirection?: 'asc' | 'desc';
   onSort?: (key: string, direction: 'asc' | 'desc') => void;
@@ -24,11 +24,11 @@ const UserTable: React.FC<UserTableProps> = ({
   onEdit,
   onDelete,
   onView,
-  onToggleStatus,
   sortKey,
   sortDirection,
   onSort,
 }) => {
+  const { user: currentUser } = useAuth();
   const [showActionsMenu, setShowActionsMenu] = React.useState<string | null>(null);
 
   const columns: Column<User>[] = [
@@ -138,6 +138,10 @@ const UserTable: React.FC<UserTableProps> = ({
     const index = users.findIndex(u => (u.id || u._id) === userId);
     const isNearBottom = index >= users.length - 2 && users.length > 2;
 
+    // Check if row is current user (handle both id and _id)
+    const currentUserId = currentUser ? (currentUser.id || (currentUser as any)._id) : null;
+    const isCurrentUser = currentUserId && userId && currentUserId === userId;
+
     return (
       <div className="relative">
         <Button
@@ -173,52 +177,44 @@ const UserTable: React.FC<UserTableProps> = ({
               <Eye className="h-4 w-4" />
               View Details
             </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setShowActionsMenu(null);
-                onEdit(user);
-              }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              <Edit className="h-4 w-4" />
-              Edit User
-            </button>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setShowActionsMenu(null);
-                onToggleStatus(user);
-              }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-            >
-              {user.isActive ? (
-                <>
-                  <ShieldOff className="h-4 w-4" />
-                  Deactivate
-                </>
-              ) : (
-                <>
-                  <Shield className="h-4 w-4" />
-                  Activate
-                </>
-              )}
-            </button>
-            <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                setShowActionsMenu(null);
-                onDelete(user);
-              }}
-              className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
-            >
-              <Trash2 className="h-4 w-4" />
-              Delete User
-            </button>
+            {!isCurrentUser && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setShowActionsMenu(null);
+                  onEdit(user);
+                }}
+                className="flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                <Edit className="h-4 w-4" />
+                Edit User
+              </button>
+            )}
+
+            {!isCurrentUser && (
+              <>
+                <div className="border-t border-gray-100 dark:border-gray-700 my-1"></div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    setShowActionsMenu(null);
+                    onDelete(user);
+                  }}
+                  className="flex items-center gap-2 w-full px-4 py-2 text-sm text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  Delete User
+                </button>
+              </>
+            )}
+
+            {isCurrentUser && (
+              <div className="px-4 py-2 text-xs text-gray-400 italic text-center">
+                Current User
+              </div>
+            )}
           </div>
         )}
       </div>

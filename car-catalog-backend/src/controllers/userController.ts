@@ -123,18 +123,16 @@ export class UserController {
   static deleteUser = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const { id } = req.params;
 
-    const user = await User.findByIdAndUpdate(id, { isActive: false }, { new: true })
-      .select('-password')
-      .lean();
+    const user = await User.findByIdAndDelete(id).lean();
 
     if (!user) {
       res.status(404).json({ success: false, message: 'User not found' });
       return;
     }
 
-    logger.info(`User deactivated by admin ${req.user?.email}: ${user.email}`);
+    logger.info(`User deleted by admin ${req.user?.email}: ${user.email}`);
 
-    res.status(200).json({ success: true, message: 'User deactivated successfully' });
+    res.status(200).json({ success: true, message: 'User deleted successfully' });
   });
 
   /**

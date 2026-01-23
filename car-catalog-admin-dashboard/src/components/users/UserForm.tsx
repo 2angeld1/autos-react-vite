@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Upload, X, Eye, EyeOff } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import { apiClient } from '@/services/api'; // Import apiClient directly
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Modal from '@/components/common/Modal';
@@ -34,8 +35,7 @@ const UserForm: React.FC<UserFormProps> = ({
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(
     user?.avatar || null
   );
-  const [showPassword, setShowPassword] = React.useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+  const [isUploading, setIsUploading] = React.useState(false);
 
   const {
     register,
@@ -55,24 +55,45 @@ const UserForm: React.FC<UserFormProps> = ({
     },
   });
 
+  // Reset form when user changes (fixes bug where previous user data persists)
+  useEffect(() => {
+    if (user) {
+      reset({
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        isActive: user.isActive,
+      });
+      setAvatarPreview(user.avatar || null);
+      setSelectedAvatar(null);
+    } else {
+      reset({
+        name: '',
+        email: '',
+        role: 'user',
+        isActive: true, // Default to active for new users
+        password: '',
+        confirmPassword: ''
+      });
+      setAvatarPreview(null);
+      setSelectedAvatar(null);
+    }
+  }, [user, reset]);
+
   const watchPassword = watch('password');
   const isEditing = !!user;
 
   const handleAvatarChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Validate file size (max 2MB)
       if (file.size > 2 * 1024 * 1024) {
         alert('File size must be less than 2MB');
         return;
       }
-
-      // Validate file type
       if (!file.type.startsWith('image/')) {
         alert('Please select an image file');
         return;
       }
-
       setSelectedAvatar(file);
       const reader = new FileReader();
       reader.onload = () => {
@@ -88,41 +109,57 @@ const UserForm: React.FC<UserFormProps> = ({
   };
 
   const onFormSubmit = async (data: UserFormData) => {
-    const formData = new FormData();
-    
-    // Add form fields
-    formData.append('name', data.name);
-    formData.append('email', data.email);
-    formData.append('role', data.role);
-    formData.append('isActive', data.isActive.toString());
+    try {
+      setIsUploading(true);
+      let avatarUrl = user?.avatar;
 
-    // Add password for new users or if provided for existing users
-    if (!isEditing && data.password) {
-      formData.append('password', data.password);
-    } else if (isEditing && data.password) {
-      formData.append('password', data.password);
+      // 1. Upload Avatar if selected
+      if (selectedAvatar) {
+        const formData = new FormData();
+        formData.append('files', selectedAvatar); // Backend expects 'files' array
+
+        const uploadResponse = await apiClient.post('/files/upload', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+
+        if (uploadResponse.data && uploadResponse.data.data && uploadResponse.data.data.length > 0) {
+          avatarUrl = uploadResponse.data.data[0].url; // Assuming backend returns { data: [{ url: ... }] }
+        }
+      }
+
+      // 2. Prepare JSON Payload
+      const payload: any = {
+        name: data.name,
+        email: data.email,
+        role: data.role,
+        isActive: data.isActive,
+        avatar: avatarUrl
+      };
+
+      if (!isEditing && data.password) {
+        payload.password = data.password;
+      } else if (isEditing && data.password) {
+        payload.password = data.password;
+      }
+
+      if (user) {
+        payload.id = user.id;
+      }
+
+      await onSubmit(payload as any);
+      handleClose();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      // Let parent handle error toast, or re-throw
+    } finally {
+      setIsUploading(false);
     }
-
-    // Add avatar if selected
-    if (selectedAvatar) {
-      formData.append('avatar', selectedAvatar);
-    }
-
-    // Add user ID if editing
-    if (user) {
-      formData.append('id', user.id);
-    }
-
-    await onSubmit(formData);
-    handleClose();
   };
 
   const handleClose = () => {
     reset();
     setSelectedAvatar(null);
     setAvatarPreview(user?.avatar || null);
-    setShowPassword(false);
-    setShowConfirmPassword(false);
     onClose();
   };
 
@@ -134,12 +171,12 @@ const UserForm: React.FC<UserFormProps> = ({
       size="md"
       footer={
         <>
-          <Button variant="outline" onClick={handleClose} disabled={loading}>
+          <Button variant="outline" onClick={handleClose} disabled={loading || isUploading}>
             Cancel
           </Button>
           <Button
             type="submit"
-            loading={loading}
+            loading={loading || isUploading}
             form="user-form"
           >
             {user ? 'Update User' : 'Create User'}
@@ -242,7 +279,7 @@ const UserForm: React.FC<UserFormProps> = ({
             <div className="relative">
               <Input
                 label="Password"
-                type={showPassword ? 'text' : 'password'}
+                type="password"
                 {...register('password', {
                   required: false,
                   minLength: { 
@@ -253,20 +290,13 @@ const UserForm: React.FC<UserFormProps> = ({
                 error={errors.password?.message}
                 placeholder={isEditing ? 'Leave blank to keep current password' : 'Leave blank to auto-generate password'}
               />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-              >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
             </div>
 
             {watchPassword && (
               <div className="relative">
                 <Input
                   label="Confirm Password"
-                  type={showConfirmPassword ? 'text' : 'password'}
+                  type="password"
                   {...register('confirmPassword', {
                     required: watchPassword ? 'Please confirm password' : false,
                     validate: value => 
@@ -275,13 +305,6 @@ const UserForm: React.FC<UserFormProps> = ({
                   error={errors.confirmPassword?.message}
                   placeholder="Confirm password"
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-8 text-gray-400 hover:text-gray-600"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
               </div>
             )}
           </div>

@@ -246,22 +246,46 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             )}
           </div>
           <div className="relative">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleUser}
-              icon={<User className="h-5 w-5 text-gray-700 dark:text-gray-200" />}
-              aria-label="User menu"
-              className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
-            />
+            {authUser?.avatar ? (
+              <button
+                onClick={toggleUser}
+                className="h-9 w-9 rounded-full overflow-hidden border border-gray-200 hover:ring-2 hover:ring-primary-500 transition-all focus:outline-none"
+              >
+                <img
+                  src={authUser.avatar.startsWith('http') ? authUser.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${authUser.avatar}`}
+                  alt="User"
+                  className="h-full w-full object-cover"
+                />
+              </button>
+            ) : (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={toggleUser}
+                  icon={<User className="h-5 w-5 text-gray-700 dark:text-gray-200" />}
+                  aria-label="User menu"
+                  className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors relative"
+                />
+            )}
 
             {userOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-lg shadow-lg z-50">
                 <div className="p-4 border-b border-gray-100 dark:border-gray-700">
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
-                      <span className="text-sm text-gray-600 dark:text-gray-300">{authUser?.name ? authUser.name.charAt(0).toUpperCase() : 'U'}</span>
-                    </div>
+                    {authUser?.avatar ? (
+                      <img
+                        src={authUser.avatar.startsWith('http') ? authUser.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${authUser.avatar}`}
+                        alt={authUser.name}
+                        className="h-10 w-10 rounded-full object-cover border border-gray-200"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                        <div className="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                          <span className="text-sm text-gray-600 dark:text-gray-300">{authUser?.name ? authUser.name.charAt(0).toUpperCase() : 'U'}</span>
+                        </div>
+                    )}
                     <div>
                       <p className="font-medium text-gray-900 dark:text-white text-sm">{authUser?.name || 'User'}</p>
                       <p className="text-xs text-gray-500 dark:text-gray-400">{authUser?.email || ''}</p>
@@ -271,7 +295,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 <div className="p-2">
                   <button
                     className="w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 rounded"
-                    onClick={() => { setUserOpen(false); navigate('/profile'); }}
+                    onClick={() => { setUserOpen(false); navigate('/settings'); }}
                   >
                     {t('nav.profile')}
                   </button>

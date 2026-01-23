@@ -3,8 +3,6 @@ import { API_BASE_URL, API_TIMEOUT, ACCESS_TOKEN_KEY } from '@/utils/constants';
 import { getFromStorage, removeFromStorage } from '@/utils/helpers';
 import toast from 'react-hot-toast';
 
-console.log('🔧 API Base URL:', API_BASE_URL);
-
 // Create axios instance
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -22,12 +20,6 @@ api.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     const token = getFromStorage(ACCESS_TOKEN_KEY, null);
 
-    console.log('📡 API Request:', {
-      url: config.url,
-      method: config.method,
-      hasToken: !!token,
-    });
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -43,12 +35,6 @@ api.interceptors.request.use(
 // Response interceptor to handle errors
 api.interceptors.response.use(
   (response: AxiosResponse) => {
-    console.log('📡 API Response:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data,
-    });
-
     return response;
   },
   (error) => {

@@ -28,6 +28,8 @@ const Users: React.FC = () => {
     userToDelete,
     showToggleStatusModal,
     userToToggle,
+    showViewModal,
+    userToView,
     generatedPassword,
     showPasswordModal,
     usersData,
@@ -103,8 +105,7 @@ const Users: React.FC = () => {
           loading={usersLoading}
           onEdit={actions.handleEditUser}
           onDelete={actions.handleDeleteUser}
-          onView={(user) => console.log('View user:', user)}
-          onToggleStatus={actions.handleToggleUserStatus}
+          onView={actions.handleViewUser}
           sortKey={sortKey}
           sortDirection={sortDirection}
           onSort={actions.handleSort}
@@ -295,6 +296,89 @@ const Users: React.FC = () => {
             </p>
           )}
         </div>
+      </Modal>
+
+      {/* View User Modal */}
+      <Modal
+        isOpen={showViewModal}
+        onClose={() => actions.setShowViewModal(false)}
+        title={t('users.user')}
+        footer={
+          <Button
+            variant="outline"
+            onClick={() => actions.setShowViewModal(false)}
+          >
+            {t('common.close')}
+          </Button>
+        }
+      >
+        {userToView && (
+          <div className="space-y-6">
+            <div className="flex flex-col items-center justify-center text-center">
+              {userToView.avatar ? (
+                <img
+                  src={userToView.avatar}
+                  alt={userToView.name}
+                  className="h-24 w-24 rounded-full object-cover border-4 border-gray-100 shadow-sm mb-4"
+                />
+              ) : (
+                <div className="h-24 w-24 rounded-full bg-primary-100 flex items-center justify-center mb-4 border-4 border-gray-50 text-primary-600 text-3xl font-bold uppercase">
+                  {userToView.name.charAt(0)}
+                </div>
+              )}
+              <h3 className="text-xl font-bold text-gray-900">{userToView.name}</h3>
+              <p className="text-gray-500">{userToView.email}</p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-lg">
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">
+                  {t('users.role')}
+                </span>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${userToView.role === 'admin'
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'bg-blue-100 text-blue-800'
+                  }`}>
+                  {userToView.role === 'admin' ? (
+                    <span className="flex items-center gap-1">
+                      <Shield className="h-3 w-3" /> Admin
+                    </span>
+                  ) : 'User'}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">
+                  {t('users.status')}
+                </span>
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${userToView.isActive
+                    ? 'bg-green-100 text-green-800'
+                    : 'bg-red-100 text-red-800'
+                  }`}>
+                  {userToView.isActive ? 'Active' : 'Inactive'}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">
+                  {t('users.joined')}
+                </span>
+                <span className="text-sm text-gray-900">
+                  {new Date(userToView.createdAt).toLocaleDateString()}
+                </span>
+              </div>
+
+              <div>
+                <span className="text-xs font-medium text-gray-500 uppercase tracking-wider block mb-1">
+                  Last Update
+                </span>
+                <span className="text-sm text-gray-900">
+                  {userToView.updatedAt ? new Date(userToView.updatedAt).toLocaleDateString() : '-'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
       </Modal>
     </motion.div>
   );

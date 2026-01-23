@@ -9,7 +9,8 @@ import {
   Save,
   Mail,
   Lock,
-  Smartphone
+  Smartphone,
+  Camera
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authSlice';
@@ -18,7 +19,6 @@ import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import Card from '@/components/common/Card';
 import Badge from '@/components/common/Badge';
-import { Dropzone } from '@/components/common';
 import toast from 'react-hot-toast';
 import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
@@ -40,7 +40,8 @@ const settingsSections: SettingsSection[] = [
 const ProfileSettings: React.FC = () => {
   const { user, updateProfile, loading } = useAuthStore();
   const [avatarPreview, setAvatarPreview] = React.useState<string | null>(null);
-  
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const {
     register,
     handleSubmit,
@@ -53,6 +54,22 @@ const ProfileSettings: React.FC = () => {
       avatar: null as File | null,
     },
   });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast.error('File too large (max 2MB)');
+        return;
+      }
+      setValue('avatar', file, { shouldDirty: true });
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   const onSubmit = async (data: any) => {
@@ -74,26 +91,36 @@ const ProfileSettings: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Avatar Upload */}
         <div className="flex items-center space-x-6">
-          <Dropzone
-            onFilesDrop={(files) => {
-              const file = files[0];
-              if (file) {
-                setValue('avatar', file, { shouldDirty: true });
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                  setAvatarPreview(reader.result as string);
-                };
-                reader.readAsDataURL(file);
-              }
-            }}
-            preview={avatarPreview || user?.avatar}
-            onRemove={() => {
-              setValue('avatar', null, { shouldDirty: true });
-              setAvatarPreview(null);
-            }}
-            className="h-24 w-24 !p-0 !rounded-full overflow-hidden"
-            description="Subir foto"
-          />
+          <div className="relative group">
+            <div className="h-24 w-24 rounded-full overflow-hidden border-4 border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center relative">
+              {avatarPreview || user?.avatar ? (
+                <img
+                  src={avatarPreview || user?.avatar}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <User className="h-10 w-10 text-gray-400" />
+              )}
+            </div>
+
+            {/* Hover Overlay */}
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all cursor-pointer text-white backdrop-blur-[1px]"
+              title="Change Profile Photo"
+            >
+              <Camera className="h-6 w-6 drop-shadow-md" />
+            </div>
+
+            <input
+              type="file"
+              ref={fileInputRef}
+              className="hidden"
+              accept="image/png, image/jpeg, image/webp"
+              onChange={handleFileChange}
+            />
+          </div>
           <div>
             <p className="text-sm font-medium text-gray-900">Profile Photo</p>
             <p className="text-sm text-gray-500">
