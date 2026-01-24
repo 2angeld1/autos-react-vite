@@ -85,3 +85,11 @@ export interface FileQueryParams {
   limit?: number;
   sort?: string;
 }
+
+export interface ModalState {
+  upload: boolean;
+  newFolder: boolean;
+  rename: boolean;
+  move: boolean;
+  preview: boolean;
+}
