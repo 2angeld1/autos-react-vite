@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Building2,
-  Plus,
-  Search,
-  Edit2,
-  Trash2,
-  Globe,
-  MapPin,
-  TrendingUp,
-  Loader2,
-  Check
-} from 'lucide-react';
+import { Building2, Plus, Search, Edit2, Trash2, Globe, MapPin, TrendingUp, Loader2, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
@@ -23,17 +12,7 @@ const countries = ['All', 'Japan', 'Germany', 'USA', 'Italy', 'UK', 'France', 'S
 const Brands: React.FC = () => {
   const { state, actions } = useBrands();
 
-  const {
-    brands,
-    loading,
-    searchTerm,
-    selectedCountry,
-    isModalOpen,
-    editingBrand,
-    isSubmitting,
-    filteredBrands,
-    featuredCount,
-  } = state;
+  const { brands, loading, searchTerm, selectedCountry, isModalOpen, editingBrand, isSubmitting, filteredBrands, featuredCount, } = state;
 
   if (loading && brands.length === 0) {
     return (

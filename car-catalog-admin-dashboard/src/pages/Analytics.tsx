@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  BarChart3,
-  Download,
-  RefreshCw,
-  Loader2
-} from 'lucide-react';
+import { BarChart3, Download, RefreshCw, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import { Breadcrumb } from '@/components/layout';
@@ -17,13 +12,7 @@ import RecentActivitySection from '@/components/analytics/RecentActivitySection'
 const Analytics: React.FC = () => {
   const { state, actions } = useAnalytics();
 
-  const {
-    loading,
-    refreshing,
-    overview,
-    charts,
-    recentActivity,
-  } = state;
+  const { loading, refreshing, overview, charts, recentActivity, } = state;
 
   if (loading) {
     return (

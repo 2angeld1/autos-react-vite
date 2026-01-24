@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  Tag,
-  Plus,
-  Search,
-  Edit2,
-  Trash2,
-  FolderTree,
-  ChevronRight,
-  Image as ImageIcon,
-  Loader2
-} from 'lucide-react';
+import {Tag,Plus,Search,Edit2,Trash2,FolderTree,ChevronRight,Image as ImageIcon,Loader2} from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
@@ -19,16 +9,7 @@ import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variant
 
 const Categories: React.FC = () => {
   const { state, actions } = useCategories();
-  const {
-    categories,
-    loading,
-    searchTerm,
-    expandedCategories,
-    isModalOpen,
-    editingCategory,
-    isSubmitting,
-    mainCategories,
-  } = state;
+  const {categories,loading,searchTerm,expandedCategories,isModalOpen,editingCategory,isSubmitting,mainCategories,} = state;
 
   if (loading && categories.length === 0) {
     return (

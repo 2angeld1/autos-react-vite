@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  Package,
-  Plus,
-  Search,
-  Edit2,
-  Trash2,
-  Filter,
-  DollarSign,
-  CheckCircle2,
-  AlertTriangle,
-  Loader2
-} from 'lucide-react';
+import { Package, Plus, Search, Edit2, Trash2, Filter, DollarSign, CheckCircle2, AlertTriangle, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
@@ -20,18 +9,7 @@ import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variant
 
 const Accessories: React.FC = () => {
   const { state, actions } = useAccessories();
-  const {
-    accessories,
-    loading,
-    searchTerm,
-    selectedCategory,
-    isModalOpen,
-    editingAccessory,
-    isSubmitting,
-    filteredAccessories,
-    stats,
-    categories,
-  } = state;
+  const { accessories, loading, searchTerm, selectedCategory, isModalOpen, editingAccessory, isSubmitting, filteredAccessories, stats, categories, } = state;
 
   if (loading && accessories.length === 0) {
     return (

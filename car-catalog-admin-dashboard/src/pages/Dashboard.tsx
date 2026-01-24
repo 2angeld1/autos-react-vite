@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Car,
-  Users,
-  Image as ImageIcon,
-  TrendingUp,
-  FileText,
-  DollarSign
-} from 'lucide-react';
+import { Car, Users, Image as ImageIcon, TrendingUp, FileText, DollarSign } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useGet } from '@/hooks/useApi';
 // import { DashboardStats } from '@/services'; 
