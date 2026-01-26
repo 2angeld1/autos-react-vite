@@ -12,6 +12,8 @@
   "dependencies": {
     "@ionic/react": "^8.7.17",
     "@ionic/react-router": "^8.7.17",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.5.0",
     "@types/leaflet": "^1.9.21",
     "axios": "^1.13.2",
     "clsx": "^2.1.1",
@@ -29,6 +31,7 @@
     "sweetalert2": "^11.26.17",
     "swiper": "^12.0.3",
     "tailwind-merge": "^3.4.0",
+    "three": "^0.182.0",
     "zustand": "^5.0.10"
   },
   "devDependencies": {

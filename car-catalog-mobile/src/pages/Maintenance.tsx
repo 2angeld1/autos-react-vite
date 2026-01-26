@@ -1,16 +1,30 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   IonContent, 
   IonHeader, 
   IonPage, 
   IonIcon
 } from '@ionic/react';
-import { arrowBack, build, carSport, alertCircle, time, helpCircle } from 'ionicons/icons';
+import { arrowBack, build, alertCircle, time, helpCircle, scanOutline, refreshOutline } from 'ionicons/icons';
 import { useHistory } from 'react-router-dom';
-import { Clock } from 'lucide-react';
+import { Clock, ShieldCheck, Zap } from 'lucide-react';
+import Car3DPrototyping from '../components/maintenance/Car3DPrototyping';
+import ScannerOverlay from '../components/maintenance/ScannerOverlay';
 
 const Maintenance: React.FC = () => {
   const history = useHistory();
+    const [isScanning, setIsScanning] = useState(false);
+    const [showPrototyping, setShowPrototyping] = useState(false);
+    const [activeAlerts] = useState(['engine', 'brakes']);
+
+    const handleStartScan = () => {
+        setIsScanning(true);
+    };
+
+    const handleScanComplete = () => {
+        setIsScanning(false);
+        setShowPrototyping(true);
+    };
 
   const services = [
     { id: 1, date: '15 Nov, 2025', type: 'Cambio de Aceite', vehicle: 'Toyota Highlander', km: '45,000 km', cost: '$85.00', status: 'Completado' },
@@ -19,6 +33,8 @@ const Maintenance: React.FC = () => {
 
   return (
     <IonPage>
+          {isScanning && <ScannerOverlay onScanComplete={handleScanComplete} />}
+
       <IonHeader className="ion-no-border shadow-none bg-slate-900 border-b border-slate-800">
         <div className="px-5 flex items-center justify-between">
            <div className="flex items-center gap-3">
@@ -42,7 +58,40 @@ const Maintenance: React.FC = () => {
       <IonContent fullscreen className="bg-slate-900">
         <div className="p-6 pb-24">
            
+                  {/* Scan / 3D Feature Reveal */}
+                  {showPrototyping && (
+                      <div className="mb-10 space-y-4">
+                          <div className="flex justify-between items-center mb-2">
+                              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                                  <Zap size={20} className="text-indigo-400" />
+                                  Vista 3D Interactiva
+                              </h3>
+                              <button
+                                  onClick={() => setShowPrototyping(false)}
+                                  className="text-xs font-bold text-slate-500 flex items-center gap-1"
+                              >
+                                  <IonIcon icon={refreshOutline} />
+                                  Reset
+                              </button>
+                          </div>
+                          <Car3DPrototyping alerts={activeAlerts} />
+                          <div className="grid grid-cols-2 gap-3">
+                              <div className="bg-slate-800/50 p-4 rounded-3xl border border-white/5">
+                                  <ShieldCheck size={18} className="text-green-500 mb-2" />
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase">Estado General</p>
+                                  <p className="text-sm font-bold text-white">Buen Estado</p>
+                              </div>
+                              <div className="bg-slate-800/50 p-4 rounded-3xl border border-white/5">
+                                  <div className="w-4 h-4 bg-red-500 rounded-full animate-pulse mb-2" />
+                                  <p className="text-[10px] text-slate-400 font-bold uppercase">Alertas</p>
+                                  <p className="text-sm font-bold text-white">2 Necesitan Acción</p>
+                              </div>
+                          </div>
+                      </div>
+                  )}
+
            {/* Next Service Card */}
+                  {!showPrototyping && (
            <div className="bg-gradient-to-br from-indigo-600 to-violet-700 rounded-[2rem] p-6 shadow-xl shadow-indigo-900/40 text-white mb-8 relative overflow-hidden">
                <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
                
@@ -53,7 +102,7 @@ const Maintenance: React.FC = () => {
                            <h2 className="text-2xl font-bold mt-1">Revisión 50k</h2>
                        </div>
                        <div className="bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold flex items-center">
-                           <Clock size={12} className="mr-1" /> En 15 días
+                                      <Clock size={12} className="mr-1" /> En {showPrototyping ? '12' : '15'} días
                        </div>
                    </div>
 
@@ -86,23 +135,27 @@ const Maintenance: React.FC = () => {
                    </button>
                </div>
            </div>
+                  )}
 
            {/* Quick Actions Grid */}
            <h3 className="text-lg font-bold text-white mb-4">Acciones Rápidas</h3>
            <div className="grid grid-cols-2 gap-4 mb-8">
-               <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 active:bg-slate-700 transition-colors">
-                   <div className="w-10 h-10 bg-green-500/20 rounded-xl flex items-center justify-center text-green-400 mb-3">
-                       <IonIcon icon={carSport} size="large" />
+                      <button
+                          onClick={handleStartScan}
+                          className="bg-slate-800 p-4 rounded-2xl border border-slate-700 active:bg-slate-700 transition-colors text-left"
+                      >
+                          <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400 mb-3">
+                              <IonIcon icon={scanOutline} size="large" />
                    </div>
-                   <h4 className="font-bold text-white text-sm">Diagnóstico</h4>
-                   <p className="text-slate-400 text-[10px]">Verificar estado</p>
-               </div>
-               <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 active:bg-slate-700 transition-colors">
+                          <h4 className="font-bold text-white text-sm">Escaneo AR</h4>
+                          <p className="text-slate-400 text-[10px]">Identificar fallas</p>
+                      </button>
+                      <div className="bg-slate-800 p-4 rounded-2xl border border-slate-700 active:bg-slate-700 transition-colors text-left">
                    <div className="w-10 h-10 bg-orange-500/20 rounded-xl flex items-center justify-center text-orange-400 mb-3">
                        <IonIcon icon={alertCircle} size="large" />
                    </div>
                    <h4 className="font-bold text-white text-sm">Alertas</h4>
-                   <p className="text-slate-400 text-[10px]">0 Activas</p>
+                          <p className="text-slate-400 text-[10px]">{activeAlerts.length} Activas</p>
                </div>
            </div>
 
