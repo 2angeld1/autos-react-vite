@@ -15,6 +15,7 @@ export { authService } from './authService';
 export { backendCarService } from './backendCarService';
 export { quoteService } from './quoteService';
 export { promotionService } from './promotionService';
+export * from './brands';
 
 // Re-export all car service functions
 export {

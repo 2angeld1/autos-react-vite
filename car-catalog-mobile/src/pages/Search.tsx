@@ -17,7 +17,7 @@ import CarCard from '@/components/CarCard';
 
 const Search: React.FC = () => {
     const {
-        makes,
+        brands,
         selectedMake, setSelectedMake,
         yearRange, setYearRange,
         results,
@@ -50,7 +50,7 @@ const Search: React.FC = () => {
 
              {/* Make Selector */}
              <div className="mb-6">
-               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Car Make</label>
+                          <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Car Brand</label>
                <div className="bg-slate-50 rounded-2xl px-2 border border-slate-100">
                               <IonSelect
                                   value={selectedMake}
@@ -59,8 +59,9 @@ const Search: React.FC = () => {
                     interface="action-sheet"
                     className="w-full text-slate-900 font-bold"
                  >
-                   {makes.map(make => (
-                     <IonSelectOption key={make} value={make}>{make}</IonSelectOption>
+                                  <IonSelectOption value="">All Brands</IonSelectOption>
+                                  {brands.map(brand => (
+                                      <IonSelectOption key={brand._id} value={brand.name}>{brand.name}</IonSelectOption>
                    ))}
                  </IonSelect>
                </div>

@@ -141,7 +141,7 @@ export const searchCars = async (filters: SearchFilters): Promise<Car[]> => {
     const params = new URLSearchParams();
     
     if (filters.searchTerm) {
-      params.set('search', filters.searchTerm);
+      params.set('q', filters.searchTerm);
     }
     
     if (filters.year) {

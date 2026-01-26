@@ -1,24 +1,24 @@
 import { useState, useEffect } from 'react';
-import { fetchMakes, searchCars } from '@/services/api';
+import { searchCars, getBrands, fetchCars, type Brand } from '@/services/api';
 
 export const useSearch = () => {
-  const [makes, setMakes] = useState<string[]>([]);
+    const [brands, setBrands] = useState<Brand[]>([]);
   const [selectedMake, setSelectedMake] = useState<string>('');
   const [yearRange, setYearRange] = useState({ lower: 2015, upper: 2024 });
   const [results, setResults] = useState<any[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
-    const loadMakes = async () => {
-      const data = await fetchMakes();
-      if (data) setMakes(data);
+      const loadBrands = async () => {
+          const data = await getBrands();
+          if (data) setBrands(data);
     };
-    loadMakes();
+      loadBrands();
     
     // Load initial cars (Catalog)
     const initialLoad = async () => {
        try {
-        const res = await searchCars({});
+           const res = await fetchCars();
         setResults(res);
        } catch(e) { console.error(e) }
     };
@@ -42,7 +42,7 @@ export const useSearch = () => {
   };
 
   return {
-    makes,
+      brands,
     selectedMake, setSelectedMake,
     yearRange, setYearRange,
     results,
