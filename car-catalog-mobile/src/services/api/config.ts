@@ -59,7 +59,9 @@ export const RELIABLE_DOMAINS = [
   'www.motortrend.com',
   'hips.hearstapps.com',
   'www.automobilemag.com',
-  'res.cloudinary.com'
+  'res.cloudinary.com',
+  'vercel.app',
+  'vercel-storage.com'
 ];
 
 // ✅ REDUCIDO: Solo dominios realmente problemáticos

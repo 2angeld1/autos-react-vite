@@ -28,7 +28,8 @@ const allowedOrigins = new Set([
   'https://autos-react-dashboard.vercel.app',
   'https://autos-react-front.vercel.app',
   'https://velodrive.vercel.app',
-  'https://velodrive-dashboard.vercel.app'
+  'https://velodrive-dashboard.vercel.app',
+  'https://velodrive-mobile.vercel.app'
 ].filter(Boolean));
 
 app.use(cors({
