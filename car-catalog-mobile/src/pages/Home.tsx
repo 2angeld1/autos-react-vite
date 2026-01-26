@@ -8,7 +8,7 @@ import {
 import { useHistory } from 'react-router-dom';
 import { notifications, arrowForward, build } from 'ionicons/icons';
 import useCarData from '@/hooks/useCarData';
-import PreferencesModal, { type SortOption } from '@/components/PreferencesModal';
+import PreferencesModal from '@/components/PreferencesModal';
 import { SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { staggerContainer, fadeInUp, scaleIn } from '../animations';
@@ -25,8 +25,6 @@ const Home: React.FC = () => {
   const { cars } = useCarData();
   const [showPreferences, setShowPreferences] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
-  const [sortOption, setSortOption] = useState<SortOption>('featured');
   const [brands, setBrands] = useState<Brand[]>([]);
 
   useEffect(() => {
@@ -172,10 +170,7 @@ const Home: React.FC = () => {
         <PreferencesModal 
           isOpen={showPreferences} 
           onClose={() => setShowPreferences(false)}
-          viewMode={viewMode}
-          onViewModeChange={setViewMode}
-          sortOption={sortOption}
-          onSortChange={setSortOption}
+          mode="home"
         />
       </IonContent>
     </IonPage>

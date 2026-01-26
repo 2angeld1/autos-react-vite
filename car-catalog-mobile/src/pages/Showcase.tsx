@@ -85,6 +85,7 @@ const Showcase: React.FC = () => {
         </div>
 
         <PreferencesModal 
+                  mode="showcase"
           isOpen={showPreferences} 
           onClose={() => setShowPreferences(false)}
           viewMode={viewMode}
