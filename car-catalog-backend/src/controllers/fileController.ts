@@ -5,6 +5,7 @@ import FileItem, { IFileItemDocument } from '@/models/FileItem';
 import { logger } from '@/utils/logger';
 import { AuthRequest } from '@/middleware/auth';
 import { CloudinaryService } from '@/services/cloudinaryService';
+import { ImageService } from '@/services/imageService';
 
 // Base upload directory
 const BASE_UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'files');
@@ -589,5 +590,14 @@ export class FileController {
         totalPages: Math.ceil(total / limitNum)
       }
     });
+  });
+  /**
+   * Get slider images
+   */
+  static getSliders = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    // Import dynamically if needed or assume it is imported at top. 
+    // But since I can edit imports, I'll add the method here.
+    const images = await ImageService.getSliderImages();
+    successResponse(res, images);
   });
 }

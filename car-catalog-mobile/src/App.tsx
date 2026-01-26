@@ -11,15 +11,14 @@ import {
   setupIonicReact
 } from '@ionic/react';
 import { IonReactRouter } from '@ionic/react-router';
-import { carSport, search, heart, person, grid } from 'ionicons/icons';
-
+import { carSport, search, build, home, location as locationIcon } from 'ionicons/icons';
 // Pages
 import Home from './pages/Home';
 import CarDetail from './pages/CarDetail';
 import Search from './pages/Search';
-import Favorites from './pages/Favorites';
-import Profile from './pages/Profile';
+import Location from './pages/Location';
 import Showcase from './pages/Showcase';
+import Maintenance from './pages/Maintenance';
 
 /* Core CSS required for Ionic components to work properly */
 import '@ionic/react/css/core.css';
@@ -42,12 +41,13 @@ import './theme/variables.css';
 
 setupIonicReact();
 
-const App: React.FC = () => (
+const App: React.FC = () => {
+  return (
   <IonApp>
     <IonReactRouter>
       <IonTabs>
         <IonRouterOutlet>
-          <Route path="/home" exact={true}>
+            <Route path="/home" exact={true}>
             <Home />
           </Route>
           <Route path="/showcase" exact={true}>
@@ -56,12 +56,12 @@ const App: React.FC = () => (
           <Route path="/search" exact={true}>
             <Search />
           </Route>
-          <Route path="/favorites" exact={true}>
-            <Favorites />
-          </Route>
-          <Route path="/profile" exact={true}>
-             <Profile />
-          </Route>
+            <Route path="/maintenance" exact={true}>
+              <Maintenance />
+            </Route>
+            <Route path="/location" exact={true}>
+              <Location />
+            </Route>
           <Route path="/car/:id" exact={true}>
             <CarDetail />
           </Route>
@@ -72,29 +72,30 @@ const App: React.FC = () => (
         
         <IonTabBar slot="bottom" className="ion-no-border bg-white h-20 shadow-sm border-t border-slate-50 pb-4">
           <IonTabButton tab="home" href="/home" className="bg-white">
-            <IonIcon icon={carSport} />
+              <IonIcon icon={home} />
             <IonLabel>Home</IonLabel>
           </IonTabButton>
           <IonTabButton tab="showcase" href="/showcase" className="bg-white">
-            <IonIcon icon={grid} />
+              <IonIcon icon={carSport} />
             <IonLabel>Cars</IonLabel>
           </IonTabButton>
           <IonTabButton tab="search" href="/search" className="bg-white">
             <IonIcon icon={search} />
             <IonLabel>Search</IonLabel>
           </IonTabButton>
-          <IonTabButton tab="favorites" href="/favorites" className="bg-white">
-            <IonIcon icon={heart} />
-            <IonLabel>Saved</IonLabel>
-          </IonTabButton>
-          <IonTabButton tab="profile" href="/profile" className="bg-white">
-            <IonIcon icon={person} />
-            <IonLabel>Profile</IonLabel>
-          </IonTabButton>
+            <IonTabButton tab="maintenance" href="/maintenance" className="bg-white">
+              <IonIcon icon={build} />
+              <IonLabel>Service</IonLabel>
+            </IonTabButton>
+            <IonTabButton tab="location" href="/location" className="bg-white">
+              <IonIcon icon={locationIcon} />
+              <IonLabel>Visítanos</IonLabel>
+            </IonTabButton>
         </IonTabBar>
       </IonTabs>
     </IonReactRouter>
   </IonApp>
-);
+  );
+};
 
 export default App;

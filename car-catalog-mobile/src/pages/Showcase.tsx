@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { 
   IonContent, 
   IonHeader, 
@@ -9,70 +9,28 @@ import {
 } from '@ionic/react';
 import { search } from 'ionicons/icons';
 import { SlidersHorizontal } from 'lucide-react';
-import { useHistory } from 'react-router-dom';
-import useCarData from '@/hooks/useCarData';
-import PreferencesModal, { type SortOption } from '@/components/PreferencesModal';
 
-const DEFAULT_IMAGE = 'https://placehold.co/600x400/f1f5f9/94a3b8?text=No+Image';
+import PreferencesModal from '@/components/PreferencesModal';
+import CarCard from '@/components/CarCard';
+import { useShowcase } from '../hooks/useShowcase';
+import { motion } from 'framer-motion';
 
 const Showcase: React.FC = () => {
-  const history = useHistory();
-  const { cars, loading } = useCarData();
-  
-  const [searchText, setSearchText] = useState('');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid'); // Default to grid
-  const [sortOption, setSortOption] = useState<SortOption>('featured');
-  const [showPreferences, setShowPreferences] = useState(false);
 
-  // Sorting Logic
-  const sortedCars = useMemo(() => {
-    const filtered = [...cars].filter(car => {
-      if (!searchText) return true;
-      const lower = searchText.toLowerCase();
-      return (
-        car.make?.toLowerCase().includes(lower) || 
-        car.model?.toLowerCase().includes(lower)
-      );
-    });
-
-    switch (sortOption) {
-      case 'price-asc':
-        return filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
-      case 'price-desc':
-        return filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-      case 'year-desc':
-        return filtered.sort((a, b) => (b.year || 0) - (a.year || 0));
-      default:
-        return filtered;
-    }
-  }, [cars, sortOption, searchText]);
-
-  const handleRefresh = (event: CustomEvent<any>) => {
-    setTimeout(() => {
-      window.location.reload(); 
-      event.detail.complete();
-    }, 1000);
-  };
-
-  const getCarImage = (car: any) => {
-    if (car.image) return car.image;
-    if (car.images && car.images.length > 0) return car.images[0];
-    if (car.imageUrl) return car.imageUrl;
-    return DEFAULT_IMAGE;
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      maximumFractionDigits: 0
-    }).format(price);
-  };
+    const {
+        sortedCars,
+        loading,
+        searchText, setSearchText,
+        viewMode, setViewMode,
+        sortOption, setSortOption,
+        showPreferences, setShowPreferences,
+        handleRefresh
+    } = useShowcase();
 
   return (
     <IonPage>
       <IonHeader className="ion-no-border bg-white shadow-none">
-        <div className="px-6 pt-6 pb-2 bg-white flex justify-between items-end">
+              <div className="px-6 pb-2 bg-white flex justify-between items-end">
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900">Showcase</h1>
             <p className="text-slate-500 font-medium">Explore our collection</p>
@@ -109,36 +67,14 @@ const Showcase: React.FC = () => {
         <div className="p-4 pb-24 min-h-screen">
            
            {/* Grid/List Results */}
-           <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                  <motion.div
+                      layout
+                      className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-2' : 'grid-cols-1'}`}
+                  >
               {sortedCars.map((car: any) => (
-                <div 
-                  key={car.id || car._id} 
-                  onClick={() => history.push(`/car/${car.id || car._id}`)}
-                  className="bg-white rounded-[2rem] shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden border border-slate-100 relative cursor-pointer active:scale-95"
-                >
-                  <div className={`relative bg-slate-100 overflow-hidden ${viewMode === 'list' ? 'aspect-[2/1]' : 'aspect-square'}`}>
-                     <img 
-                       src={getCarImage(car)} 
-                       alt={car.model}
-                       className="w-full h-full object-cover"
-                       loading="lazy"
-                     />
-                     <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg shadow-sm">
-                        <span className="font-extrabold text-slate-900 text-[10px] tracking-tight">{formatPrice(car.price)}</span>
-                     </div>
-                  </div>
-
-                  <div className="p-3">
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{car.make}</p>
-                     <h3 className="font-bold text-slate-900 text-sm leading-tight truncate">{car.model}</h3>
-                     <div className="mt-2 flex gap-1">
-                        <span className="bg-slate-50 w-full text-center text-slate-500 text-[10px] font-bold py-1 rounded-md capitalize">{car.year}</span>
-                        <span className="bg-slate-50 w-full text-center text-slate-500 text-[10px] font-bold py-1 rounded-md capitalize truncate">{car.fuel_type || 'Gas'}</span>
-                     </div>
-                  </div>
-                </div>
+                  <CarCard key={car.id || car._id} car={car} viewMode={viewMode} />
               ))}
-           </div>
+                  </motion.div>
            
            {sortedCars.length === 0 && !loading && (
              <div className="text-center py-20 opacity-50">

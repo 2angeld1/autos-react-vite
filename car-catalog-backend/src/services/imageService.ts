@@ -209,4 +209,38 @@ export class ImageService {
       return { totalImages: 0, totalSize: 0, avgSize: 0 };
     }
   }
+  /**
+   * Get slider images from Database (Cloudinary URLs)
+   * Looks for a virtual folder named 'sliders' and returns its file URLs.
+   */
+  static async getSliderImages(): Promise<string[]> {
+    try {
+      // Dynamic import to avoid potential circular dependencies
+      const FileItem = (await import('@/models/FileItem')).default;
+
+      // 1. Find the folder named 'sliders' (case insensitive)
+      const slidersFolder = await FileItem.findOne({
+        name: { $regex: /^sliders$/i },
+        type: 'folder'
+      });
+
+      if (!slidersFolder) {
+        logger.warn('Sliders folder not found in database');
+        return [];
+      }
+
+      // 2. Find all images inside this folder
+      const images = await FileItem.find({
+        parentFolder: slidersFolder._id,
+        type: 'file',
+        mimeType: { $regex: /^image\// }
+      }).sort({ createdAt: -1 });
+
+      // 3. Return URLs
+      return images.map(img => img.url || '').filter(Boolean);
+    } catch (error) {
+      logger.error('Failed to get slider images from DB:', error);
+      return [];
+    }
+  }
 }

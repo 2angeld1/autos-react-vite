@@ -61,6 +61,13 @@ const upload = multer({
 });
 
 /**
+ * @route   GET /api/files/sliders
+ * @desc    Get slider images
+ * @access  Public
+ */
+router.get('/sliders', FileController.getSliders);
+
+/**
  * @route   GET /api/files
  * @desc    Get all files and folders in a directory
  * @access  Private (Admin)

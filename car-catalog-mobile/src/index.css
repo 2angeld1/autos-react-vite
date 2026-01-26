@@ -76,3 +76,7 @@ ion-content {
   display: none;
 }
 
+/* SweetAlert2 + Ionic Fix: prevent Swal from breaking body height */
+body.swal2-height-auto {
+    height: 100% !important;
+}

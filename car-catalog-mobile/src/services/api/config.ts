@@ -201,3 +201,23 @@ export const isReliableDomain = (domain: string): boolean => {
 export const getFallbackUrl = (type: keyof typeof FALLBACK_URLS): string => {
   return FALLBACK_URLS[type];
 };
+
+const api = axios.create({
+  baseURL: BACKEND_API_BASE_URL,
+  timeout: BACKEND_API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
+  }
+});
+
+// Interceptor para agregar token si existe
+api.interceptors.request.use(config => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+export default api;
