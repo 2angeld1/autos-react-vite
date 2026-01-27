@@ -82,7 +82,7 @@ const Maintenance: React.FC = () => {
                               </p>
                           </div>
 
-                          <Car3DPrototyping alerts={activeAlerts} />
+                          <Car3DPrototyping />
 
                           {/* Status Cards */}
                           <div className="grid grid-cols-2 gap-3">
