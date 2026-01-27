@@ -13,7 +13,7 @@ import {
     IonRange,
     IonSpinner
 } from '@ionic/react';
-import { heart, shareSocial, call, calendar, cashOutline, personOutline, mailOutline, phonePortraitOutline, closeOutline } from 'ionicons/icons';
+import { heart, shareSocial, call, calendar, cashOutline, personOutline, mailOutline, phonePortraitOutline, closeOutline, carSport, home, sync } from 'ionicons/icons';
 import { useParams, useHistory } from 'react-router-dom';
 import { Fuel, Gauge, SlidersHorizontal, MapPin, Calculator } from 'lucide-react';
 import { useCarDetail } from '../hooks/useCarDetail';
@@ -22,12 +22,26 @@ import { fadeInUp, staggerContainer } from '../animations';
 import { createQuote } from '../services/api/quotes';
 import { useAuthStore } from '../store/authStore';
 import Swal from 'sweetalert2';
+import Car3DViewer from '../components/Car3DViewer';
 
 const CarDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
     const { user } = useAuthStore();
     const { car, similarCars, loading, formatPrice, getCarImage } = useCarDetail(id);
+
+    // Tab Navigation State
+    const [activeTab, setActiveTab] = useState<'resumen' | 'especificaciones' | 'galeria'>('resumen');
+    const [activeGalleryTab, setActiveGalleryTab] = useState<'exterior' | 'interior' | '360'>('exterior');
+
+    // Image Zoom State
+    const [selectedImage, setSelectedImage] = useState<string | null>(null);
+    const [showImageModal, setShowImageModal] = useState(false);
+
+    const handleImageClick = (imageUrl: string) => {
+        setSelectedImage(imageUrl);
+        setShowImageModal(true);
+    };
 
     // Quote State
     const [showQuoteModal, setShowQuoteModal] = useState(false);
@@ -168,7 +182,7 @@ const CarDetail: React.FC = () => {
               >
 
             {/* Header Info */}
-            <div className="mb-8">
+                  <div className="mb-6">
               <div className="flex items-start justify-between mb-2">
                 <div>
                    <span className="inline-block py-1 px-3 rounded-full bg-slate-100 text-slate-600 font-bold tracking-wider text-[10px] uppercase mb-3">
@@ -191,108 +205,260 @@ const CarDetail: React.FC = () => {
               </div>
             </div>
 
-            {/* Specs Grid */}
+                  {/* Main Tabs */}
+                  <div className="mb-6 -mx-6 px-6">
+                      <div className="flex gap-2 !bg-slate-50 !p-1.5 !rounded-[1.5rem]">
+                          {[
+                              { id: 'resumen' as const, label: 'Resumen' },
+                              { id: 'especificaciones' as const, label: 'Especificaciones' },
+                              { id: 'galeria' as const, label: 'Galería' }
+                          ].map(tab => (
+                              <button
+                                  key={tab.id}
+                                  onClick={() => setActiveTab(tab.id)}
+                                  className={`flex-1 !py-3 !px-4 !text-xs !font-bold !transition-all !relative !rounded-[1.2rem] ${activeTab === tab.id
+                                      ? '!bg-white !text-slate-900 !shadow-lg !shadow-slate-900/10'
+                                      : '!bg-transparent !text-slate-400'
+                                      }`}
+                              >
+                                  {tab.label}
+                              </button>
+                          ))}
+                      </div>
+                  </div>
+
+                  {/* Gallery Sub-Tabs (only visible when Galería is active) */}
+                  {activeTab === 'galeria' && (
+                      <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="mb-6 -mx-6 px-6"
+                      >
+                          <div className="flex gap-2.5">
+                              {[
+                                  { id: 'exterior' as const, label: 'Exterior', icon: carSport },
+                                  { id: 'interior' as const, label: 'Interior', icon: home },
+                                  { id: '360' as const, label: '360°', icon: sync }
+                              ].map(tab => (
+                                  <button
+                                      key={tab.id}
+                                      onClick={() => setActiveGalleryTab(tab.id)}
+                                      className={`flex-1 !py-3 !px-4 !rounded-[1.2rem] !text-xs !font-bold !transition-all !border-2 ${activeGalleryTab === tab.id
+                                          ? '!bg-slate-900 !text-white !shadow-xl !shadow-slate-900/30 !border-slate-900 !scale-[1.02]'
+                                          : '!bg-white !text-slate-500 !border-slate-100 hover:!border-slate-200'
+                                          }`}
+                                  >
+                                      <IonIcon icon={tab.icon} className="!mr-1.5 !text-base" />
+                                      {tab.label}
+                                  </button>
+                              ))}
+                          </div>
+                      </motion.div>
+                  )}
+
+                  {/* Tab Content */}
+                  <motion.div
+                      key={activeTab}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.3 }}
+                  >
+                      {/* Resumen Tab */}
+                      {activeTab === 'resumen' && (
+                          <div className="space-y-8">
+                              {/* Specs Grid */}
                   <motion.div
                       variants={staggerContainer}
                       initial="hidden"
                       whileInView="show"
                       viewport={{ once: true }}
-                      className="grid grid-cols-3 gap-4 mb-8"
+                                  className="grid grid-cols-3 gap-4"
                   >
                       <motion.div variants={fadeInUp} className="bg-slate-50 p-4 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 aspect-[4/5]">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
-                     <Gauge size={20} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <span className="block text-slate-900 font-bold text-sm leading-tight mb-1">
-                      {car.class ? car.class.split(' ')[0] : 'Sedan'}
-                    </span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Class</span>
-                  </div>
+                                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
+                                          <Gauge size={20} strokeWidth={2} />
+                                      </div>
+                                      <div>
+                                          <span className="block text-slate-900 font-bold text-sm leading-tight mb-1">
+                                              {car.class ? car.class.split(' ')[0] : 'Sedan'}
+                                          </span>
+                                          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Class</span>
+                                      </div>
                       </motion.div>
 
                       <motion.div variants={fadeInUp} className="bg-slate-50 p-4 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 aspect-[4/5]">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
-                     <Fuel size={20} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <span className="block text-slate-900 font-bold text-sm leading-tight mb-1 capitalize truncate w-full">
-                      {car.fuel_type || 'Gas'}
-                    </span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Fuel</span>
-                  </div>
+                                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
+                                          <Fuel size={20} strokeWidth={2} />
+                                      </div>
+                                      <div>
+                                          <span className="block text-slate-900 font-bold text-sm leading-tight mb-1 capitalize truncate w-full">
+                                              {car.fuel_type || 'Gas'}
+                                          </span>
+                                          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Fuel</span>
+                                      </div>
                       </motion.div>
 
                       <motion.div variants={fadeInUp} className="bg-slate-50 p-4 rounded-[2rem] flex flex-col items-center justify-center text-center gap-2 aspect-[4/5]">
-                  <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
-                     <SlidersHorizontal size={20} strokeWidth={2} />
-                  </div>
-                  <div>
-                    <span className="block text-slate-900 font-bold text-sm leading-tight mb-1 capitalize">
-                       {car.transmission === 'a' ? 'Auto' : (car.transmission || 'Auto')}
-                    </span>
-                    <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Trans</span>
-                  </div>
+                                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-900 mb-1">
+                                          <SlidersHorizontal size={20} strokeWidth={2} />
+                                      </div>
+                                      <div>
+                                          <span className="block text-slate-900 font-bold text-sm leading-tight mb-1 capitalize">
+                                              {car.transmission === 'a' ? 'Auto' : (car.transmission || 'Auto')}
+                                          </span>
+                                          <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider">Trans</span>
+                                      </div>
                       </motion.div>
                   </motion.div>
 
-            {/* Description */}
-            <div className="mb-8">
-              <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
-                About this vehicle
-              </h3>
-              <p className="text-slate-500 leading-relaxed text-sm font-medium">
-                {car.description || `Experience the power and luxury of this ${car.year} ${car.make} ${car.model}. A perfect blend of style and performance, ready for your next adventure.`}
-              </p>
-            </div>
+                              {/* Description */}
+                              <div>
+                                  <h3 className="text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+                                      About this vehicle
+                                  </h3>
+                                  <p className="text-slate-500 leading-relaxed text-sm font-medium">
+                                      {car.description || `Experience the power and luxury of this ${car.year} ${car.make} ${car.model}. A perfect blend of style and performance, ready for your next adventure.`}
+                                  </p>
+                              </div>
 
-            {/* Technical Details List */}
-            <div>
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Technical Specs</h3>
-              <div className="space-y-3">
-                 {[
-                    { label: 'Engine', value: car.displacement ? `${car.displacement}L` : 'V6 Turbo' },
-                    { label: 'Cylinders', value: car.cylinders || '6' },
-                    { label: 'City MPG', value: car.city_mpg || '21' },
-                    { label: 'Hwy MPG', value: car.highway_mpg || '28' },
-                 ].map((item, i) => (
-                    <div key={i} className="flex justify-between items-center py-3 border-b border-slate-50 last:border-0">
-                       <span className="text-slate-500 text-sm font-medium">{item.label}</span>
-                       <span className="font-bold text-slate-900 text-sm">{item.value}</span>
-                    </div>
-                 ))}
-              </div>
-            </div>
+                              {/* Similar Vehicles */}
+                              {similarCars.length > 0 && (
+                                  <div className="pt-6 border-t border-slate-50">
+                                      <h3 className="text-lg font-bold text-slate-900 mb-4">Similar Vehicles</h3>
+                                      <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
+                                          {similarCars.map((sCar: any) => (
+                                              <motion.div
+                                                  key={sCar.id || sCar._id}
+                                                  whileTap={{ scale: 0.95 }}
+                                                  onClick={() => history.push(`/car/${sCar.id || sCar._id}`)}
+                                                  className="flex-shrink-0 w-40 bg-white rounded-2xl border border-slate-100/10 shadow-sm overflow-hidden transition-transform"
+                                              >
+                                                  <div className="h-28 w-full relative">
+                                                      <img
+                                                          src={getCarImage(sCar)}
+                                                          alt={sCar.model}
+                                                          className="w-full h-full object-cover"
+                                                      />
+                                                  </div>
+                                                  <div className="p-3">
+                                                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{sCar.make}</p>
+                                                      <p className="text-xs font-bold text-slate-900 truncate">{sCar.model}</p>
+                                                      <p className="text-xs font-bold text-slate-900 mt-1">{formatPrice(sCar.price)}</p>
+                                                  </div>
+                                              </motion.div>
+                                          ))}
+                                      </div>
+                                  </div>
+                              )}
+                          </div>
+                      )}
 
-            {/* Similar Vehicles */}
-            {similarCars.length > 0 && (
-              <div className="mt-10 pt-6 border-t border-slate-50">
-                <h3 className="text-lg font-bold text-slate-900 mb-4">Similar Vehicles</h3>
-                <div className="flex gap-4 overflow-x-auto pb-4 -mx-6 px-6 scrollbar-hide">
-                  {similarCars.map((sCar: any) => (
-                      <motion.div
-                          key={sCar.id || sCar._id}
-                          whileTap={{ scale: 0.95 }}
-                      onClick={() => history.push(`/car/${sCar.id || sCar._id}`)}
-                          className="flex-shrink-0 w-40 bg-white rounded-2xl border border-slate-100/10 shadow-sm overflow-hidden transition-transform"
-                    >
-                      <div className="h-28 w-full relative">
-                              <img
-                                  src={getCarImage(sCar)}
-                          alt={sCar.model}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                      <div className="p-3">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">{sCar.make}</p>
-                        <p className="text-xs font-bold text-slate-900 truncate">{sCar.model}</p>
-                        <p className="text-xs font-bold text-slate-900 mt-1">{formatPrice(sCar.price)}</p>
-                      </div>
-                      </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
+                      {/* Especificaciones Tab */}
+                      {activeTab === 'especificaciones' && (
+                          <div className="space-y-6">
+                              <div>
+                                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Technical Specs</h3>
+                                  <div className="space-y-3">
+                                      {[
+                                          { label: 'Engine', value: car.displacement ? `${car.displacement}L` : 'V6 Turbo' },
+                                          { label: 'Cylinders', value: car.cylinders || '6' },
+                                          { label: 'City MPG', value: car.city_mpg || '21' },
+                                          { label: 'Hwy MPG', value: car.highway_mpg || '28' },
+                                          { label: 'Transmission', value: car.transmission === 'a' ? 'Automatic' : (car.transmission || 'Automatic') },
+                                          { label: 'Fuel Type', value: car.fuel_type || 'Gasoline' },
+                                      ].map((item, i) => (
+                                          <div key={i} className="flex justify-between items-center py-3 border-b border-slate-50 last:border-0">
+                                              <span className="text-slate-500 text-sm font-medium">{item.label}</span>
+                                              <span className="font-bold text-slate-900 text-sm">{item.value}</span>
+                                          </div>
+                                      ))}
+                                  </div>
+                              </div>
+                          </div>
+                      )}
+
+                      {/* Galería Tab */}
+                      {activeTab === 'galeria' && (
+                          <motion.div
+                              key={activeGalleryTab}
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              transition={{ duration: 0.3 }}
+                              className="space-y-4"
+                          >
+                              {activeGalleryTab === 'exterior' && (
+                                  <div className="grid grid-cols-2 gap-4">
+                                      {[1, 2, 3, 4].map(i => (
+                                          <div
+                                              key={i}
+                                              className="aspect-[4/3] bg-slate-100 rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                                              onClick={() => handleImageClick(getCarImage(car))}
+                                          >
+                                              <img
+                                                  src={getCarImage(car)}
+                                                  alt={`Exterior ${i}`}
+                                                  className="w-full h-full object-cover"
+                                              />
+                                          </div>
+                                      ))}
+                                  </div>
+                              )}
+
+                              {activeGalleryTab === 'interior' && (
+                                  <div className="space-y-4">
+                                      <div
+                                          className="aspect-video bg-slate-100 rounded-2xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                                          onClick={() => handleImageClick('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=1200&q=90')}
+                                      >
+                                          <img
+                                              src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?w=800&q=80"
+                                              alt="Interior principal"
+                                              className="w-full h-full object-cover"
+                                          />
+                                      </div>
+                                      <div className="grid grid-cols-3 gap-3">
+                                          <div
+                                              className="aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                                              onClick={() => handleImageClick('https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=90')}
+                                          >
+                                              <img
+                                                  src="https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&q=80"
+                                                  alt="Interior - Dashboard"
+                                                  className="w-full h-full object-cover"
+                                              />
+                                          </div>
+                                          <div
+                                              className="aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                                              onClick={() => handleImageClick('https://images.unsplash.com/photo-1542362567-b07e54358753?w=800&q=90')}
+                                          >
+                                              <img
+                                                  src="https://images.unsplash.com/photo-1542362567-b07e54358753?w=400&q=80"
+                                                  alt="Interior - Steering Wheel"
+                                                  className="w-full h-full object-cover"
+                                              />
+                                          </div>
+                                          <div
+                                              className="aspect-square bg-slate-100 rounded-xl overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                                              onClick={() => handleImageClick('https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=800&q=90')}
+                                          >
+                                              <img
+                                                  src="https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?w=400&q=80"
+                                                  alt="Interior - Seats"
+                                                  className="w-full h-full object-cover"
+                                              />
+                                          </div>
+                                      </div>
+                                  </div>
+                              )}
+
+                              {activeGalleryTab === '360' && (
+                                  <div className="aspect-video bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl overflow-hidden">
+                                      <Car3DViewer />
+                                  </div>
+                              )}
+                          </motion.div>
+                      )}
+                  </motion.div>
 
               </motion.div>
       </IonContent>
@@ -487,6 +653,46 @@ const CarDetail: React.FC = () => {
                           </p>
                       </div>
                   </IonContent>
+              </div>
+          </IonModal>
+
+          {/* Image Zoom Modal */}
+          <IonModal
+              isOpen={showImageModal}
+              onDidDismiss={() => setShowImageModal(false)}
+              className="image-zoom-modal"
+          >
+              <div className="h-full w-full bg-black flex flex-col">
+                  {/* Close Button */}
+                  <div className="absolute top-0 right-0 z-50 p-4 pt-12">
+                      <button
+                          onClick={() => setShowImageModal(false)}
+                          className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-full flex items-center justify-center text-white active:scale-90 transition-transform"
+                      >
+                          <IonIcon icon={closeOutline} className="text-2xl" />
+                      </button>
+                  </div>
+
+                  {/* Image Container */}
+                  <div className="flex-1 flex items-center justify-center p-4">
+                      {selectedImage && (
+                          <motion.img
+                              initial={{ opacity: 0, scale: 0.9 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.3 }}
+                              src={selectedImage}
+                              alt="Imagen ampliada"
+                              className="max-w-full max-h-full object-contain rounded-2xl"
+                          />
+                      )}
+                  </div>
+
+                  {/* Hint Text */}
+                  <div className="p-6 text-center">
+                      <p className="text-white/60 text-xs font-medium">
+                          Pellizca para hacer zoom • Toca para cerrar
+                      </p>
+                  </div>
               </div>
           </IonModal>
     </IonPage>
