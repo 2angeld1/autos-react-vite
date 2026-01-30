@@ -13,7 +13,8 @@ import {
   FileText,
   Percent,
   Building2,
-  Zap
+  Zap,
+  Mountain
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
@@ -62,6 +63,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           href: '/accessories',
           icon: Wrench,
           badge: 'New',
+        },
+        {
+          name: 'IronTrail',
+          href: '/irontrail',
+          icon: Mountain,
+          badge: '4x4',
         },
         {
           name: t('nav.brands'),

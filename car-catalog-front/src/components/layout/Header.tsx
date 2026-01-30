@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser, faHeart, faInfoCircle, faHome, faTags, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
+    const location = useLocation();
     const [isActive, setIsActive] = useState<boolean>(false);
     const [scrolled, setScrolled] = useState<boolean>(false);
+
+    if (location.pathname === '/irontrail') return null;
 
     // Handle the scroll event to change the navbar style
     useEffect(() => {

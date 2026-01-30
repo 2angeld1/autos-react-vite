@@ -1,56 +1,64 @@
 import mongoose, { Schema, Document } from 'mongoose';
 
+export interface IQuoteItem {
+  product: mongoose.Types.ObjectId;
+  itemModel: 'Car' | 'Product';
+  quantity: number;
+  notes?: string;
+}
+
 export interface IQuote extends Document {
-  car: mongoose.Types.ObjectId;
+  // Legacy (Single Car)
+  car?: mongoose.Types.ObjectId;
+
+  // Modern (Multi Item)
+  items?: IQuoteItem[];
+
   customerName: string;
   email: string;
   phone: string;
-  downPayment: number;
-  term: number;
+  downPayment?: number; // Opcional ahora (no aplica a repuestos siempre)
+  term?: number;        // Opcional
+  message?: string;     // General inquiry message
+
   status: 'pending' | 'contacted' | 'negotiating' | 'closed' | 'lost';
-  notes?: string;
+  source: 'web' | 'mobile' | 'pos'; // Origen de la cotización
   createdAt: Date;
   updatedAt: Date;
 }
 
-const QuoteSchema: Schema = new Schema({
+const QuoteSchema = new Schema<IQuote>({
+// --- LEGACY ---
   car: {
     type: Schema.Types.ObjectId,
-    ref: 'Car',
-    required: true
+    ref: 'Car'
   },
-  customerName: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  email: {
-    type: String,
-    required: true,
-    trim: true,
-    lowercase: true
-  },
-  phone: {
-    type: String,
-    required: true,
-    trim: true
-  },
-  downPayment: {
-    type: Number,
-    required: true
-  },
-  term: {
-    type: Number,
-    required: true
-  },
+
+  // --- AGNOSTIC MULTI-ITEM ---
+  items: [{
+    product: { type: Schema.Types.ObjectId, refPath: 'items.itemModel' },
+    itemModel: { type: String, enum: ['Car', 'Product'], default: 'Product' },
+    quantity: { type: Number, default: 1 },
+    notes: String
+  }],
+
+  customerName: { type: String, required: true, trim: true },
+  email: { type: String, required: true, trim: true, lowercase: true },
+  phone: { type: String, required: true, trim: true },
+
+  downPayment: { type: Number },
+  term: { type: Number },
+  message: { type: String },
+
   status: {
     type: String,
     enum: ['pending', 'contacted', 'negotiating', 'closed', 'lost'],
     default: 'pending'
   },
-  notes: {
+  source: {
     type: String,
-    trim: true
+    enum: ['web', 'mobile', 'pos'],
+    default: 'web'
   }
 }, {
   timestamps: true
