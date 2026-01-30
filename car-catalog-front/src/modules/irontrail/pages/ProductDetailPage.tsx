@@ -36,19 +36,25 @@ const ProductDetailPage = () => {
     }
 
     return (
-        <IronLayout>
-            {/* Header Background Spacer */}
-            <div className="bg-black h-24 w-full" />
+        <IronLayout headerVariant="solid">
+            {/* Spacer for fixed header */}
+            <div className="h-16" />
             
-            <div className="bg-white min-h-screen pb-12">
-                <div className="container mx-auto px-6 pt-12">
-                    {/* BREADCRUMB */}
-                    <div className="flex items-center gap-2 text-xs font-bold uppercase text-gray-400 m-5">
-                        <Link to="/irontrail" className="hover:text-[#FFD700]">Home</Link>
-                        <span>/</span>
-                        <Link to="/irontrail/catalogo" className="hover:text-[#FFD700]">Catálogo</Link>
-                        <span>/</span>
-                        <span className="text-black">{product.title}</span>
+            <div className="bg-gray-50 min-h-screen pb-12">
+                <div className="container mx-auto px-6 lg:px-12">
+                    {/* BREADCRUMB - Subtle bar */}
+                    <div className="py-4 mb-8 border-b border-gray-200">
+                        <nav className="flex items-center gap-2 text-sm">
+                            <Link to="/irontrail" className="text-gray-500 hover:text-gray-900 transition-colors">
+                                Home
+                            </Link>
+                            <span className="text-gray-300">/</span>
+                            <Link to="/irontrail/catalogo" className="text-gray-500 hover:text-gray-900 transition-colors">
+                                Catálogo
+                            </Link>
+                            <span className="text-gray-300">/</span>
+                            <span className="text-gray-900 font-medium truncate max-w-xs">{product.title}</span>
+                        </nav>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">

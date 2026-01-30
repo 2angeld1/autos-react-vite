@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom';
 import { Search, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const Header = () => {
+interface HeaderProps {
+    variant?: 'default' | 'solid';
+}
+
+const Header = ({ variant = 'default' }: HeaderProps) => {
     const [scrolled, setScrolled] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
@@ -18,31 +22,41 @@ const Header = () => {
     const handleSearch = (e: React.FormEvent) => {
         e.preventDefault();
         console.log('Searching for:', searchQuery);
-        // Mock search action
         setSearchOpen(false);
     };
 
+    // Styles based on variant
+    const isSolid = variant === 'solid';
+    const navClasses = isSolid
+        ? 'fixed top-0 w-full z-50 bg-black py-4'
+        : `fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-md py-3 shadow-lg' : 'bg-transparent py-6'}`;
+
     return (
         <>
-            <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${scrolled ? 'bg-black/90 backdrop-blur-md py-3 shadow-lg' : 'bg-transparent py-6'}`}>
-                <div className="container mx-auto px-6 flex justify-between items-center">
-                    <Link to="/irontrail" className="text-2xl font-black text-white italic tracking-tighter cursor-pointer flex items-center gap-2">
-                        <span className="text-[#FFD700] text-4xl not-italic">///</span> IRON<span className="text-gray-400">TRAIL</span>
-                    </Link>
+            <nav className={navClasses}>
+                <div className={`container mx-auto px-6 ${isSolid ? 'lg:px-12' : ''}`}>
+                    <div className="flex justify-between items-center">
+                        {/* Logo */}
+                        <Link to="/irontrail" className={`font-black text-white italic tracking-tighter cursor-pointer flex items-center gap-2 ${isSolid ? 'text-xl min-w-[160px]' : 'text-2xl'}`}>
+                            <span className={`text-[#FFD700] not-italic ${isSolid ? 'text-3xl' : 'text-4xl'}`}>///</span> IRON<span className="text-gray-400">TRAIL</span>
+                        </Link>
 
-                    <div className="hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-wider">
-                        <Link to="/irontrail/suspensiones" className="text-white hover:text-[#FFD700] transition-colors duration-300">Suspensiones</Link>
-                        <Link to="/irontrail/accesorios" className="text-white hover:text-[#FFD700] transition-colors duration-300">4x4 Accesorios</Link>
-                        <Link to="/irontrail/catalogo" className="text-white hover:text-[#FFD700] transition-colors duration-300">Catálogo</Link>
-                        <Link to="/irontrail/distribuidores" className="text-white hover:text-[#FFD700] transition-colors duration-300">Ubícanos</Link>
-                    </div>
+                        {/* Navigation */}
+                        <div className={`hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-wider ${isSolid ? 'justify-center flex-1' : ''}`}>
+                            <Link to="/irontrail/suspensiones" className="text-white hover:text-[#FFD700] transition-colors duration-300">Suspensiones</Link>
+                            <Link to="/irontrail/accesorios" className="text-white hover:text-[#FFD700] transition-colors duration-300">4x4 Accesorios</Link>
+                            <Link to="/irontrail/catalogo" className="text-white hover:text-[#FFD700] transition-colors duration-300">Catálogo</Link>
+                            <Link to="/irontrail/distribuidores" className="text-white hover:text-[#FFD700] transition-colors duration-300">Ubícanos</Link>
+                        </div>
 
-                    <div className="flex items-center gap-4 text-white">
-                        <Search 
-                            className="w-5 h-5 cursor-pointer hover:text-[#FFD700] transition-colors" 
-                            onClick={() => setSearchOpen(true)}
-                        />
-                        <Menu className="w-6 h-6 md:hidden cursor-pointer" onClick={() => setMenuOpen(true)} />
+                        {/* Right side */}
+                        <div className={`flex items-center gap-4 text-white ${isSolid ? 'justify-end min-w-[160px]' : ''}`}>
+                            <Search
+                                className="w-5 h-5 cursor-pointer hover:text-[#FFD700] transition-colors"
+                                onClick={() => setSearchOpen(true)}
+                            />
+                            <Menu className="w-6 h-6 md:hidden cursor-pointer" onClick={() => setMenuOpen(true)} />
+                        </div>
                     </div>
                 </div>
 
