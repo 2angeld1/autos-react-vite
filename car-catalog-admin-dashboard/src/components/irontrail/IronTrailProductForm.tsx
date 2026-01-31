@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Settings, Check, DollarSign, Package, Image as ImageIcon, Tag } from 'lucide-react';
+import { Settings, Check, DollarSign, Package, Image as ImageIcon, Tag, Loader2 } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
+import Dropzone from '@/components/common/Dropzone';
+import { filesService } from '@/services/files';
 import { IronTrailProduct, IronTrailProductInput, IronTrailCategoryOption } from '@/services/irontrail';
 
 interface IronTrailProductFormProps {
@@ -32,8 +34,9 @@ const IronTrailProductForm: React.FC<IronTrailProductFormProps> = ({
     loading 
 }) => {
     const [imagePreview, setImagePreview] = useState<string | null>(product?.thumbnail || null);
+    const [uploading, setUploading] = useState(false);
 
-    const { register, handleSubmit, formState: { errors }, watch } = useForm<FormData>({
+    const { register, handleSubmit, formState: { errors }, watch, setValue } = useForm<FormData>({
         defaultValues: product ? {
             name: product.name,
             sku: product.sku || '',
@@ -54,11 +57,30 @@ const IronTrailProductForm: React.FC<IronTrailProductFormProps> = ({
     const thumbnailUrl = watch('thumbnail');
 
     // Update preview when thumbnail URL changes
-    React.useEffect(() => {
+    useEffect(() => {
         if (thumbnailUrl) {
             setImagePreview(thumbnailUrl);
         }
     }, [thumbnailUrl]);
+
+    const handleFilesDrop = async (files: File[]) => {
+        if (files.length === 0) return;
+
+        try {
+            setUploading(true);
+            const uploadedFiles = await filesService.uploadFiles(files, 'irontrail'); // Organize in irontrail folder
+            if (uploadedFiles.length > 0) {
+                const file = uploadedFiles[0];
+                const url = filesService.getFileUrl(file);
+                setValue('thumbnail', url, { shouldValidate: true });
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            // Optionally add error toast here
+        } finally {
+            setUploading(false);
+        }
+    };
 
     const onFormSubmit = async (data: FormData) => {
         const payload: IronTrailProductInput = {
@@ -77,30 +99,53 @@ const IronTrailProductForm: React.FC<IronTrailProductFormProps> = ({
     return (
         <div className="space-y-6">
             <form id="irontrail-product-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
-                {/* Image Preview */}
-                <div className="flex items-center gap-6">
-                    <div className="relative group">
-                        <div className="w-24 h-24 bg-gradient-to-br from-amber-500/20 to-orange-500/20 rounded-2xl flex items-center justify-center overflow-hidden border-2 border-dashed border-amber-400/50">
-                            {imagePreview ? (
-                                <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
-                            ) : (
-                                <Package className="h-10 w-10 text-amber-500" />
-                            )}
-                        </div>
+                {/* Image Upload Area */}
+                {/* Image Upload Stack */}
+                <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                        Imagen del Producto *
+                    </label>
+
+                    {/* 1. Large Dropzone */}
+                    <div className="w-full">
+                        {uploading ? (
+                            <div className="h-48 w-full bg-gray-50 dark:bg-gray-800 rounded-xl flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 animate-pulse">
+                                <Loader2 className="h-8 w-8 text-amber-500 animate-spin mb-2" />
+                                <p className="text-sm text-gray-500 dark:text-gray-400">Subiendo imagen...</p>
+                            </div>
+                        ) : (
+                            <Dropzone
+                                onFilesDrop={handleFilesDrop}
+                                className="h-48 w-full bg-gray-50 dark:bg-gray-800 border-gray-300 dark:border-gray-600 hover:border-amber-400 dark:hover:border-amber-500 transition-colors"
+                                description="Arrastra una imagen aquí o haz clic para abrir el navegador"
+                                accept="image/*"
+                                preview={imagePreview}
+                                onRemove={() => {
+                                    setValue('thumbnail', '', { shouldValidate: true });
+                                    setImagePreview(null);
+                                }}
+                            />
+                        )}
                     </div>
-                    <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900">Imagen del Producto</h3>
-                        <p className="text-sm text-gray-500 mt-1">Ingresa la URL de la imagen principal.</p>
+
+                    {/* 2. URL Input Backup */}
+                    <div className="relative">
+                        <div className="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
+                        </div>
+                        <div className="relative flex justify-center text-sm mb-4">
+                            <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">O ingresa URL manualmente</span>
+                        </div>
+
+                        <Input
+                            startIcon={<ImageIcon className="h-4 w-4" />}
+                            {...register('thumbnail', { required: 'La imagen es requerida' })}
+                            error={errors.thumbnail?.message}
+                            placeholder="https://example.com/image.jpg"
+                            className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                        />
                     </div>
                 </div>
-
-                <Input
-                    label="URL de Imagen *"
-                    startIcon={<ImageIcon className="h-4 w-4" />}
-                    {...register('thumbnail', { required: 'La imagen es requerida' })}
-                    error={errors.thumbnail?.message}
-                    placeholder="https://example.com/image.jpg"
-                />
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <Input

@@ -99,14 +99,14 @@ const CatalogoPage = () => {
                                 Mostrando {filteredProducts.length} productos
                             </p>
                             <motion.div 
+                                    key={`${activeCategory}-${searchQuery}`}
                                 className="grid grid-cols-1 sm:grid-cols-2 lg:!grid-cols-4 gap-6"
                                 variants={staggerContainer}
                                 initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
+                                    animate="visible"
                             >
-                                {filteredProducts.map((product, i) => (
-                                    <motion.div key={i} variants={slideUp} className="pb-4">
+                                    {filteredProducts.map((product) => (
+                                        <motion.div key={product._id || product.title} variants={slideUp} className="pb-4">
                                         <ProductCard {...product} />
                                     </motion.div>
                                 ))}

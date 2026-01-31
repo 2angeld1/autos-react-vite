@@ -21,6 +21,8 @@ import AccesoriosPage from '../modules/irontrail/pages/AccesoriosPage';
 import CatalogoPage from '../modules/irontrail/pages/CatalogoPage';
 import DistribuidoresPage from '../modules/irontrail/pages/DistribuidoresPage';
 import ProductDetailPage from '../modules/irontrail/pages/ProductDetailPage';
+import LaMarcaPage from '../modules/irontrail/pages/LaMarcaPage';
+import TecnologiaPage from '../modules/irontrail/pages/TecnologiaPage';
 
 // Layout Independiente para el sitio principal (VeloDrive)
 const MainLayout = ({ children }: { children: React.ReactNode }) => (
@@ -44,6 +46,8 @@ const App: React.FC = () => {
           <Route path="/irontrail/catalogo" element={<CatalogoPage />} />
           <Route path="/irontrail/distribuidores" element={<DistribuidoresPage />} />
           <Route path="/irontrail/product/:id" element={<ProductDetailPage />} />
+        <Route path="/irontrail/la-marca" element={<LaMarcaPage />} />
+        <Route path="/irontrail/tecnologia" element={<TecnologiaPage />} />
 
           {/* RUTAS PRINCIPALES (VeloDrive) - Envueltas en MainLayout */}
           <Route path="*" element={

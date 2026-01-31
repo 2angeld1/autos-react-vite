@@ -229,21 +229,55 @@ export class FileController {
    * Upload files
    */
   static uploadFiles = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
-    const { parentFolder = null } = req.body;
+    let { parentFolder = null } = req.body;
     const files = req.files as Express.Multer.File[];
 
     if (!files || files.length === 0) {
       return errorResponse(res, 400, 'No files uploaded');
     }
 
-    // Get parent folder info
+    // Resolve parent folder ID or Name
     let basePath = '';
     let parentFolderDoc = null;
+
     if (parentFolder && parentFolder !== 'null' && parentFolder !== 'root') {
-      parentFolderDoc = await FileItem.findById(parentFolder);
+      const isValidId = /^[0-9a-fA-F]{24}$/.test(parentFolder);
+
+      if (isValidId) {
+        parentFolderDoc = await FileItem.findById(parentFolder);
+      } else {
+        // Assume it's a folder name in root
+        const folderName = parentFolder.trim();
+        parentFolderDoc = await FileItem.findOne({
+          name: folderName,
+          type: 'folder',
+          parentFolder: null
+        });
+
+        // If simple folder name passed but not found, create it
+        if (!parentFolderDoc) {
+          const sanitizedName = folderName.replace(/[/\\?%*:|"<>]/g, '-');
+          parentFolderDoc = new FileItem({
+            name: sanitizedName,
+            type: 'folder',
+            path: `/${sanitizedName}`,
+            parentFolder: null,
+            createdBy: req.user?.id,
+            isPublic: true
+          });
+          await parentFolderDoc.save();
+          logger.info(`Auto-created folder during upload: ${sanitizedName}`);
+        }
+        // Update parentFolder variable to the resolved ID
+        parentFolder = parentFolderDoc._id.toString();
+      }
+
       if (parentFolderDoc) {
         basePath = parentFolderDoc.path;
       }
+    } else {
+      // Ensure parentFolder is explicitly null if 'null' or 'root' string passed
+      parentFolder = null; 
     }
 
     const uploadedFiles: IFileItemDocument[] = [];

@@ -1,5 +1,7 @@
 import { Request, Response } from 'express';
 import Product from '../models/Product';
+import Category from '../models/Category';
+
 import { 
     IronTrailCategory, 
     getAllIronTrailCategories, 
@@ -152,6 +154,24 @@ export const createProduct = async (req: Request, res: Response) => {
             });
         }
 
+        // --- SOLUCIÓN ERROR 500: Asegurar categoría por defecto ---
+        // El modelo Product requiere 'category'. Si no viene, usamos/creamos una genérica "IronTrail"
+        let categoryId = category;
+        if (!categoryId) {
+            let defaultCat = await Category.findOne({ name: 'IronTrail' });
+            if (!defaultCat) {
+                // Crear categoría genérica si no existe
+                defaultCat = await Category.create({
+                    name: 'IronTrail',
+                    slug: 'irontrail',
+                    description: 'Categoría general para productos 4x4 IronTrail',
+                    type: 'part' // Tipo compatible
+                });
+            }
+            categoryId = defaultCat._id;
+        }
+        // -----------------------------------------------------------
+
         // Generar slug
         const slug = name.toLowerCase()
             .replace(/[^a-z0-9]+/g, '-')
@@ -162,7 +182,7 @@ export const createProduct = async (req: Request, res: Response) => {
             slug,
             sku,
             type: 'irontrail', // Siempre será irontrail para este módulo
-            category,
+            category: categoryId, // Usamos la categoría resuelta
             brand,
             price,
             comparePrice,

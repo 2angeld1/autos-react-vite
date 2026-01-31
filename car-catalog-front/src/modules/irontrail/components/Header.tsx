@@ -43,9 +43,10 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
 
                         {/* Navigation */}
                         <div className={`hidden md:flex items-center gap-8 text-sm font-bold uppercase tracking-wider ${isSolid ? 'justify-center flex-1' : ''}`}>
-                            <Link to="/irontrail/suspensiones" className="text-white hover:text-[#FFD700] transition-colors duration-300">Suspensiones</Link>
-                            <Link to="/irontrail/accesorios" className="text-white hover:text-[#FFD700] transition-colors duration-300">4x4 Accesorios</Link>
                             <Link to="/irontrail/catalogo" className="text-white hover:text-[#FFD700] transition-colors duration-300">Catálogo</Link>
+                            <Link to="/irontrail/accesorios" className="text-white hover:text-[#FFD700] transition-colors duration-300">4x4 Accesorios</Link>
+                            <Link to="/irontrail/tecnologia" className="text-white hover:text-[#FFD700] transition-colors duration-300">Tecnología</Link>
+                            <Link to="/irontrail/la-marca" className="text-white hover:text-[#FFD700] transition-colors duration-300">La Marca</Link>
                             <Link to="/irontrail/distribuidores" className="text-white hover:text-[#FFD700] transition-colors duration-300">Ubícanos</Link>
                         </div>
 
@@ -75,9 +76,10 @@ const Header = ({ variant = 'default' }: HeaderProps) => {
                                 <X className="w-8 h-8 cursor-pointer" onClick={() => setMenuOpen(false)} />
                             </div>
                             <nav className="flex flex-col gap-6 text-2xl font-black uppercase italic tracking-wider">
-                                <Link to="/irontrail/suspensiones" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Suspensiones</Link>
-                                <Link to="/irontrail/accesorios" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Accesorios</Link>
                                 <Link to="/irontrail/catalogo" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Catálogo</Link>
+                                <Link to="/irontrail/accesorios" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Accesorios</Link>
+                                <Link to="/irontrail/tecnologia" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Tecnología</Link>
+                                <Link to="/irontrail/la-marca" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>La Marca</Link>
                                 <Link to="/irontrail/distribuidores" className="hover:text-[#FFD700]" onClick={() => setMenuOpen(false)}>Ubícanos</Link>
                             </nav>
                         </motion.div>
