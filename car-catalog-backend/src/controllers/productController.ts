@@ -46,18 +46,20 @@ export class ProductController {
     // 4. MAPEO DE FILTROS DINÁMICOS (La Magia Agnóstica)
     // Todo lo que no sea param estándar, asumimos que es una 'spec' del producto
     Object.keys(dynamicFilters).forEach(key => {
+      // SEGURIDAD: Evitar inyección de operadores de Mongo (ej. $where, $ne)
+      if (key.startsWith('$')) return;
+
         const value = dynamicFilters[key];
         if (value && key !== 'limit' && key !== 'page') {
-            // Buscamos dentro del objeto 'specs' o en la raíz si existe
-            // Nota: Para ser más precisos, idealmente prefijar en frontend: ?specs_year=2024
-            // Pero para UX limpia, intentamos mapear directo:
+          // Buscamos dentro del objeto 'specs' o en la raíz si existe
             
             // Si es un rango numérico (ej: year)
             if (!isNaN(Number(value))) {
                  query[`specs.${key}`] = Number(value);
             } else {
-                 // Búsqueda regex insensible a mayúsculas para textos
-                 query[`specs.${key}`] = new RegExp(String(value), 'i');
+              // SEGURIDAD: Escapar caracteres especiales para evitar ReDoS en la RegExp
+              const safeValue = String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              query[`specs.${key}`] = new RegExp(safeValue, 'i');
             }
         }
     });
@@ -120,8 +122,22 @@ export class ProductController {
    * Crear producto (Admin)
    */
   static create = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    // Aquí podrías agregar validaciones extra según el 'type' si fuera necesario
-    const product = await Product.create(req.body);
+    // SEGURIDAD: Mass Assignment Protection
+    const {
+      name, sku, description, price, comparePrice,
+      stock, category, brand, type,
+      thumbnail, images, specs, isAvailable,
+      isFeatured, tags
+    } = req.body;
+
+    const safeData = {
+      name, sku, description, price, comparePrice,
+      stock, category, brand, type,
+      thumbnail, images, specs, isAvailable,
+      isFeatured, tags
+    };
+
+    const product = await Product.create(safeData);
     res.status(201).json({ success: true, data: product });
   });
 
@@ -130,7 +146,33 @@ export class ProductController {
    * Actualizar
    */
    static update = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const product = await Product.findByIdAndUpdate(req.params.id, req.body, {
+     // SEGURIDAD: Mass Assignment Protection
+     const {
+       name, sku, description, price, comparePrice,
+       stock, category, brand, type,
+       thumbnail, images, specs, isAvailable,
+       isFeatured, tags
+     } = req.body;
+
+     // Solo incluimos campos definidos (para permitir updates parciales)
+     const updates: any = {};
+     if (name !== undefined) updates.name = name;
+     if (sku !== undefined) updates.sku = sku;
+     if (description !== undefined) updates.description = description;
+     if (price !== undefined) updates.price = price;
+     if (comparePrice !== undefined) updates.comparePrice = comparePrice;
+     if (stock !== undefined) updates.stock = stock;
+     if (category !== undefined) updates.category = category;
+     if (brand !== undefined) updates.brand = brand;
+     if (type !== undefined) updates.type = type;
+     if (thumbnail !== undefined) updates.thumbnail = thumbnail;
+     if (images !== undefined) updates.images = images;
+     if (specs !== undefined) updates.specs = specs;
+     if (isAvailable !== undefined) updates.isAvailable = isAvailable;
+     if (isFeatured !== undefined) updates.isFeatured = isFeatured;
+     if (tags !== undefined) updates.tags = tags;
+
+     const product = await Product.findByIdAndUpdate(req.params.id, updates, {
         new: true,
         runValidators: true
     });

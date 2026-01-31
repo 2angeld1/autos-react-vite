@@ -59,9 +59,10 @@ export const getProducts = async (req: Request, res: Response) => {
             if (maxPrice) filter.price.$lte = Number(maxPrice);
         }
 
-        // Búsqueda por texto
+        // Búsqueda por texto (Sanitizada contra NoSQL Injection)
         if (search) {
-            filter.$text = { $search: search as string };
+            const searchString = String(search); // Forzamos conversión a string
+            filter.$text = { $search: searchString };
         }
 
         const skip = (Number(page) - 1) * Number(limit);

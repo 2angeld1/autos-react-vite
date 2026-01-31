@@ -2,6 +2,8 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { connectWithRetry } from './config/database';
 import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
@@ -18,6 +20,20 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware básico
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" } // Permite cargar imágenes desde otros dominios si es necesario
+}));
+
+// Rate Limiting: Máximo 300 peticiones por 15 minutos por IP
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 300,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: 'Demasiadas peticiones desde esta IP, por favor intente nuevamente en 15 minutos.'
+});
+app.use(limiter);
+
 // Configure CORS to allow local dev and the deployed frontend(s).
 const FRONTEND_URL = (process.env.FRONTEND_URL || '').replace(/\/$/, '');
 const allowedOrigins = new Set([

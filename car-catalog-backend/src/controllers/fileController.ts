@@ -236,6 +236,25 @@ export class FileController {
       return errorResponse(res, 400, 'No files uploaded');
     }
 
+    // SEGURIDAD: Validar extensiones permitidas
+    const ALLOWED_EXTENSIONS = new Set([
+      // Imagenes
+      '.jpg', '.jpeg', '.png', '.gif', '.webp', '.svg', '.bmp', '.tiff',
+      // Documentos
+      '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx', '.txt', '.csv',
+      // Archivos comprimidos (opcional)
+      '.zip', '.rar'
+    ]);
+
+    for (const file of files) {
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (!ALLOWED_EXTENSIONS.has(ext)) {
+        // Eliminar archivo temporal
+        if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        return errorResponse(res, 400, `Tipo de archivo no permitido: ${ext}`);
+      }
+    }
+
     // Resolve parent folder ID or Name
     let basePath = '';
     let parentFolderDoc = null;
