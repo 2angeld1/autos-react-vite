@@ -1,6 +1,6 @@
 # PROPUESTA DE EVOLUCIÓN DIGITAL: PROYECTO IRONTRAIL
 **Preparado para:** Dobinsons Spring & Suspension Panamá
-**Fecha:** Enero 2026
+**Fecha:** Febrero 2026
 
 ---
 
@@ -44,7 +44,7 @@ A diferencia de contratar una agencia tradicional (costosa y lenta) o un gestor 
 *   Trabajo enfocado a objetivos y entregables.
 *   Modalidad **Remota** para maximizar horas de desarrollo efectivo y respuesta rápida.
 
-## 5. VALOR ESTRATÉGICO ADICIONAL (BUSINESS INTELLIGENCE)
+## 5. INTELIGENCIA DE NEGOCIO Y SEGURIDAD
 A diferencia de un sitio estático, esta plataforma recolecta datos vitales para la toma de decisiones gerenciales:
 
 *   **Reportes de "Demanda Insatisfecha":** El sistema rastreará qué vehículos buscan los usuarios. Recibirán un reporte mensual detallando *"Qué busca el mercado panameño versus qué tenemos en inventario"*, permitiendo al departamento de compras ajustar sus pedidos de importación con datos reales.
@@ -62,7 +62,7 @@ Bonificar el 100% del costo de desarrollo inicial bajo un modelo de **Suscripci�
 
 ---
 
-## 6. SIGUIENTES PASOS
+## 7. SIGUIENTES PASOS
 La plataforma **IronTrail** se encuentra en fase "Production Ready". 
 1.  Aprobación de propuesta.
 2.  Migración de catálogo y ajustes finales (2 semanas).
