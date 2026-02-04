@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import SearchFilter from '../common/SearchFilter';
 import TravelCarCard from '../cards/TravelCarCard';
 import { Car, SearchFilters } from '@/types';
@@ -225,12 +224,12 @@ const FeaturedCarsSection: React.FC<FeaturedCarsSectionProps> = ({
                         </div>
                         
                         <div className="has-text-centered mt-6">
-                            <Link to="/catalog" className="button is-accent is-medium mr-2">
+                            <a href="#featured-cars" className="button is-accent is-medium mr-2">
                                 <span className="icon">
                                     <i className="fas fa-th-large"></i>
                                 </span>
                                 <span>Ver catálogo completo</span>
-                            </Link>
+                            </a>
                             <button 
                                 className="button is-warning is-medium"
                                 onClick={onClearCache}

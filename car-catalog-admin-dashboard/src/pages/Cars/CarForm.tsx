@@ -11,6 +11,7 @@ import { Car, FileItem } from '@/types';
 import { useGet } from '@/hooks/useApi';
 import { motion } from 'framer-motion';
 import { slideUp, staggerContainer } from '@/animations/variants';
+import { X, Plus, Image as ImageIcon } from 'lucide-react';
 
 interface CarFormData {
   make: string;
@@ -32,6 +33,13 @@ interface CarFormData {
   promotion: string;
 }
 
+interface ImageItem {
+  id: string;
+  file?: File;
+  url?: string;
+  isMain: boolean;
+}
+
 interface CarFormProps {
   car?: Car;
   isOpen: boolean;
@@ -47,11 +55,10 @@ const CarForm: React.FC<CarFormProps> = ({
   loading = false,
 }) => {
   const { t } = useTranslation();
-  const [selectedImage, setSelectedImage] = React.useState<File | null>(null);
-  const [imagePreview, setImagePreview] = React.useState<string | null>(null);
-  const [selectedFileItem, setSelectedFileItem] = React.useState<FileItem | null>(null);
+
+  // Multi-image state
+  const [images, setImages] = React.useState<ImageItem[]>([]);
   const [showImagePicker, setShowImagePicker] = React.useState(false);
-  const [removeCurrentImage, setRemoveCurrentImage] = React.useState(false);
 
   // Fetch Inventory Data
   const { data: brandsResponse } = useGet<any>('/inventory/brands', { immediate: true });
@@ -64,19 +71,43 @@ const CarForm: React.FC<CarFormProps> = ({
   const accessories = React.useMemo(() => accessoriesResponse?.data || [], [accessoriesResponse]);
   const promotions = React.useMemo(() => promotionsResponse?.data || [], [promotionsResponse]);
 
-  // Initialize image preview from car data
+  // Initialize images from car data
   React.useEffect(() => {
-    if (car?.image) {
-      const imageUrl = car.image.startsWith('http') 
-        ? car.image 
-        : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${car.image}`;
-      setImagePreview(imageUrl);
+    if (car) {
+      const initialImages: ImageItem[] = [];
+
+      // Main image
+      if (car.image) {
+        const imageUrl = car.image.startsWith('http')
+          ? car.image
+          : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${car.image}`;
+        initialImages.push({
+          id: 'main-' + Date.now(),
+          url: imageUrl,
+          isMain: true
+        });
+      }
+
+      // Additional images
+      if ((car as any).images && Array.isArray((car as any).images)) {
+        (car as any).images.forEach((img: string, index: number) => {
+          if (img && img !== car.image) {
+            const imgUrl = img.startsWith('http')
+              ? img
+              : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${img}`;
+            initialImages.push({
+              id: `gallery-${index}-${Date.now()}`,
+              url: imgUrl,
+              isMain: false
+            });
+          }
+        });
+      }
+
+      setImages(initialImages);
     } else {
-      setImagePreview(null);
+      setImages([]);
     }
-    setRemoveCurrentImage(false);
-    setSelectedImage(null);
-    setSelectedFileItem(null);
   }, [car]);
 
   const {
@@ -106,16 +137,14 @@ const CarForm: React.FC<CarFormProps> = ({
     }
   });
 
-  // When the `car` prop changes (e.g. loaded from API), populate the form
+  // When the `car` prop changes, populate the form
   React.useEffect(() => {
     if (car) {
-      // Safely handle accessories array (could be populated objects or IDs)
       let currentAccessories: string[] = [];
       if (Array.isArray((car as any).accessories)) {
         currentAccessories = (car as any).accessories.map((a: any) => typeof a === 'object' ? a._id || a.id : a);
       }
 
-      // Safely handle promotion (could be object or ID)
       let currentPromotion = '';
       if ((car as any).promotion) {
         currentPromotion = typeof (car as any).promotion === 'object'
@@ -145,25 +174,54 @@ const CarForm: React.FC<CarFormProps> = ({
     }
   }, [car, reset]);
 
+  // Handle adding new images from file drop
+  const handleFilesDrop = (files: File[]) => {
+    const newImages: ImageItem[] = files.map((file, index) => ({
+      id: `new-${Date.now()}-${index}`,
+      file,
+      url: URL.createObjectURL(file),
+      isMain: images.length === 0 && index === 0 // First image is main if no images exist
+    }));
 
-  const handleImagePickerSelect = (file: FileItem) => {
-    setSelectedFileItem(file);
-    setSelectedImage(null);
-    setRemoveCurrentImage(false);
-    setImagePreview(filesService.getFileUrl(file));
+    setImages(prev => [...prev, ...newImages]);
   };
 
-  const removeImage = () => {
-    setSelectedImage(null);
-    setSelectedFileItem(null);
-    setImagePreview(null);
-    setRemoveCurrentImage(true);
+  // Handle image from library picker
+  const handleImagePickerSelect = (file: FileItem) => {
+    const url = filesService.getFileUrl(file);
+    const newImage: ImageItem = {
+      id: `lib-${Date.now()}`,
+      url,
+      isMain: images.length === 0
+    };
+    setImages(prev => [...prev, newImage]);
+    setShowImagePicker(false);
+  };
+
+  // Remove image
+  const removeImage = (id: string) => {
+    setImages(prev => {
+      const filtered = prev.filter(img => img.id !== id);
+      // If we removed the main image, make the first one main
+      if (filtered.length > 0 && !filtered.some(img => img.isMain)) {
+        filtered[0].isMain = true;
+      }
+      return filtered;
+    });
+  };
+
+  // Set image as main
+  const setAsMain = (id: string) => {
+    setImages(prev => prev.map(img => ({
+      ...img,
+      isMain: img.id === id
+    })));
   };
 
   const onFormSubmit = async (data: CarFormData) => {
-    // Validate image for new cars
-    if (!car && !selectedImage && !selectedFileItem) {
-      toast.error('Image is required for new cars');
+    // Validate at least one image for new cars
+    if (!car && images.length === 0) {
+      toast.error('Se requiere al menos una imagen');
       return;
     }
 
@@ -177,24 +235,40 @@ const CarForm: React.FC<CarFormProps> = ({
           : value;
         formData.append(key, JSON.stringify(featuresArray));
       } else if (key === 'accessories') {
-        // value is string[]
         formData.append(key, JSON.stringify(value));
       } else if (key === 'promotion') {
-        // value is string (ID) or empty
         if (value) formData.append(key, value.toString());
-        else formData.append(key, ''); // explicitly send empty if cleared
+        else formData.append(key, '');
       } else {
         formData.append(key, value.toString());
       }
     });
 
-    // Handle image
-    if (selectedImage && selectedImage.size > 0) {
-      formData.append('image', selectedImage);
-    } else if (selectedFileItem) {
-      formData.append('imageUrl', filesService.getFileUrl(selectedFileItem));
-    } else if (removeCurrentImage) {
-      formData.append('removeImage', 'true');
+    // Handle images
+    const mainImage = images.find(img => img.isMain);
+    const galleryImages = images.filter(img => !img.isMain);
+
+    // Main image
+    if (mainImage) {
+      if (mainImage.file) {
+        formData.append('image', mainImage.file);
+      } else if (mainImage.url) {
+        formData.append('imageUrl', mainImage.url);
+      }
+    }
+
+    // Gallery images (additional)
+    const galleryUrls: string[] = [];
+    galleryImages.forEach((img) => {
+      if (img.file) {
+        formData.append('galleryImages', img.file);
+      } else if (img.url) {
+        galleryUrls.push(img.url);
+      }
+    });
+
+    if (galleryUrls.length > 0) {
+      formData.append('existingGalleryImages', JSON.stringify(galleryUrls));
     }
 
     if (car) {
@@ -207,10 +281,7 @@ const CarForm: React.FC<CarFormProps> = ({
 
   const handleClose = () => {
     reset();
-    setSelectedImage(null);
-    setSelectedFileItem(null);
-    setImagePreview(null);
-    setRemoveCurrentImage(false);
+    setImages([]);
     onClose();
   };
 
@@ -223,31 +294,102 @@ const CarForm: React.FC<CarFormProps> = ({
       initial="hidden"
       animate="visible"
     >
-      {/* Image Upload */}
+      {/* Multi-Image Upload Section */}
       <motion.div variants={slideUp}>
         <label className="block text-sm font-medium text-gray-700 mb-2">
-          Imagen del Auto
+          Imágenes del Auto
+          <span className="text-xs text-gray-400 ml-2">(La primera imagen será la principal)</span>
         </label>
-        <Dropzone
-          onFilesDrop={(files) => {
-            const file = files[0];
-            if (file) {
-              setSelectedImage(file);
-              setSelectedFileItem(null);
-              setRemoveCurrentImage(false);
-              const reader = new FileReader();
-              reader.onload = () => {
-                setImagePreview(reader.result as string);
-              };
-              reader.readAsDataURL(file);
-            }
+
+        {/* Image Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-4">
+          {images.map((img) => (
+            <div
+              key={img.id}
+              className={`relative group rounded-lg overflow-hidden border-2 transition-all ${img.isMain ? 'border-orange-500 ring-2 ring-orange-200' : 'border-gray-200'
+                }`}
+            >
+              <img
+                src={img.url}
+                alt="Car"
+                className="w-full h-24 object-cover"
+              />
+
+              {/* Main badge */}
+              {img.isMain && (
+                <div className="absolute top-1 left-1 bg-orange-500 text-white text-xs px-2 py-0.5 rounded">
+                  Principal
+                </div>
+              )}
+
+              {/* Overlay actions */}
+              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                {!img.isMain && (
+                  <button
+                    type="button"
+                    onClick={() => setAsMain(img.id)}
+                    className="p-1.5 bg-white rounded-full text-gray-700 hover:bg-orange-100"
+                    title="Establecer como principal"
+                  >
+                    <ImageIcon className="h-4 w-4" />
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeImage(img.id)}
+                  className="p-1.5 bg-red-500 rounded-full text-white hover:bg-red-600"
+                  title="Eliminar"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          ))}
+
+          {/* Add More Button */}
+          <div
+            onClick={() => document.getElementById('multi-image-input')?.click()}
+            className="border-2 border-dashed border-gray-300 rounded-lg h-24 flex flex-col items-center justify-center cursor-pointer hover:border-orange-400 hover:bg-orange-50 transition-colors"
+          >
+            <Plus className="h-6 w-6 text-gray-400" />
+            <span className="text-xs text-gray-500 mt-1">Agregar</span>
+          </div>
+        </div>
+
+        {/* Hidden file input for multiple images */}
+        <input
+          id="multi-image-input"
+          type="file"
+          accept="image/*"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            if (files.length > 0) handleFilesDrop(files);
+            e.target.value = '';
           }}
-          preview={imagePreview}
-          onRemove={removeImage}
-          onLibraryClick={() => setShowImagePicker(true)}
-          description="Click o arrastra una imagen aquí para subirla"
+          className="hidden"
         />
 
+        {/* Dropzone for drag & drop */}
+        {images.length === 0 && (
+          <Dropzone
+            onFilesDrop={handleFilesDrop}
+            multiple={true}
+            onLibraryClick={() => setShowImagePicker(true)}
+            description="Arrastra múltiples imágenes o haz clic para subir"
+          />
+        )}
+
+        {/* Library button when images exist */}
+        {images.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setShowImagePicker(true)}
+            className="mt-2 text-sm text-orange-600 hover:text-orange-700 underline"
+          >
+            Seleccionar del Gestor de Archivos
+          </button>
+        )}
       </motion.div>
 
       {/* Basic Information */}
@@ -496,7 +638,6 @@ const CarForm: React.FC<CarFormProps> = ({
     </motion.form>
   );
 
-  // Always render as page
   return (
     <div className="space-y-6">
       {formContent}
@@ -518,7 +659,7 @@ const CarForm: React.FC<CarFormProps> = ({
         isOpen={showImagePicker}
         onClose={() => setShowImagePicker(false)}
         onSelect={handleImagePickerSelect}
-        currentImage={imagePreview}
+        currentImage={images.length > 0 ? images[0].url : null}
         title={t('cars.selectImage')}
       />
     </div>

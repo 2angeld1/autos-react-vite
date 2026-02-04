@@ -5,6 +5,7 @@ export interface Car {
   year: number;
   price: number;
   image: string;
+  images?: string[]; // Array de URLs para galería múltiple
   description?: string;
   fuel_type?: string;
   transmission?: string;
@@ -15,12 +16,20 @@ export interface Car {
   city_mpg?: number;
   highway_mpg?: number;
   combination_mpg?: number;
+  features?: string[]; // Lista de características del vehículo
+  isAvailable?: boolean;
 }
 
 // ✅ SIMPLIFICADO: Solo marca/modelo y año
 export interface SearchFilters {
-  searchTerm?: string; // Para marca y modelo
-  year?: string;       // Para año
+  searchTerm?: string;
+  make?: string;
+  fuelType?: string;
+  transmission?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  year?: string;
+  category?: string;
 }
 
 export interface CarContextType {
@@ -32,6 +41,20 @@ export interface CarContextType {
   isFavorite: (carId: string) => boolean;
   toggleFavorite: (carId: string) => void;
   getFavorites: () => Car[];
+}
+
+export interface Review {
+  id: string;
+  carId: string;
+  userName: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+  car?: {
+    make: string;
+    model: string;
+    year: number;
+  };
 }
 
 export interface ApiResponse<T> {

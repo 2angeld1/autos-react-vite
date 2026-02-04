@@ -31,6 +31,7 @@ export interface ICarDocument extends Document {
   year: number;
   price: number;
   image: string;
+  images?: string[]; // Array de URLs para galería múltiple
   description: string;
   fuel_type: 'gas' | 'diesel' | 'electricity' | 'hybrid';
   transmission: 'a' | 'm';
@@ -87,6 +88,10 @@ const CarSchema = new Schema<ICarDocument>({
   image: {
     type: String,
     required: true
+  },
+  images: {
+    type: [String],
+    default: []
   },
   cloudinaryId: {
     type: String,

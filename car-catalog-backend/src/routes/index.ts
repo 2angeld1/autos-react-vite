@@ -11,6 +11,7 @@ import notificationRoutes from './notifications';
 import quoteRoutes from './quoteRoutes';
 import productRoutes from './products';
 import irontrailRoutes from './irontrail';
+import reviewRoutes from './reviews';
 
 const router = Router();
 
@@ -27,6 +28,7 @@ router.use('/notifications', notificationRoutes);
 router.use('/quotes', quoteRoutes);
 router.use('/products', productRoutes);
 router.use('/irontrail', irontrailRoutes);
+router.use('/reviews', reviewRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

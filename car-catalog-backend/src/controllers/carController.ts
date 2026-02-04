@@ -173,40 +173,65 @@ export class CarController {
    */
   static createCar = asyncHandler(async (req: AuthRequest, res: Response): Promise<void> => {
     const carData = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    logger.info(`req.file: ${req.file ? req.file.filename : 'no file'}`);
-    logger.info(`carData.image before processing:`, carData.image);
-    logger.info(`carData.imageUrl before processing:`, carData.imageUrl);
+    logger.info(`req.files: ${files ? JSON.stringify(Object.keys(files)) : 'no files'}`);
 
-    // Procesar imagen subida
-    if (req.file) {
-      // --- CLOUDINARY UPLOAD ---
-      const cloudinaryResult = await CloudinaryService.uploadImage(req.file.path, 'autos');
+    // Process main image (from upload.fields)
+    const mainImageFile = files?.image?.[0];
+    if (mainImageFile) {
+      const cloudinaryResult = await CloudinaryService.uploadImage(mainImageFile.path, 'autos');
       carData.image = cloudinaryResult.secure_url;
       carData.cloudinaryId = cloudinaryResult.public_id;
       carData.cloudinaryUrl = cloudinaryResult.secure_url;
-
-      // Delete local temp file
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
+      if (fs.existsSync(mainImageFile.path)) {
+        fs.unlinkSync(mainImageFile.path);
       }
-      // --- END CLOUDINARY UPLOAD ---
-
-      logger.info(`Image processed from file and uploaded to Cloudinary: ${carData.image}`);
+      logger.info(`Main image uploaded to Cloudinary: ${carData.image}`);
     } else if (carData.imageUrl) {
-      // Si se seleccionó una imagen del gestor de archivos
       carData.image = carData.imageUrl;
       delete carData.imageUrl;
-      logger.info(`Image processed from file manager: ${carData.image}`);
+      logger.info(`Main image from file manager: ${carData.image}`);
     } else if (typeof carData.image === 'object' || !carData.image) {
-      // Si image es un objeto vacío o no existe, elimínalo
       delete carData.image;
-      logger.info('Image field deleted because no file uploaded');
+      logger.info('No main image provided');
     }
 
-    logger.info(`carData.image after processing:`, carData.image);
+    // Process gallery images (multiple)
+    const galleryImages: string[] = [];
 
-    // Parse numeric fields (FormData sends everything as strings)
+    // Handle uploaded gallery files
+    if (files && !Array.isArray(files) && files.galleryImages) {
+      for (const file of files.galleryImages) {
+        try {
+          const cloudinaryResult = await CloudinaryService.uploadImage(file.path, 'autos');
+          galleryImages.push(cloudinaryResult.secure_url);
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (err) {
+          logger.error(`Failed to upload gallery image: ${file.filename}`, err);
+        }
+      }
+      logger.info(`Uploaded ${galleryImages.length} gallery images to Cloudinary`);
+    }
+
+    // Handle existing gallery URLs from file manager
+    if (carData.existingGalleryImages) {
+      try {
+        const existingUrls = JSON.parse(carData.existingGalleryImages);
+        if (Array.isArray(existingUrls)) {
+          galleryImages.push(...existingUrls);
+        }
+      } catch (err) {
+        logger.error('Failed to parse existingGalleryImages', err);
+      }
+      delete carData.existingGalleryImages;
+    }
+
+    carData.images = galleryImages;
+
+    // Parse numeric fields
     const numericFields = ['year', 'price', 'cylinders', 'displacement', 'city_mpg', 'highway_mpg', 'combination_mpg'];
     numericFields.forEach(field => {
       if (carData[field] !== undefined) {
@@ -219,7 +244,7 @@ export class CarController {
       carData.isAvailable = carData.isAvailable === 'true';
     }
 
-    // Parse features if it's a string (from form data)
+    // Parse features
     if (carData.features && typeof carData.features === 'string') {
       try {
         carData.features = JSON.parse(carData.features);
@@ -228,7 +253,7 @@ export class CarController {
       }
     }
 
-    // Parse accessories if it's a string
+    // Parse accessories
     if (carData.accessories && typeof carData.accessories === 'string') {
       try {
         carData.accessories = JSON.parse(carData.accessories);
@@ -242,12 +267,12 @@ export class CarController {
       carData.promotion = null;
     }
 
-    // Generate unique ID if not provided
+    // Generate unique ID
     if (!carData.id) {
       carData.id = `car-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     }
 
-    // Cambiar model a carModel antes de crear
+    // Map model to carModel
     if (carData.model) {
       carData.carModel = carData.model;
       delete carData.model;
@@ -283,40 +308,69 @@ export class CarController {
     const { id } = req.params;
     const trimmedId = id.trim();
     const updateData = req.body;
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] } | undefined;
 
-    // Procesar imagen subida
-    if (req.file) {
-      // --- CLOUDINARY UPLOAD ---
-      const cloudinaryResult = await CloudinaryService.uploadImage(req.file.path, 'autos');
+    // Process main image (from upload.fields)
+    const mainImageFile = files?.image?.[0];
+    if (mainImageFile) {
+      const cloudinaryResult = await CloudinaryService.uploadImage(mainImageFile.path, 'autos');
       updateData.image = cloudinaryResult.secure_url;
       updateData.cloudinaryId = cloudinaryResult.public_id;
       updateData.cloudinaryUrl = cloudinaryResult.secure_url;
-
-      // Delete local temp file
-      if (fs.existsSync(req.file.path)) {
-        fs.unlinkSync(req.file.path);
+      if (fs.existsSync(mainImageFile.path)) {
+        fs.unlinkSync(mainImageFile.path);
       }
-      // --- END CLOUDINARY UPLOAD ---
-
-      logger.info(`Image processed from file upload and Cloudinary: ${updateData.image}`);
+      logger.info(`Main image uploaded: ${updateData.image}`);
     } else if (updateData.imageUrl) {
-      // Si se seleccionó una imagen del gestor de archivos
       updateData.image = updateData.imageUrl;
       delete updateData.imageUrl;
-      logger.info(`Image processed from file manager: ${updateData.image}`);
+      logger.info(`Main image from file manager: ${updateData.image}`);
     } else if (updateData.removeImage === 'true') {
-      // Si el usuario quiere eliminar la imagen
-      updateData.image = ''; // O puedes usar una imagen por defecto
+      updateData.image = '';
       delete updateData.removeImage;
-      logger.info('Image removed by user');
+      logger.info('Main image removed');
     } else {
-      // No se envió imagen, no actualizar el campo
       delete updateData.image;
       delete updateData.imageUrl;
       delete updateData.removeImage;
     }
 
-    // Parse numeric fields (FormData sends everything as strings)
+    // Process gallery images
+    const galleryImages: string[] = [];
+
+    // Uploaded gallery files
+    if (files && !Array.isArray(files) && files.galleryImages) {
+      for (const file of files.galleryImages) {
+        try {
+          const cloudinaryResult = await CloudinaryService.uploadImage(file.path, 'autos');
+          galleryImages.push(cloudinaryResult.secure_url);
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (err) {
+          logger.error(`Failed to upload gallery image: ${file.filename}`, err);
+        }
+      }
+    }
+
+    // Existing gallery URLs
+    if (updateData.existingGalleryImages) {
+      try {
+        const existingUrls = JSON.parse(updateData.existingGalleryImages);
+        if (Array.isArray(existingUrls)) {
+          galleryImages.push(...existingUrls);
+        }
+      } catch (err) {
+        logger.error('Failed to parse existingGalleryImages', err);
+      }
+      delete updateData.existingGalleryImages;
+    }
+
+    if (galleryImages.length > 0) {
+      updateData.images = galleryImages;
+    }
+
+    // Parse numeric fields
     const numericFields = ['year', 'price', 'cylinders', 'displacement', 'city_mpg', 'highway_mpg', 'combination_mpg'];
     numericFields.forEach(field => {
       if (updateData[field] !== undefined) {
@@ -329,7 +383,7 @@ export class CarController {
       updateData.isAvailable = updateData.isAvailable === 'true';
     }
 
-    // Parse features if it's a string (from form data)
+    // Parse features
     if (updateData.features && typeof updateData.features === 'string') {
       try {
         updateData.features = JSON.parse(updateData.features);
@@ -338,7 +392,7 @@ export class CarController {
       }
     }
 
-    // Parse accessories if it's a string
+    // Parse accessories
     if (updateData.accessories && typeof updateData.accessories === 'string') {
       try {
         updateData.accessories = JSON.parse(updateData.accessories);
@@ -352,13 +406,12 @@ export class CarController {
       updateData.promotion = null;
     }
 
-    // Cambiar model a carModel antes de actualizar
+    // Map model to carModel
     if (updateData.model) {
       updateData.carModel = updateData.model;
       delete updateData.model;
     }
 
-    // Actualizar auto
     const car = await Car.findOneAndUpdate(
       { id: trimmedId },
       updateData,

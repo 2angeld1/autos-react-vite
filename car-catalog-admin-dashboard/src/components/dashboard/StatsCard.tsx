@@ -2,8 +2,6 @@ import React from 'react';
 import { LucideIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 
-import { useTranslation } from 'react-i18next';
-
 export interface StatsCardProps {
   title: string;
   value: string | number;
@@ -12,6 +10,7 @@ export interface StatsCardProps {
     value: number;
     type: 'increase' | 'decrease';
     period: string;
+    noSymbol?: boolean;
   };
   color?: 'blue' | 'green' | 'yellow' | 'red' | 'purple';
   loading?: boolean;
@@ -25,8 +24,6 @@ const StatsCard: React.FC<StatsCardProps> = ({
   color = 'blue',
   loading = false,
 }) => {
-  const { t } = useTranslation();
-
   const colorClasses = {
     blue: {
       bg: 'bg-blue-50',
@@ -93,9 +90,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
                 change.type === 'increase' ? 'text-green-600' : 'text-red-600'
               )}
             >
-              {change.type === 'increase' ? '+' : '-'}{Math.abs(change.value)}%
+              {change.noSymbol ? '' : (change.type === 'increase' ? '+' : '-')}{Math.abs(change.value)}{change.noSymbol ? '' : '%'}
             </span>
-            <span className="text-gray-500 ml-1">{t('dashboard.from')} {change.period}</span>
+            <span className="text-gray-500 ml-1">{change.period}</span>
           </div>
         </div>
       )}

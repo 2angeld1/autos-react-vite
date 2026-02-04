@@ -2,18 +2,17 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 
 export interface IReview {
   _id?: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId?: Types.ObjectId; // AHORA ES OPCIONAL (para usuarios logueados)
+  userName?: string;       // PARA USUARIOS NO LOGUEADOS
 
-  // Legacy
-  carId?: Types.ObjectId;
+  carId: string;           // Referencia al ID del auto (String para match con el id de nuestro sistema)
 
-  // Agnostic
-  productId?: Types.ObjectId;
-  itemModel?: string;
-
-  rating: number;
-  comment: string;
+  rating: number;      // 1 a 5 estrellas
+  comment: string;     // El texto de la opinión
+  reply?: string;      // Respuesta del admin
+  repliedAt?: Date;    // Fecha de la respuesta
   isApproved: boolean;
+  ip?: string;          // Para control de spam
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -24,29 +23,20 @@ const ReviewSchema = new Schema<IReviewDocument>({
   userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
+    required: false, // Permitimos reseñas anónimas
+    index: true
+  },
+  userName: {
+    type: String,
+    required: function (this: any) { return !this.userId; }, // Requerido si no hay userId
+    trim: true,
+    maxlength: 50
+  },
+  carId: {
+    type: String,
     required: true,
     index: true
   },
-
-  // --- LEGACY ---
-  carId: {
-    type: Schema.Types.ObjectId,
-    ref: 'Car',
-    index: true
-  },
-
-  // --- AGNOSTIC ---
-  productId: {
-    type: Schema.Types.ObjectId,
-    refPath: 'itemModel',
-    index: true
-  },
-  itemModel: {
-    type: String,
-    enum: ['Car', 'Product'],
-    default: 'Car'
-  },
-
   rating: {
     type: Number,
     required: true,
@@ -59,9 +49,21 @@ const ReviewSchema = new Schema<IReviewDocument>({
     trim: true,
     maxlength: 500
   },
+  reply: {
+    type: String,
+    trim: true,
+    maxlength: 500
+  },
+  repliedAt: {
+    type: Date
+  },
   isApproved: {
     type: Boolean,
-    default: false,
+    default: true, // Por ahora las aprobamos al instante
+    index: true
+  },
+  ip: {
+    type: String,
     index: true
   }
 }, {
@@ -70,43 +72,15 @@ const ReviewSchema = new Schema<IReviewDocument>({
   toObject: { virtuals: true }
 });
 
-// Validación de Integridad
-ReviewSchema.pre('validate', function (next) {
-  if (!this.carId && !this.productId) {
-    next(new Error('Review must target either a Car or a Product'));
-  } else {
-    next();
-  }
-});
-
-// Compound index
-ReviewSchema.index({ userId: 1, carId: 1 }, { unique: true, sparse: true });
-ReviewSchema.index({ userId: 1, productId: 1 }, { unique: true, sparse: true });
-
-// Virtuals
-ReviewSchema.virtual('user', {
-  ref: 'User',
-  localField: 'userId',
-  foreignField: '_id',
-  justOne: true,
-  select: 'name avatar'
-});
-
-// Dynamic item population virtual
-ReviewSchema.virtual('item', {
-  ref: (doc: IReviewDocument) => doc.itemModel || 'Car',
-  localField: (doc: IReviewDocument) => doc.productId ? 'productId' : 'carId',
-  foreignField: '_id',
-  justOne: true
-});
-
-// Legacy Virtual (borrar en futuro)
+// Virtual para obtener info del auto
 ReviewSchema.virtual('car', {
   ref: 'Car',
   localField: 'carId',
-  foreignField: '_id',
-  justOne: true,
-  select: 'make model year'
+  foreignField: 'id',
+  justOne: true
 });
+
+// Evitar spam masivo de la misma IP para el mismo auto
+ReviewSchema.index({ carId: 1, ip: 1 });
 
 export default mongoose.model<IReviewDocument>('Review', ReviewSchema);

@@ -99,7 +99,10 @@ router.post(
   [
     authenticateToken,
     requireAdmin,
-    upload.single('image'),
+    upload.fields([
+      { name: 'image', maxCount: 1 },
+      { name: 'galleryImages', maxCount: 20 }
+    ]),
     sanitizeInput,
     ...carValidationRules.create,
     handleValidationErrors
@@ -117,7 +120,10 @@ router.put(
   [
     authenticateToken,
     requireAdmin,
-    upload.single('image'),
+    upload.fields([
+      { name: 'image', maxCount: 1 },
+      { name: 'galleryImages', maxCount: 20 }
+    ]),
     param('id').notEmpty().withMessage('ID is required'),
     sanitizeInput,
     ...carValidationRules.update,

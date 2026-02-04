@@ -94,28 +94,28 @@ const Dashboard: React.FC = () => {
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" // Gap reducido
           >
             <StatsCard
-              title={t('dashboard.totalCars')}
-              value={stats?.totalCars || 0}
+              title="Total Ventas"
+              value={stats?.totalSales ? formatCurrency(stats.totalSales) : '$0'}
+              icon={TrendingUp}
+              color="green"
+              loading={statsLoading}
+              change={{ value: stats?.salesCount || 0, type: 'increase', period: 'Autos vendidos' } as any}
+            />
+            <StatsCard
+              title="Monto Pendiente"
+              value={stats?.pendingAmount ? formatCurrency(stats.pendingAmount) : '$0'}
+              icon={DollarSign}
+              color="yellow"
+              loading={statsLoading}
+              change={{ value: stats?.pendingCount || 0, type: 'increase', period: 'En proceso', noSymbol: true } as any}
+            />
+            <StatsCard
+              title="Valor Inventario"
+              value={stats?.inventoryValue ? formatCurrency(stats.inventoryValue) : '$0'}
               icon={Car}
               color="blue"
               loading={statsLoading}
-              change={{ value: stats?.activeCars || 0, type: 'increase', period: 'Disponibles' }}
-            />
-            <StatsCard
-              title="Leads"
-              value={stats?.totalQuotes || 0}
-              icon={FileText}
-              color="yellow"
-              loading={statsLoading}
-              change={{ value: stats?.pendingQuotes || 0, type: 'increase', period: 'Pendientes' }}
-            />
-            <StatsCard
-              title="Inventario"
-              value={stats?.inventoryValue ? formatCurrency(stats.inventoryValue) : '$0'}
-              icon={DollarSign}
-              color="green"
-              loading={statsLoading}
-              change={{ value: 0, type: 'increase', period: 'Estimado' }}
+              change={{ value: stats?.activeCars || 0, type: 'increase', period: 'Disponibles', noSymbol: true } as any}
             />
             <StatsCard
               title={t('dashboard.totalUsers')}
@@ -123,7 +123,7 @@ const Dashboard: React.FC = () => {
               icon={Users}
               color="purple"
               loading={statsLoading}
-              change={{ value: stats?.activeUsers || 0, type: 'increase', period: 'Activos' }}
+              change={{ value: stats?.activeUsers || 0, type: 'increase', period: 'Activos', noSymbol: true } as any}
             />
           </motion.div>
 

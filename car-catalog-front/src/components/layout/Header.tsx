@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser, faHeart, faInfoCircle, faHome, faTags, faWrench } from '@fortawesome/free-solid-svg-icons';
+import { faHeart, faInfoCircle, faHome, faTags, faWrench } from '@fortawesome/free-solid-svg-icons';
 
 const Header: React.FC = () => {
     const location = useLocation();
@@ -72,21 +72,6 @@ const Header: React.FC = () => {
                             <FontAwesomeIcon icon={faWrench} className="mr-2 nav-icon" />
                             Mantenimiento
                         </NavLink>
-                        <div className="navbar-item">
-                            <div className="buttons">
-                                <a
-                                    href={import.meta.env.VITE_DASHBOARD_URL || 'http://localhost:3001'}
-                                    className="button is-accent nav-admin-btn"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                >
-                                    <span className="icon">
-                                        <FontAwesomeIcon icon={faUser} />
-                                    </span>
-                                    <span>Admin</span>
-                                </a>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>

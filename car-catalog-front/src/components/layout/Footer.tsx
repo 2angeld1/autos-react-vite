@@ -1,8 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { inventoryService, Category } from '../../services/api/inventoryService';
 
 const Footer: React.FC = () => {
     const location = useLocation();
+    const [categories, setCategories] = useState<Category[]>([]);
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            const cats = await inventoryService.getCategories();
+            if (cats && cats.length > 0) {
+                setCategories(cats.slice(0, 5));
+            }
+        };
+        loadCategories();
+    }, []);
 
     if (location.pathname === '/irontrail') return null;
 
@@ -51,10 +63,18 @@ const Footer: React.FC = () => {
                     <div className="column is-2">
                         <h3 className="footer-title">Categorías</h3>
                         <ul className="footer-links">
-                            <li><a href="#">Sedanes</a></li>
-                            <li><a href="#">SUVs</a></li>
-                            <li><a href="#">Deportivos</a></li>
-                            <li><a href="#">Eléctricos</a></li>
+                            {categories.length > 0 ? (
+                                categories.map(cat => (
+                                    <li key={cat._id}><Link to="/">{cat.name}</Link></li>
+                                ))
+                            ) : (
+                                <>
+                                    <li><Link to="/">Sedanes</Link></li>
+                                    <li><Link to="/">SUVs</Link></li>
+                                    <li><Link to="/">Deportivos</Link></li>
+                                    <li><Link to="/">Eléctricos</Link></li>
+                                </>
+                            )}
                         </ul>
                     </div>
 

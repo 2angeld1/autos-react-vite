@@ -140,13 +140,14 @@ export const searchCars = async (filters: SearchFilters): Promise<Car[]> => {
     // Build query params
     const params = new URLSearchParams();
     
-    if (filters.searchTerm) {
-      params.set('search', filters.searchTerm);
-    }
-    
-    if (filters.year) {
-      params.set('year', filters.year);
-    }
+    if (filters.searchTerm) params.set('search', filters.searchTerm);
+    if (filters.make) params.set('make', filters.make);
+    if (filters.category) params.set('category', filters.category);
+    if (filters.year) params.set('year', filters.year);
+    if (filters.transmission) params.set('transmission', filters.transmission);
+    if (filters.fuelType) params.set('fuelType', filters.fuelType);
+    if (filters.minPrice) params.set('minPrice', filters.minPrice);
+    if (filters.maxPrice) params.set('maxPrice', filters.maxPrice);
     
     const url = `${base}/cars/search?${params.toString()}`;
     const response = await fetch(url);

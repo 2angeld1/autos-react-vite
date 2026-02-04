@@ -23,6 +23,7 @@ const Quotes = React.lazy(() => import('@/pages/Quotes/Quotes'));
 const Promotions = React.lazy(() => import('@/pages/Promotions'));
 const Categories = React.lazy(() => import('@/pages/Categories'));
 const IronTrail = React.lazy(() => import('@/pages/IronTrail'));
+const Reviews = React.lazy(() => import('@/pages/Reviews'));
 
 // Loading component
 const PageLoader = () => (
@@ -80,6 +81,16 @@ const AppRoutes: React.FC = () => {
 
           {/* IronTrail Routes */}
           <Route path="irontrail" element={<IronTrail />} />
+
+          {/* Reviews Routes */}
+          <Route
+            path="reviews"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <Reviews />
+              </ProtectedRoute>
+            }
+          />
 
           {/* Users Routes - Admin only */}
           <Route

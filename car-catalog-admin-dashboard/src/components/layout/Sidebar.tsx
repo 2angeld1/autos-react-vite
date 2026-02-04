@@ -14,7 +14,8 @@ import {
   Percent,
   Building2,
   Zap,
-  Mountain
+  Mountain,
+  MessageSquare
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
@@ -104,6 +105,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           name: t('nav.categories'),
           href: '/categories',
           icon: Tag,
+        },
+        {
+          name: t('nav.reviews'),
+          href: '/reviews',
+          icon: MessageSquare,
         },
       ],
     },

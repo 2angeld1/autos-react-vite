@@ -68,7 +68,58 @@ router.get('/stats', async (req: AuthRequest, res) => {
       { $sort: { _id: 1 } }
     ]);
 
-    // Get recent cars and users (Mantener por compatibilidad hasta actualizar frontend)
+    // Estadísticas Financieras Reales (Basadas en Quotes/Ofertas)
+    const financialStats = await Quote.aggregate([
+      {
+        $facet: {
+          sales: [
+            { $match: { status: 'accepted' } },
+            {
+              $lookup: {
+                from: 'cars',
+                localField: 'car',
+                foreignField: '_id',
+                as: 'carData'
+              }
+            },
+            { $unwind: '$carData' },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$carData.price' },
+                count: { $sum: 1 }
+              }
+            }
+          ],
+          pending: [
+            { $match: { status: 'pending' } },
+            {
+              $lookup: {
+                from: 'cars',
+                localField: 'car',
+                foreignField: '_id',
+                as: 'carData'
+              }
+            },
+            { $unwind: '$carData' },
+            {
+              $group: {
+                _id: null,
+                total: { $sum: '$carData.price' },
+                count: { $sum: 1 }
+              }
+            }
+          ]
+        }
+      }
+    ]);
+
+    const totalSales = financialStats[0]?.sales[0]?.total || 0;
+    const salesCount = financialStats[0]?.sales[0]?.count || 0;
+    const pendingAmount = financialStats[0]?.pending[0]?.total || 0;
+    const pendingCount = financialStats[0]?.pending[0]?.count || 0;
+
+    // Get recent cars and users
     const [recentCars, recentUsers] = await Promise.all([
       Car.find({ isAvailable: true })
         .sort({ createdAt: -1 })
@@ -90,6 +141,10 @@ router.get('/stats', async (req: AuthRequest, res) => {
       totalQuotes,
       pendingQuotes,
       inventoryValue,
+      totalSales,
+      salesCount,
+      pendingAmount,
+      pendingCount,
       recentCars,
       recentUsers,
       charts: {

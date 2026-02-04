@@ -58,6 +58,7 @@
     "inventory": "Inventario",
     "sales": "Ventas",
     "content": "Contenido",
+    "reviews": "Reseñas",
     "system": "Sistema"
   },
   "header": {
@@ -345,6 +346,10 @@
     "addCategory": "Agregar Categoría",
     "editCategory": "Editar Categoría",
     "searchPlaceholder": "Buscar categorías..."
+  },
+  "reviews": {
+    "title": "Reseñas",
+    "subtitle": "Administra las opiniones de los usuarios"
   },
   "errors": {
     "notFound": "Página no encontrada",

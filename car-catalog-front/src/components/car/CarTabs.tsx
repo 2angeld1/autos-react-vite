@@ -54,8 +54,8 @@ const CarTabs: React.FC<CarTabsProps> = ({ car }) => {
                         className="p-4"
                     >
                         {activeTab === 'specs' && <CarSpecs car={car} />}
-                        {activeTab === 'features' && <CarFeatures />}
-                        {activeTab === 'reviews' && <CarReviews />}
+                        {activeTab === 'features' && <CarFeatures car={car} />}
+                        {activeTab === 'reviews' && <CarReviews carId={car.id} />}
                     </motion.div>
                 </AnimatePresence>
             </div>

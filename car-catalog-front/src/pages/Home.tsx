@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useCarContext } from '../context/CarContext';
 import Testimonials from '../components/home/Testimonials';
 import FeaturedCars from '../components/home/FeaturedCars';
-import { searchCars } from '../services/api';
-import type { Car, SearchFilters } from '@/types';
+import type { Car } from '@/types';
 import { useCarImage } from '../hooks/useCarImage';
 import FeaturedCarsSection from '../components/home/FeaturedCarsSection';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '../animations/variants';
 import HeroSection from '../components/home/HeroSection';
 
+import { inventoryService, Category } from '../services/api/inventoryService';
+
 const Home: React.FC = () => {
-    const { cars: contextCars, loading: contextLoading } = useCarContext();
+    const { cars: contextCars, loading: contextLoading, handleSearch } = useCarContext();
     const [displayedCars, setDisplayedCars] = useState<Car[]>([]);
+    const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
     const [searchError, setSearchError] = useState<string | null>(null);
     
@@ -22,46 +23,35 @@ const Home: React.FC = () => {
     const [currentSlide, setCurrentSlide] = useState<number>(0);
     const slidesToShow = 4; // Número fijo de tarjetas visibles a la vez
 
-    // Cargar vehículos al montar el componente
+    // Cargar datos al montar
     useEffect(() => {
-        const loadCars = async (): Promise<void> => {
+        const loadInitialData = async () => {
             try {
                 setLoading(true);
+                // Cargar categorías del backend
+                const cats = await inventoryService.getCategories();
+                setCategories(cats);
+
                 if (contextCars && contextCars.length > 0 && !contextLoading) {
-                    // ✅ Asegurar que tengamos al menos 8 autos para el carrusel
-                    if (contextCars.length >= 8) {
-                        setDisplayedCars(contextCars);
-                    } else {
-                        // Si no hay suficientes en context, cargar más
-                        const { fetchCars } = await import('../services/api/carService');
-                        const moreCars = await fetchCars(16); // Cargar más autos
-                        setDisplayedCars(moreCars);
-                    }
+                    setDisplayedCars(contextCars);
                 }
             } catch (error) {
-                console.error("Error loading cars:", error);
-                setSearchError("No pudimos cargar los vehículos. Por favor intenta nuevamente.");
+                console.error("Error loading initial data:", error);
             } finally {
                 setLoading(false);
             }
         };
         
-        loadCars();
+        loadInitialData();
     }, [contextCars, contextLoading]);
 
-    // Manejador para la búsqueda
-    const handleSearch = async (filters: SearchFilters): Promise<void> => {
-        try {
-            setLoading(true);
-            setSearchError(null);
-            
-            const results = await searchCars(filters);
-            setDisplayedCars(results);
-        } catch (error) {
-            console.error("Error searching cars:", error);
-            setSearchError("Ocurrió un error al buscar. Por favor intenta nuevamente.");
-        } finally {
-            setLoading(false);
+    // Manejador para filtrar por categoría desde las cards
+    const handleCategoryClick = (categoryName: string) => {
+        handleSearch({ searchTerm: '', make: '', fuelType: '', transmission: '', category: categoryName });
+        // Hacer scroll suave hacia los resultados destacados
+        const element = document.getElementById('featured-cars-section');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
         }
     };
 
@@ -208,72 +198,37 @@ const Home: React.FC = () => {
                     </motion.p>
                     
                     <motion.div
-                        className="columns is-multiline"
+                        className="columns is-multiline is-centered"
                         initial="hidden"
                         whileInView="visible"
                         viewport={{ once: true }}
                         variants={staggerContainer}
                     >
-                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
-                            <div className="category-card">
-                                <img 
-                                    src="https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
-                                    alt="Sedanes" 
-                                    onError={categoryImageHook.handleImageError}
-                                />
-                                <div className="category-overlay">
-                                    <h3 className="title is-4 has-text-white mb-2">Sedanes</h3>
-                                    <Link to="#" className="button is-small is-secondary-accent is-outlined">
-                                        Ver todos
-                                    </Link>
+                        {(categories.length > 0 ? categories : [
+                            { _id: '1', name: 'Sedanes', slug: 'sedanes', image: 'https://images.pexels.com/photos/170811/pexels-photo-170811.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750' },
+                            { _id: '2', name: 'SUVs', slug: 'suvs', image: 'https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750' },
+                            { _id: '3', name: 'Deportivos', slug: 'deportivos', image: 'https://images.pexels.com/photos/3764984/pexels-photo-3764984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750' },
+                            { _id: '4', name: 'Pickups', slug: 'pickups', image: 'https://images.pexels.com/photos/2526127/pexels-photo-2526127.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750' }
+                        ]).map((cat: any) => (
+                            <motion.div key={cat._id} variants={scaleIn} className="column is-3-desktop is-6-tablet">
+                                <div
+                                    className="category-card is-clickable"
+                                    onClick={() => handleCategoryClick(cat.name)}
+                                >
+                                    <img 
+                                        src={cat.image || 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&q=80'}
+                                        alt={cat.name}
+                                        onError={categoryImageHook.handleImageError}
+                                    />
+                                    <div className="category-overlay">
+                                        <h3 className="title is-4 has-text-white mb-2">{cat.name}</h3>
+                                        <span className="button is-small is-secondary-accent is-outlined">
+                                            Explorar
+                                        </span>
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
-                            <div className="category-card">
-                                <img 
-                                    src="https://images.pexels.com/photos/116675/pexels-photo-116675.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
-                                    alt="SUVs" 
-                                    onError={categoryImageHook.handleImageError}
-                                />
-                                <div className="category-overlay">
-                                    <h3 className="title is-4 has-text-white mb-2">SUVs</h3>
-                                    <Link to="#" className="button is-small is-secondary-accent is-outlined">
-                                        Ver todos
-                                    </Link>
-                                </div>
-                            </div>
-                        </motion.div>
-                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
-                            <div className="category-card">
-                                <img 
-                                    src="https://images.pexels.com/photos/3764984/pexels-photo-3764984.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
-                                    alt="Deportivos" 
-                                    onError={categoryImageHook.handleImageError}
-                                />
-                                <div className="category-overlay">
-                                    <h3 className="title is-4 has-text-white mb-2">Deportivos</h3>
-                                    <Link to="#" className="button is-small is-secondary-accent is-outlined">
-                                        Ver todos
-                                    </Link>
-                                </div>
-                            </div>
-                        </motion.div>
-                        <motion.div variants={scaleIn} className="column is-3-desktop is-6-tablet">
-                            <div className="category-card">
-                                <img 
-                                    src="https://images.pexels.com/photos/2526127/pexels-photo-2526127.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750" 
-                                    alt="Eléctricos" 
-                                    onError={categoryImageHook.handleImageError}
-                                />
-                                <div className="category-overlay">
-                                    <h3 className="title is-4 has-text-white mb-2">Eléctricos</h3>
-                                    <Link to="#" className="button is-small is-secondary-accent is-outlined">
-                                        Ver todos
-                                    </Link>
-                                </div>
-                            </div>
-                        </motion.div>
+                            </motion.div>
+                        ))}
                     </motion.div>
                 </div>
             </section>
@@ -298,16 +253,38 @@ const Home: React.FC = () => {
                             </motion.p>
                         </div>
                         <div className="column is-6">
-                            <motion.div variants={slideUp} className="field has-addons">
-                                <div className="control is-expanded">
-                                    <input className="input is-medium" type="email" placeholder="Tu correo electrónico" />
-                                </div>
-                                <div className="control">
-                                    <button className="button is-medium is-accent">
-                                        Suscribirse
-                                    </button>
-                                </div>
-                            </motion.div>
+                            <form onSubmit={async (e) => {
+                                e.preventDefault();
+                                const email = (e.currentTarget.elements.namedItem('email') as HTMLInputElement).value;
+                                if (!email) return;
+                                const { quoteService } = await import('../services/api');
+                                try {
+                                    await quoteService.requestQuote({
+                                        carId: 'newsletter',
+                                        customerName: 'Suscripción Newsletter',
+                                        email: email,
+                                        phone: '0000000000',
+                                        downPayment: 0,
+                                        term: 0
+                                    });
+                                    const { toast } = await import('react-hot-toast');
+                                    toast.success('¡Gracias por suscribirte!');
+                                    (e.target as HTMLFormElement).reset();
+                                } catch (err) {
+                                    console.error(err);
+                                }
+                            }}>
+                                <motion.div variants={slideUp} className="field has-addons">
+                                    <div className="control is-expanded">
+                                        <input className="input is-medium" type="email" name="email" placeholder="Tu correo electrónico" required />
+                                    </div>
+                                    <div className="control">
+                                        <button type="submit" className="button is-medium is-accent">
+                                            Suscribirse
+                                        </button>
+                                    </div>
+                                </motion.div>
+                            </form>
                             <motion.p variants={fadeIn} className="has-text-grey-light is-size-7 mt-2">
                                 Al suscribirte aceptas nuestra política de privacidad. Nunca compartiremos tu correo electrónico.
                             </motion.p>
