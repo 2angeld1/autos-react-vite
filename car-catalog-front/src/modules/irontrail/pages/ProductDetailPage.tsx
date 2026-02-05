@@ -282,6 +282,17 @@ const ProductDetailPage = () => {
                                         Solicitar Cotización
                                     </span>
                                 </button>
+                                <a
+                                    href={`https://wa.me/50760000000?text=Hola, quiero ordenar el producto: ${product.title} (Precio: $${product.price}) que vi en su sitio web.`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="w-full bg-[#25D366] text-white hover:bg-[#128C7E] transition-all font-black uppercase py-4 text-lg tracking-widest flex items-center justify-center gap-3 -skew-x-[5deg] shadow-lg"
+                                >
+                                    <span className="skew-x-[5deg] flex items-center gap-3">
+                                        <Phone className="w-5 h-5" />
+                                        Ordenar por WhatsApp
+                                    </span>
+                                </a>
                                 <div className="flex gap-3">
                                     <button className="flex-1 border-2 border-gray-200 font-bold uppercase py-3 text-xs tracking-wider flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-all">
                                         <Info className="w-4 h-4" /> Ficha Técnica

@@ -105,9 +105,9 @@ const Dashboard: React.FC = () => {
               title="Monto Pendiente"
               value={stats?.pendingAmount ? formatCurrency(stats.pendingAmount) : '$0'}
               icon={DollarSign}
-              color="yellow"
+              color="orange"
               loading={statsLoading}
-              change={{ value: stats?.pendingCount || 0, type: 'increase', period: 'En proceso', noSymbol: true } as any}
+              change={{ value: stats?.pendingCount || 0, type: 'increase', period: 'En negociación', noSymbol: true } as any}
             />
             <StatsCard
               title="Valor Inventario"

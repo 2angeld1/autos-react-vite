@@ -122,6 +122,25 @@ export const ContactBox: React.FC<ContactBoxProps> = ({ car }) => {
                         </button>
                     </div>
                 </div>
+
+                <div className="dropdown-divider my-4"></div>
+
+                <div className="field">
+                    <div className="control">
+                        <a
+                            href={`https://wa.me/50760000000?text=Hola, estoy interesado en el ${car.make} ${car.model} ${car.year} que vi en VeloDrive.`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="button is-success is-fullwidth"
+                            style={{ backgroundColor: '#25D366', color: 'white', border: 'none' }}
+                        >
+                            <span className="icon">
+                                <i className="fab fa-whatsapp"></i>
+                            </span>
+                            <span>WhatsApp Directo</span>
+                        </a>
+                    </div>
+                </div>
             </form>
         </div>
     );
