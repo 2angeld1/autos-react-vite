@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propuesta Digital: Core Retail Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --accent: #f97316;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --gray: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 850px;
+            margin: 0 auto;
+            background: white;
+            padding: 60px;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Decorative elements */
+        .container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 8px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .tag {
+            display: inline-block;
+            background: #dbeafe;
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 900;
+            text-transform: uppercase;
+            padding: 6px 16px;
+            border-radius: 100px;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: 38px;
+            font-weight: 900;
+            line-height: 1.1;
+            color: var(--dark);
+            margin-bottom: 10px;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: var(--gray);
+            font-weight: 500;
+        }
+
+        .meta {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--gray);
+            font-weight: 600;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: 900;
+            margin: 40px 0 20px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        h2::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #334155;
+        }
+
+        .highlight-box {
+            background: #f1f5f9;
+            padding: 30px;
+            border-radius: 16px;
+            margin: 30px 0;
+            border-left: 6px solid var(--primary);
+        }
+
+        ul {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #475569;
+        }
+
+        li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-weight: 900;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-cols: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            transform: translateY(-2px);
+        }
+
+        .feature-card strong {
+            display: block;
+            color: var(--dark);
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+
+        .feature-card span {
+            font-size: 13px;
+            color: var(--gray);
+        }
+
+        .pricing {
+            background: var(--dark);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            margin-top: 40px;
+        }
+
+        .pricing h2 {
+            color: white !important;
+            margin-top: 0;
+        }
+
+        .pricing h2::before {
+            background: var(--primary);
+        }
+
+        .pricing p, .pricing li, .pricing strong {
+            color: rgba(255, 255, 255, 0.9) !important;
+        }
+
+        .pricing li::before {
+            color: var(--accent);
+        }
+
+        .price-tag {
+            font-size: 32px;
+            font-weight: 900;
+            color: var(--accent);
+            margin: 20px 0;
+        }
+
+        .footer {
+            margin-top: 60px;
+            text-align: center;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        strong {
+            color: var(--dark);
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 30px 20px; }
+            h1 { font-size: 28px; }
+            .feature-grid { grid-template-cols: 1fr; }
+            .meta { flex-direction: column; gap: 10px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <span class="tag">Exclusivo: Propuesta 2026</span>
+            <h1>CORE RETAIL ENGINE</h1>
+            <p class="subtitle">Propuesta de Transformación Digital y Ventas Omnicanal</p>
+            <div class="meta">
+                <span>PARA: [Nombre del Comercio / Joya Oculta]</span>
+                <span>FECHA: FEBRERO 2026</span>
+            </div>
+        </header>
+
+        <section>
+            <h2>1. El Diagnóstico</h2>
+            <p>Muchos negocios con excelente inventario y precios competitivos enfrentan hoy el mismo desafío: <strong>El cliente no sabe todo lo que usted tiene.</strong></p>
+            <div class="highlight-box">
+                <p style="margin-bottom:0">Las redes sociales (Instagram/WhatsApp) son útiles pero desordenadas. El stock se queda "atrapado" en la bodega porque no hay una plataforma que permita al cliente buscar, filtrar por precio o ver especificaciones técnicas de forma rápida y profesional.</p>
+            </div>
+        </section>
+
+        <section>
+            <h2>2. La Solución</h2>
+            <p>No proponemos una "página web" estática. Proponemos la implementación del <strong>Core Retail Engine</strong>, un ecosistema tecnológico de alta gama diseñado para maximizar el retorno de su inventario.</p>
+            
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <strong>Visibilidad Total</strong>
+                    <span>Transforme su bodega en un catálogo digital interactivo disponible 24/7.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Control Móvil</strong>
+                    <span>Gestione ventas, leads y stock desde su celular, esté donde esté.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Venta por WhatsApp</strong>
+                    <span>Botón de orden instantánea que envía el pedido listo al WhatsApp de su vendedor.</span>
+                </div>
+                <div class="feature-card">
+                    <strong>Dominio en Google</strong>
+                    <span>SEO avanzado para aparecer en los primeros resultados de búsqueda en Panamá.</span>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>3. Diferenciación</h2>
+            <p>Nuestro sistema usa la tecnología de alto rendimiento de gigantes como Google y Facebook (React/Next.js):</p>
+            <ul>
+                <li><strong>Velocidad Extrema:</strong> Carga instantánea con miles de productos.</li>
+                <li><strong>Fácil Administración:</strong> Suba fotos y cambie precios en menos de 1 minuto.</li>
+                <li><strong>Seguridad Blindada:</strong> Backups automáticos y protección contra ataques.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>4. Inteligencia de Datos</h2>
+            <p>Usted recibirá reportes mensuales para tomar decisiones basadas en dinero real:</p>
+            <ul>
+                <li>Productos más buscados sin stock.</li>
+                <li>Horas pico de interés de clientes.</li>
+                <li>Categorías de mayor rentabilidad.</li>
+            </ul>
+        </section>
+
+        <section class="pricing">
+            <h2>Inversión Estratégica</h2>
+            <p>Obtenga una plataforma valorada en más de <strong>$20,000 USD</strong> bajo un modelo de suscripción sin riesgo inicial alto.</p>
+            <div class="price-tag">MODELO PARTNER</div>
+            <ul>
+                <li>Mantenimiento y Servidores de Alta Velocidad.</li>
+                <li>Actualizaciones continuas del sistema.</li>
+                <li>Optimización constante en buscadores (SEO).</li>
+            </ul>
+        </section>
+
+        <div class="footer">
+            <p>¿Agendamos una demo del panel administrativo?</p>
+            <a href="#" class="btn">Ver Demo en Vivo Ahora</a>
+        </div>
+    </div>
+</body>
+</html>
