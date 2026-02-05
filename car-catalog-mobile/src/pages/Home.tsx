@@ -3,7 +3,10 @@ import {
   IonContent, 
   IonPage, 
   IonHeader,
-  IonIcon
+  IonIcon,
+  IonRefresher,
+  IonRefresherContent,
+  type RefresherEventDetail
 } from '@ionic/react';
 import { useHistory } from 'react-router-dom';
 import { notifications, arrowForward, build } from 'ionicons/icons';
@@ -22,7 +25,7 @@ import { useEffect } from 'react';
 
 const Home: React.FC = () => {
   const history = useHistory();
-  const { cars } = useCarData();
+  const { cars, refetch } = useCarData();
   const [showPreferences, setShowPreferences] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
@@ -84,6 +87,13 @@ const Home: React.FC = () => {
         scrollEvents={true}
         onIonScroll={(e) => setIsScrolled(e.detail.scrollTop > 10)}
       >
+        <IonRefresher slot="fixed" onIonRefresh={async (e: CustomEvent<RefresherEventDetail>) => {
+          await refetch();
+          e.detail.complete();
+        }}>
+          <IonRefresherContent pullingText="Desliza para actualizar" refreshingSpinner="circles" />
+        </IonRefresher>
+
         <motion.div
           className="pb-24"
           variants={staggerContainer}

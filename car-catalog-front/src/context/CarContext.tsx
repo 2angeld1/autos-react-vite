@@ -11,6 +11,7 @@ interface CarContextType {
   isFavorite: (carId: string) => boolean;
   toggleFavorite: (carId: string) => void;
   getFavorites: () => Car[];
+  refetchCars: () => Promise<void>;
 }
 
 const CarContext = createContext<CarContextType | undefined>(undefined);
@@ -108,7 +109,19 @@ export const CarProvider: React.FC<CarProviderProps> = ({ children }) => {
     favorites,
     isFavorite,
     toggleFavorite,
-    getFavorites
+    getFavorites,
+    refetchCars: async () => {
+      setLoading(true);
+      try {
+        const data = await fetchCars();
+        setCars(data);
+        setError(null);
+      } catch (err) {
+        setError((err as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    }
   };
 
   return (
