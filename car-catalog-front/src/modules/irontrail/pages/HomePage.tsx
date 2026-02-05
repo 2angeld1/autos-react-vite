@@ -1,11 +1,10 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Star } from 'lucide-react';
 import { IronLayout } from '../layout/IronLayout';
 import { staggerContainer, slideUp, slideInRight } from '../animations/variants';
-import suspensionImg from '../assets/suspension.png';
-import springsImg from '../assets/springs.png';
-import snorkelImg from '../assets/snorkel.png';
 import specsTruckImg from '../assets/specs_truck.png';
+import { ironService, IronProduct } from '../services/ironService';
 
 // Modular Components
 import HeroBanner, { ButtonPrimary } from '../components/HeroBanner';
@@ -17,6 +16,15 @@ import FeaturedExpedition from '../components/FeaturedExpedition';
 import DealerSection from '../components/DealerSection';
 
 const IronTrailHome = () => {
+    const [products, setProducts] = useState<IronProduct[]>([]);
+
+    useEffect(() => {
+        const loadProducts = async () => {
+            const data = await ironService.getAllProducts();
+            setProducts(data);
+        };
+        loadProducts();
+    }, []);
     return (
         <IronLayout>
             <HeroBanner />
@@ -50,24 +58,15 @@ const IronTrailHome = () => {
                         whileInView="visible"
                         viewport={{ once: true, amount: 0.2 }}
                     >
-                         <ProductCard 
-                            image={suspensionImg}
-                            title="Kit MRR Pro 2.0"
-                            category="SUSPENSIÓN"
-                            price="1,299"
-                         />
-                          <ProductCard 
-                             image={springsImg}
-                             title="Resortes Heavy Duty"
-                             category="RESORTES"
-                             price="249"
-                          />
-                          <ProductCard 
-                             image={snorkelImg}
-                             title="Snorkel Safari"
-                             category="ACCESORIOS"
-                             price="189"
-                          />
+                        {products.slice(0, 3).map((product) => (
+                            <ProductCard 
+                                key={product._id}
+                                image={product.image}
+                                title={product.title}
+                                category={product.category}
+                                price={product.price}
+                            />
+                        ))}
                     </motion.div>
                 </div>
             </section>
