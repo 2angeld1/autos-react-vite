@@ -24,9 +24,14 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
+    // If data is FormData, let the browser set the Content-Type header with the boundary
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    }
+
     return config;
   },
-  (error) => {
+  (error: any) => {
     console.error('📡 Request error:', error);
     return Promise.reject(error);
   }
@@ -37,7 +42,7 @@ api.interceptors.response.use(
   (response: AxiosResponse) => {
     return response;
   },
-  (error) => {
+  (error: any) => {
     console.error('📡 API Error:', {
       url: error.config?.url,
       status: error.response?.status,
@@ -50,16 +55,16 @@ api.interceptors.response.use(
     } else if (!error.response) {
       toast.error('Network error. Please check your internet connection.');
     } else if (error.response?.status === 401) {
-        // Avoid redirecting to login for authentication endpoints (login/register/2fa)
-        const requestUrl = error.config?.url || '';
-        const isAuthEndpoint = /auth\/(login|register|verify-2fa|resend-2fa)/i.test(requestUrl);
+      // Avoid redirecting to login for authentication endpoints (login/register/2fa)
+      const requestUrl = error.config?.url || '';
+      const isAuthEndpoint = /auth\/(login|register|verify-2fa|resend-2fa)/i.test(requestUrl);
 
-        if (!isAuthEndpoint) {
-          removeFromStorage(ACCESS_TOKEN_KEY);
-          removeFromStorage('user');
-          window.location.href = '/login';
-          toast.error('Session expired. Please login again.');
-        }
+      if (!isAuthEndpoint) {
+        removeFromStorage(ACCESS_TOKEN_KEY);
+        removeFromStorage('user');
+        window.location.href = '/login';
+        toast.error('Session expired. Please login again.');
+      }
     } else if (error.response?.status === 403) {
       toast.error('Access denied. Insufficient permissions.');
     } else if (error.response?.status >= 500) {
