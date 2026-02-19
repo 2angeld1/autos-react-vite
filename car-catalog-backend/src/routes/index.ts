@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, Request, Response } from 'express';
 import authRoutes from './auth';
 import carRoutes from './cars';
 import userRoutes from './users';
@@ -11,6 +11,8 @@ import notificationRoutes from './notifications';
 import quoteRoutes from './quoteRoutes';
 import productRoutes from './products';
 import irontrailRoutes from './irontrail';
+import jewelryRoutes from './jewelry';
+import furnitureRoutes from './furniture';
 import reviewRoutes from './reviews';
 
 const router = Router();
@@ -28,10 +30,12 @@ router.use('/notifications', notificationRoutes);
 router.use('/quotes', quoteRoutes);
 router.use('/products', productRoutes);
 router.use('/irontrail', irontrailRoutes);
+router.use('/jewelry', jewelryRoutes);
+router.use('/furniture', furnitureRoutes);
 router.use('/reviews', reviewRoutes);
 
 // Health check
-router.get('/health', (req, res) => {
+router.get('/health', (req: Request, res: Response) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),

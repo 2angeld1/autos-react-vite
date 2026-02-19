@@ -23,6 +23,8 @@ const Quotes = React.lazy(() => import('@/pages/Quotes/Quotes'));
 const Promotions = React.lazy(() => import('@/pages/Promotions'));
 const Categories = React.lazy(() => import('@/pages/Categories'));
 const IronTrail = React.lazy(() => import('@/pages/IronTrail'));
+const Jewelry = React.lazy(() => import('@/pages/Jewelry'));
+const Furniture = React.lazy(() => import('@/pages/Furniture'));
 const Reviews = React.lazy(() => import('@/pages/Reviews'));
 
 // Loading component
@@ -117,6 +119,16 @@ const AppRoutes: React.FC = () => {
 
           {/* Images/Files Routes */}
           <Route path="images" element={<Images />} />
+
+          {/* LuxJewel Routes */}
+          <Route path="jewelry" element={
+            <ProtectedRoute requiredRole="admin"><Jewelry /></ProtectedRoute>
+          } />
+
+          {/* DecoHaus Routes */}
+          <Route path="furniture" element={
+            <ProtectedRoute requiredRole="admin"><Furniture /></ProtectedRoute>
+          } />
         </Route>
 
         {/* 404 Page */}

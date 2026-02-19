@@ -15,7 +15,9 @@ import {
   Building2,
   Zap,
   Mountain,
-  MessageSquare
+  MessageSquare,
+  Gem,
+  Sofa
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
@@ -70,6 +72,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           href: '/irontrail',
           icon: Mountain,
           badge: '4x4',
+        },
+        {
+          name: 'LuxJewel',
+          href: '/jewelry',
+          icon: Gem,
+          badge: '💎',
+        },
+        {
+          name: 'DecoHaus',
+          href: '/furniture',
+          icon: Sofa,
+          badge: '🛋️',
         },
         {
           name: t('nav.brands'),
