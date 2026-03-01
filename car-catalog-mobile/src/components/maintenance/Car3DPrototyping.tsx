@@ -6,6 +6,13 @@ import { IonIcon, IonModal } from '@ionic/react';
 import { alertCircle, checkmarkCircle, warningOutline, closeOutline, expandOutline } from 'ionicons/icons';
 import * as THREE from 'three';
 
+// Detectar si es un dispositivo móvil para desactivar post-procesamiento pesado
+const isMobileDevice = () => {
+  if (typeof navigator === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+    || ('ontouchstart' in window && window.innerWidth < 1024);
+};
+
 interface MaintenanceAlert {
   id: string;
   part: string;
@@ -73,7 +80,7 @@ function MaintenanceTooltip({ alert, onClose }: MaintenanceTooltipProps) {
   };
 
   return (
-    <div 
+    <div
       className={`!bg-slate-900/95 !backdrop-blur-xl !border-2 ${getBgColor()} !rounded-2xl !p-4 !shadow-2xl w-full max-w-[300px] md:max-w-xs`}
       style={{ pointerEvents: 'auto' }}
     >
@@ -86,7 +93,7 @@ function MaintenanceTooltip({ alert, onClose }: MaintenanceTooltipProps) {
           <p className="!text-slate-400 !text-[10px] !uppercase !font-bold">{alert.location}</p>
         </div>
       </div>
-      
+
       <div className="space-y-2 mb-3">
         <div className="!bg-slate-800/50 !rounded-xl !p-3">
           <p className="!text-[10px] !text-slate-500 !uppercase !font-bold !mb-1">Diagnóstico</p>
@@ -137,7 +144,7 @@ function MarkerWithLine({ startPosition, endPosition, color, label, onClick }: M
 
       {/* Label flotante */}
       <Html position={endPosition} center>
-        <div 
+        <div
           className="!bg-slate-900/95 !backdrop-blur-md !px-3 !py-1.5 !rounded-lg !border-2 !pointer-events-none !shadow-xl !whitespace-nowrap cursor-pointer hover:!scale-105 active:!scale-95 transition-transform"
           style={{ borderColor: color }}
           onClick={(e) => {
@@ -168,7 +175,7 @@ function CameraController({ selectedPart }: { selectedPart: string | null }) {
     if (selectedPart === 'engine') {
       // Motor (Capó - Delante)
       targetPosRef.current.set(0, 0.5, 1.0);
-      cameraPosRef.current.set(0, 1.5, 2.5); 
+      cameraPosRef.current.set(0, 1.5, 2.5);
     } else if (selectedPart === 'tires') {
       // Neumáticos (Frente Derecho)
       targetPosRef.current.set(0.7, 0.35, 1.0);
@@ -256,15 +263,15 @@ function InteractiveFerrari({ onPartClick }: InteractiveFerrariProps) {
   // Zona de resaltado NEÓN (con toneMapped=false para Bloom)
   const HighlightZone = ({ position, scale, color, alertId }: any) => (
     <group position={position}>
-      <mesh 
+      <mesh
         onClick={(e) => { e.stopPropagation(); onPartClick?.(alertId); }}
         scale={scale}
       >
         <boxGeometry />
         <meshBasicMaterial
           color={color}
-          transparent 
-          opacity={0.3} 
+          transparent
+          opacity={0.3}
           depthWrite={false}
           side={THREE.DoubleSide}
           toneMapped={false}
@@ -281,21 +288,21 @@ function InteractiveFerrari({ onPartClick }: InteractiveFerrariProps) {
     {
       id: 'engine',
       startPosition: [0, 0.6, 1.4], // Capó
-      endPosition: [-0.8, 1.2, 1.8], 
+      endPosition: [-0.8, 1.2, 1.8],
       color: '#ef4444',
       label: '🔴 Motor (Capó)'
     },
     {
       id: 'tires',
       startPosition: [0.75, 0.35, 1.0], // Rueda
-      endPosition: [1.4, 0.8, 1.2], 
+      endPosition: [1.4, 0.8, 1.2],
       color: '#f59e0b',
       label: '🟡 Neumáticos'
     },
     {
       id: 'bumper',
       startPosition: [0, 0.8, -1.8], // Defensa Trasera
-      endPosition: [0.8, 1.4, -2.2], 
+      endPosition: [0.8, 1.4, -2.2],
       color: '#22c55e',
       label: '🟢 Defensa Trasera'
     }
@@ -310,7 +317,7 @@ function InteractiveFerrari({ onPartClick }: InteractiveFerrariProps) {
         position={[0, 0.55, 1.3]}
         scale={[1.4, 0.08, 1.2]}
         color="#ef4444"
-        alertId="engine" 
+        alertId="engine"
       />
 
       {/* DEFENSA TRASERA VERDE NEÓN */}
@@ -318,7 +325,7 @@ function InteractiveFerrari({ onPartClick }: InteractiveFerrariProps) {
         position={[0, 0.7, -1.9]}
         scale={[1.6, 0.2, 0.5]}
         color="#22c55e"
-        alertId="bumper" 
+        alertId="bumper"
       />
 
       {markers.map(marker => (
@@ -370,6 +377,8 @@ const Car3DPrototyping: React.FC = () => {
     return () => unlockOrientation();
   }, [isFullscreen]);
 
+  const isMobile = useMemo(() => isMobileDevice(), []);
+
   const CanvasContent = () => (
     <>
       <Suspense fallback={null}>
@@ -381,28 +390,30 @@ const Car3DPrototyping: React.FC = () => {
 
         {/* SOMBRA DE CONTACTO: Ajustada para "plantar" el auto */}
         <ContactShadows
-          position={[0, 0, 0]} // Subir al nivel del suelo (antes -0.4)
-          opacity={0.7}        // Más oscura (antes 0.5)
+          position={[0, 0, 0]}
+          opacity={0.7}
           scale={10}
-          blur={2.0}           // Más suave (antes 1.5)
+          blur={2.0}
           far={1}
-          resolution={512}     // Mejor calidad
+          resolution={isMobile ? 256 : 512}
         />
       </Suspense>
 
-      {/* BLOOM POST-PROCESSING */}
-      <EffectComposer>
-        <Bloom
-          luminanceThreshold={0.5}
-          mipMapBlur
-          intensity={1.5}
-          radius={0.6}
-        />
-      </EffectComposer>
+      {/* BLOOM POST-PROCESSING - Solo en desktop (causa pantalla blanca en móviles) */}
+      {!isMobile && (
+        <EffectComposer>
+          <Bloom
+            luminanceThreshold={0.5}
+            mipMapBlur
+            intensity={1.5}
+            radius={0.6}
+          />
+        </EffectComposer>
+      )}
 
       <CameraController selectedPart={selectedPart} />
 
-      <OrbitControls 
+      <OrbitControls
         enablePan={false}
         minDistance={1.5}
         maxDistance={6}
@@ -450,7 +461,7 @@ const Car3DPrototyping: React.FC = () => {
         <div className="animate-fadeIn w-full flex justify-center">
           <MaintenanceTooltip
             alert={getAlertForPart(selectedPart)!}
-            onClose={() => setSelectedPart(null)} 
+            onClose={() => setSelectedPart(null)}
           />
         </div>
       )}
@@ -501,7 +512,7 @@ const Car3DPrototyping: React.FC = () => {
               <CanvasContent />
             </Canvas>
           </div>
-          
+
           <TooltipOverlay />
 
           {!selectedPart && (
