@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { getCategories, getProjects, getProjectById, createProject, updateProject, deleteProject } from '../controllers/architectureController';
-import { authenticateToken, requireAdmin } from '../middleware/auth';
+import { authenticateToken, requireAdmin, requireRole } from '../middleware/auth';
 
 const router = Router();
 
@@ -14,8 +14,8 @@ router.get('/projects', getProjects);
 router.get('/projects/:id', getProjectById);
 
 // === PROTEGIDAS (Admin / Arquitecto) ===
-router.post('/projects', authenticateToken, requireAdmin, createProject);
-router.put('/projects/:id', authenticateToken, requireAdmin, updateProject);
-router.delete('/projects/:id', authenticateToken, requireAdmin, deleteProject);
+router.post('/projects', authenticateToken, requireRole(['admin', 'architect']), createProject);
+router.put('/projects/:id', authenticateToken, requireRole(['admin', 'architect']), updateProject);
+router.delete('/projects/:id', authenticateToken, requireRole(['admin', 'architect']), deleteProject);
 
 export default router;

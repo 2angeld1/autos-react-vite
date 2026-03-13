@@ -26,6 +26,7 @@ const IronTrail = React.lazy(() => import('@/pages/IronTrail'));
 const Jewelry = React.lazy(() => import('@/pages/Jewelry'));
 const Furniture = React.lazy(() => import('@/pages/Furniture'));
 const Architecture = React.lazy(() => import('@/pages/Architecture'));
+const ArchitectureCategories = React.lazy(() => import('@/pages/ArchitectureCategories'));
 const Reviews = React.lazy(() => import('@/pages/Reviews'));
 
 // Loading component
@@ -106,14 +107,7 @@ const AppRoutes: React.FC = () => {
           />
 
           {/* Settings Routes */}
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute requiredRole="admin">
-                <Settings />
-              </ProtectedRoute>
-            }
-          />
+          <Route path="settings" element={<Settings />} />
 
           {/* Analytics Routes */}
           <Route path="analytics" element={<Analytics />} />
@@ -134,6 +128,9 @@ const AppRoutes: React.FC = () => {
           {/* Architecture Routes */}
           <Route path="architecture" element={
             <ProtectedRoute requiredRole="architect"><Architecture /></ProtectedRoute>
+          } />
+          <Route path="architecture/categories" element={
+            <ProtectedRoute requiredRole="architect"><ArchitectureCategories /></ProtectedRoute>
           } />
         </Route>
 

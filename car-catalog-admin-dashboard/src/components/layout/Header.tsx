@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, Bell, User, Search, X, Clock, Check, Globe, Zap } from 'lucide-react';
+import { Menu, Bell, User, Search, X, Clock, Check, Globe } from 'lucide-react';
 import Button from '@/components/common/Button';
 import Input from '@/components/common/Input';
 import { useAuthStore } from '@/store/authSlice';
@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { useGet, useApi } from '@/hooks/useApi';
 import { formatDistanceToNow } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
+import { clsx } from '@/utils/clsx';
 
 interface HeaderProps {
   onToggleSidebar: () => void;
@@ -130,11 +131,44 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
             className="hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
           />
           <div className="flex items-center">
-            <div className="h-8 w-8 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white fill-current" />
+            <div className={clsx(
+              "h-9 w-9 rounded-xl flex items-center justify-center shadow-lg transform transition-transform duration-300 hover:scale-105",
+              authUser?.role === 'architect' 
+                ? "bg-sky-600" 
+                : "bg-gradient-to-tr from-indigo-600 to-violet-600"
+            )}>
+              {authUser?.role === 'architect' ? (
+                <svg 
+                  viewBox="0 0 24 24" 
+                  className="h-5 w-5 text-white"
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" />
+                </svg>
+              ) : (
+                <svg 
+                  viewBox="0 0 24 24" 
+                  className="h-5 w-5 text-white"
+                  fill="none" 
+                  stroke="currentColor" 
+                  strokeWidth="2.5" 
+                  strokeLinecap="round" 
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                  <path d="M12 12l8-4.5" />
+                  <path d="M12 12v9" />
+                  <path d="M12 12L4 7.5" />
+                </svg>
+              )}
             </div>
-            <span className="ml-2 font-semibold text-lg hidden sm:block text-gray-900 dark:text-white">
-              Velo<span className="text-orange-600">Drive</span>
+            <span className="ml-3 font-black text-xl hidden sm:block text-gray-900 dark:text-white tracking-tighter uppercase">
+              {authUser?.role === 'architect' ? 'Architect' : 'Nexus'}<span className="text-indigo-600">.</span>
             </span>
           </div>
         </div>

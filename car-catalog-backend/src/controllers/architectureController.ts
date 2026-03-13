@@ -10,7 +10,30 @@ import { getAllArchitectureCategories, isValidProjectCategory } from '../types/a
 
 export const getCategories = async (_req: Request, res: Response) => {
     try {
-        res.json({ success: true, data: getAllArchitectureCategories() });
+        const categories = await Category.find({ type: 'architecture', parentCategory: null }).lean();
+        
+        // Formatear para el frontend (compatibilidad con Selects y Gestión)
+        const formatted = await Promise.all(categories.map(async (cat) => {
+            const subcategories = await Category.find({ parentCategory: cat._id }).lean();
+            return {
+                _id: cat._id,
+                name: cat.name,
+                slug: cat.slug,
+                description: cat.description,
+                value: cat.slug,
+                label: cat.name,
+                icon: 'LayoutGrid',
+                subcategories: subcategories.map(s => ({
+                    _id: s._id,
+                    name: s.name,
+                    slug: s.slug,
+                    value: s.slug,
+                    label: s.name
+                }))
+            };
+        }));
+
+        res.json({ success: true, data: formatted });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error al obtener categorías', error: (error as Error).message });
     }
@@ -18,11 +41,32 @@ export const getCategories = async (_req: Request, res: Response) => {
 
 export const getProjects = async (req: Request, res: Response) => {
     try {
-        const { category, search, minPrice, maxPrice, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 12 } = req.query;
-
+        const { category, group, search, minPrice, maxPrice, sortBy = 'createdAt', sortOrder = 'desc', page = 1, limit = 12 } = req.query;
         const filter: any = { type: 'architecture', isAvailable: true };
 
-        if (category && isValidProjectCategory(category as string)) {
+        // Filtrar por Hub (Grupo) con Regex para capturar subcategorías
+        if (group) {
+            let regex: RegExp;
+            if (group === 'houses') {
+                regex = /^(casa|mansion|residencial|villa)/i;
+            } else if (group === 'buildings') {
+                regex = /^(edificio|conjunto|departamento|apartamento|torre|vertical)/i;
+            } else if (group === 'commercial') {
+                regex = /^(comercial|hotel|resort|local|mall)/i;
+            } else if (group === 'urbanism') {
+                regex = /^(urbanismo|barriada|condominio|masterplan|ciudad)/i;
+            } else if (group === 'industrial') {
+                regex = /^(industrial|nave|planta|logistico)/i;
+            } else if (group === 'institutional') {
+                regex = /^(institucional|salud|hospital|clinica|escuela|colegio)/i;
+            } else {
+                regex = new RegExp(`^${group}`, 'i');
+            }
+            filter['specs.projectCategory'] = { $regex: regex };
+        }
+
+        // Si hay una categoría específica, tiene prioridad sobre el filtro general del grupo
+        if (category && category !== 'all') {
             filter['specs.projectCategory'] = category;
         }
         if (minPrice || maxPrice) {
@@ -58,10 +102,12 @@ export const getProjectById = async (req: Request, res: Response) => {
 
 export const createProject = async (req: Request, res: Response) => {
     try {
-        const { name, sku, projectCategory, price, comparePrice, stock, thumbnail, images, files, description, area, levels, style, isAvailable } = req.body;
-
-        if (projectCategory && !isValidProjectCategory(projectCategory)) {
-            return res.status(400).json({ success: false, message: 'Categoría de arquitectura inválida' });
+        const { name, sku, projectCategory, projectSubCategory, price, comparePrice, stock, thumbnail, images, files, description, area, levels, style, isAvailable } = req.body;
+        
+        // Validación dinámica contra la DB
+        const categoryExists = await Category.findOne({ slug: projectCategory, type: 'architecture' });
+        if (!categoryExists) {
+            return res.status(400).json({ success: false, message: 'Categoría de arquitectura no encontrada en el sistema' });
         }
 
         let defaultCat = await Category.findOne({ name: 'Architect' });
@@ -82,7 +128,7 @@ export const createProject = async (req: Request, res: Response) => {
             thumbnail,
             images: images || [],
             files: files || [],
-            specs: { projectCategory, description, area, levels, style }
+            specs: { projectCategory, projectSubCategory, description, area, levels, style }
         });
 
         await product.save();
@@ -98,6 +144,10 @@ export const updateProject = async (req: Request, res: Response) => {
         if (updates.projectCategory) {
             updates['specs.projectCategory'] = updates.projectCategory;
             delete updates.projectCategory;
+        }
+        if (updates.projectSubCategory) {
+            updates['specs.projectSubCategory'] = updates.projectSubCategory;
+            delete updates.projectSubCategory;
         }
 
         const product = await Product.findOneAndUpdate({ _id: req.params.id, type: 'architecture' }, updates, { new: true, runValidators: true });

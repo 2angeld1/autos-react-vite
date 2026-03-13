@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { FileController } from '@/controllers/fileController';
-import { authenticateToken, requireAdmin } from '@/middleware/auth';
+import { authenticateToken, requireAdmin, requireRole } from '@/middleware/auth';
 import { sanitizeInput } from '@/middleware/validation';
 import multer from 'multer';
 import path from 'path';
@@ -118,11 +118,11 @@ router.get('/:id', [
 /**
  * @route   POST /api/files/folder
  * @desc    Create a new folder
- * @access  Private (Admin)
+ * @access  Private (Admin/Architect)
  */
 router.post('/folder', [
   authenticateToken,
-  requireAdmin,
+  requireRole(['admin', 'architect']),
   body('name').trim().notEmpty().withMessage('Folder name is required'),
   body('parentFolder').optional(),
   body('description').optional().trim()
@@ -131,22 +131,22 @@ router.post('/folder', [
 /**
  * @route   POST /api/files/upload
  * @desc    Upload files
- * @access  Private (Admin)
+ * @access  Private (Admin/Architect)
  */
 router.post('/upload', [
   authenticateToken,
-  requireAdmin,
+  requireRole(['admin', 'architect']),
   upload.array('files', 20)
 ], FileController.uploadFiles);
 
 /**
  * @route   PUT /api/files/:id
  * @desc    Update file/folder
- * @access  Private (Admin)
+ * @access  Private (Admin/Architect)
  */
 router.put('/:id', [
   authenticateToken,
-  requireAdmin,
+  requireRole(['admin', 'architect']),
   param('id').notEmpty().withMessage('File ID is required')
 ], FileController.updateFile);
 
@@ -165,11 +165,11 @@ router.put('/:id/move', [
 /**
  * @route   DELETE /api/files/:id
  * @desc    Delete file/folder
- * @access  Private (Admin)
+ * @access  Private (Admin/Architect)
  */
 router.delete('/:id', [
   authenticateToken,
-  requireAdmin,
+  requireRole(['admin', 'architect']),
   param('id').notEmpty().withMessage('File ID is required')
 ], FileController.deleteFile);
 

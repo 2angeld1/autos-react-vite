@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { Eye, EyeOff, Lock, Mail, AlertCircle, Zap } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
@@ -55,19 +55,39 @@ const LoginForm: React.FC = () => {
         <motion.div variants={slideUp} className="text-center">
           <motion.div
             variants={scaleIn}
-            className="mx-auto h-20 w-20 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-2xl"
+            className="mx-auto h-20 w-20 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-2xl flex items-center justify-center shadow-2xl relative overflow-hidden"
           >
-            <Zap className="h-10 w-10 text-white fill-current" />
+            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
+            <motion.div
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ repeat: Infinity, duration: 4 }}
+            >
+              <svg 
+                viewBox="0 0 24 24" 
+                className="h-10 w-10 text-white relative z-10"
+                fill="none" 
+                stroke="currentColor" 
+                strokeWidth="2" 
+                strokeLinecap="round" 
+                strokeLinejoin="round"
+              >
+                <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9L12 3z" />
+                <path d="M12 12l8-4.5" />
+                <path d="M12 12v9" />
+                <path d="M12 12L4 7.5" />
+              </svg>
+            </motion.div>
           </motion.div>
-          <motion.h1 variants={slideUp} className="mt-6 text-4xl font-extrabold text-gray-900 tracking-tight">
-            Velo<span className="text-orange-600">Drive</span>
+          <motion.h1 
+            variants={slideUp} 
+            className="mt-6 text-4xl font-black text-gray-900 tracking-tighter"
+          >
+            NEXUS<span className="text-indigo-600">.</span>
           </motion.h1>
-          <motion.h2 variants={slideUp} className="mt-6 text-3xl font-bold text-gray-900">
+          <motion.h2 variants={slideUp} className="mt-2 text-xl font-medium text-gray-500">
             {t('auth.signIn')}
           </motion.h2>
-          <p className="mt-2 text-sm text-gray-600">
-            {t('auth.accessDashboard')}
-          </p>
+          <div className="mt-1 h-1 w-12 bg-indigo-600 mx-auto rounded-full"></div>
         </motion.div>
 
         {/* Error Alert */}

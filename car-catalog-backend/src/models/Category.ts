@@ -9,6 +9,7 @@ export interface ICategory extends Document {
   cloudinaryUrl?: string;
   featured: boolean;
   status: 'active' | 'inactive';
+  type: 'car' | 'architecture';
   parentCategory?: mongoose.Types.ObjectId | null;
   createdAt: Date;
   updatedAt: Date;
@@ -52,6 +53,12 @@ const CategorySchema = new Schema<ICategory>({
     type: String,
     enum: ['active', 'inactive'],
     default: 'active',
+    index: true
+  },
+  type: {
+    type: String,
+    enum: ['car', 'architecture'],
+    default: 'car',
     index: true
   },
   parentCategory: {

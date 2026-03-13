@@ -12,6 +12,7 @@ export interface ArchitectureCategoryOption {
     value: string;
     label: string;
     icon: string;
+    subcategories?: { value: string; label: string; }[];
 }
 
 export interface ArchitectureProject {
@@ -42,6 +43,7 @@ export interface ArchitectureProjectInput {
     name: string;
     sku?: string;
     projectCategory: string;
+    projectSubCategory?: string;
     price: number;
     comparePrice?: number;
     stock?: number;
@@ -65,7 +67,7 @@ export const architectureService = {
         const response = await api.get<{ success: boolean; data: ArchitectureCategoryOption[] }>('/architecture/categories');
         return response.data.data;
     },
-    getProducts: async (params?: { category?: string; search?: string; page?: number; limit?: number; }): Promise<ArchitectureProjectsResponse> => {
+    getProducts: async (params?: { category?: string; group?: string; search?: string; page?: number; limit?: number; }): Promise<ArchitectureProjectsResponse> => {
         const response = await api.get<ArchitectureProjectsResponse>('/architecture/projects', { params });
         return response.data;
     },

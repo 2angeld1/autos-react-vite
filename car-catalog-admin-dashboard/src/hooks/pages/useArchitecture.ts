@@ -1,17 +1,29 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { architectureService, ArchitectureProject, ArchitectureProjectInput, ArchitectureCategoryOption } from '@/services/architecture';
 import toast from 'react-hot-toast';
 
 export const useArchitecture = () => {
+    const [searchParams] = useSearchParams();
+    const queryCategory = searchParams.get('category') || 'all';
+    const queryGroup = searchParams.get('group') || null;
+
     const [products, setProducts] = useState<ArchitectureProject[]>([]);
     const [categories, setCategories] = useState<ArchitectureCategoryOption[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedCategory, setSelectedCategory] = useState('all');
+    const [selectedCategory, setSelectedCategory] = useState(queryCategory);
+    const [selectedGroup, setSelectedGroup] = useState<string | null>(queryGroup);
     const [pagination, setPagination] = useState({ page: 1, limit: 12, total: 0, totalPages: 0 });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingProduct, setEditingProduct] = useState<ArchitectureProject | undefined>(undefined);
     const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Sincronizar con cambios en la URL (ej: clics en el sidebar)
+    useEffect(() => {
+        setSelectedCategory(searchParams.get('category') || 'all');
+        setSelectedGroup(searchParams.get('group') || null);
+    }, [searchParams]);
 
     const fetchCategories = useCallback(async () => {
         try {
@@ -24,6 +36,7 @@ export const useArchitecture = () => {
         try {
             setLoading(true);
             const response = await architectureService.getProducts({
+                group: selectedGroup || undefined,
                 category: selectedCategory !== 'all' ? selectedCategory : undefined,
                 search: searchTerm || undefined,
                 page: pagination.page,
@@ -33,7 +46,7 @@ export const useArchitecture = () => {
             setPagination(prev => ({ ...prev, total: response.pagination.total, totalPages: response.pagination.totalPages }));
         } catch { toast.error('Error al cargar proyectos'); }
         finally { setLoading(false); }
-    }, [selectedCategory, searchTerm, pagination.page, pagination.limit]);
+    }, [selectedGroup, selectedCategory, searchTerm, pagination.page, pagination.limit]);
 
     useEffect(() => { fetchCategories(); }, [fetchCategories]);
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
@@ -65,7 +78,7 @@ export const useArchitecture = () => {
 
     const handlePageChange = (page: number) => setPagination(prev => ({ ...prev, page }));
 
-    const categoryOptions = useMemo(() => [{ value: 'all', label: 'Todos', icon: '📐' }, ...categories], [categories]);
+    const categoryOptions = useMemo(() => [{ value: 'all', label: 'Todos', icon: 'LayoutGrid' }, ...categories], [categories]);
     const filteredProducts = useMemo(() => products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase())), [products, searchTerm]);
 
     const stats = useMemo(() => ({
@@ -76,7 +89,7 @@ export const useArchitecture = () => {
     }), [products]);
 
     return {
-        state: { products, categories, categoryOptions, loading, searchTerm, selectedCategory, isModalOpen, editingProduct, isSubmitting, filteredProducts, stats, pagination },
-        actions: { setSearchTerm, setSelectedCategory, handleAddProduct, handleEditProduct, handleDeleteProduct, handleSubmit, handlePageChange, setIsModalOpen, refetch: fetchProducts },
+        state: { products, categories, categoryOptions, loading, searchTerm, selectedCategory, selectedGroup, isModalOpen, editingProduct, isSubmitting, filteredProducts, stats, pagination },
+        actions: { setSearchTerm, setSelectedCategory, setSelectedGroup, handleAddProduct, handleEditProduct, handleDeleteProduct, handleSubmit, handlePageChange, setIsModalOpen, refetch: fetchProducts },
     };
 };

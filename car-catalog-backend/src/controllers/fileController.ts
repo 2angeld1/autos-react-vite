@@ -28,7 +28,7 @@ const errorResponse = (res: Response, status: number, message: string) => {
 };
 
 // Async handler wrapper
-const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => 
+const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) =>
   (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
@@ -38,10 +38,10 @@ export class FileController {
    * Get all files and folders in a directory
    */
   static getFiles = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { 
-      parentFolder = null, 
-      type, 
-      mimeType, 
+    const {
+      parentFolder = null,
+      type,
+      mimeType,
       search,
       page = 1,
       limit = 50,
@@ -49,7 +49,7 @@ export class FileController {
     } = req.query;
 
     const filters: Record<string, unknown> = {};
-    
+
     // Handle parent folder
     if (parentFolder && parentFolder !== 'null' && parentFolder !== 'root') {
       filters.parentFolder = parentFolder;
@@ -132,7 +132,7 @@ export class FileController {
         id: currentFolder._id.toString(),
         name: currentFolder.name
       });
-      
+
       if (currentFolder.parentFolder) {
         currentFolder = await FileItem.findById(currentFolder.parentFolder);
       } else {
@@ -296,7 +296,7 @@ export class FileController {
       }
     } else {
       // Ensure parentFolder is explicitly null if 'null' or 'root' string passed
-      parentFolder = null; 
+      parentFolder = null;
     }
 
     const uploadedFiles: IFileItemDocument[] = [];
@@ -305,12 +305,12 @@ export class FileController {
       try {
         // Current file location (in base uploads/files directory)
         const currentPath = file.path;
-        
+
         // Target directory based on parent folder
-        const targetDir = basePath 
+        const targetDir = basePath
           ? path.join(BASE_UPLOAD_DIR, ...basePath.split('/').filter(Boolean))
           : BASE_UPLOAD_DIR;
-        
+
         // Ensure target directory exists
         if (!fs.existsSync(targetDir)) {
           fs.mkdirSync(targetDir, { recursive: true });
@@ -318,7 +318,7 @@ export class FileController {
 
         // Target file path
         const targetPath = path.join(targetDir, file.filename);
-        
+
         // Move file if it's not already in the target directory
         if (currentPath !== targetPath) {
           fs.renameSync(currentPath, targetPath);
@@ -419,7 +419,7 @@ export class FileController {
     // Update fields
     if (name) {
       const sanitizedName = name.trim().replace(/[/\\?%*:|"<>]/g, '-');
-      
+
       // Check for duplicate name in same folder
       const existingFile = await FileItem.findOne({
         _id: { $ne: id },
@@ -433,9 +433,9 @@ export class FileController {
       }
 
       file.name = sanitizedName;
-      
+
       // Update path
-      const parentPath = file.parentFolder 
+      const parentPath = file.parentFolder
         ? (await FileItem.findById(file.parentFolder))?.path || ''
         : '';
       file.path = `${parentPath}/${sanitizedName}`;
@@ -466,7 +466,7 @@ export class FileController {
     // If it's a folder, delete all contents recursively
     if (file.type === 'folder') {
       await FileController.deleteFolderContents(file._id.toString());
-      
+
       // Delete physical folder if it exists
       const physicalPath = path.join(BASE_UPLOAD_DIR, ...file.path.split('/').filter(Boolean));
       if (fs.existsSync(physicalPath)) {
@@ -527,7 +527,7 @@ export class FileController {
         return errorResponse(res, 400, 'Target folder not found');
       }
       newPath = `${target.path}/${file.name}`;
-      
+
       // Prevent moving folder into itself
       if (file.type === 'folder' && target.path.startsWith(file.path)) {
         return errorResponse(res, 400, 'Cannot move folder into itself');
@@ -546,8 +546,8 @@ export class FileController {
       return errorResponse(res, 400, `A ${file.type} with this name already exists in the target folder`);
     }
 
-    file.parentFolder = targetFolder && targetFolder !== 'null' && targetFolder !== 'root' 
-      ? targetFolder 
+    file.parentFolder = targetFolder && targetFolder !== 'null' && targetFolder !== 'root'
+      ? targetFolder
       : null;
     file.path = newPath;
 
@@ -599,8 +599,8 @@ export class FileController {
    * Get only images (for image picker)
    */
   static getImages = asyncHandler(async (req: Request, res: Response): Promise<void> => {
-    const { 
-      parentFolder = null, 
+    const {
+      parentFolder = null,
       search,
       page = 1,
       limit = 50
@@ -610,7 +610,7 @@ export class FileController {
       type: 'file',
       mimeType: { $regex: /^image\// }
     };
-    
+
     if (parentFolder && parentFolder !== 'null' && parentFolder !== 'root') {
       filters.parentFolder = parentFolder;
     } else {

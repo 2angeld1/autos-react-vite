@@ -54,13 +54,6 @@ const Modal: React.FC<ModalProps> = ({
     xl: 'max-w-4xl',
   };
 
-  const modalClasses = clsx(
-    'relative bg-white rounded-lg shadow-xl transform transition-all',
-    'w-full mx-4',
-    sizeClasses[size],
-    className
-  );
-
   const handleOverlayClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (closeOnOverlayClick && event.target === event.currentTarget) {
       onClose();
@@ -80,12 +73,18 @@ const Modal: React.FC<ModalProps> = ({
         />
 
         {/* Modal */}
-        <div className={modalClasses}>
+        <div className={clsx(
+          'relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl transform transition-all',
+          'w-full mx-4 flex flex-col text-left',
+          sizeClasses[size],
+          'max-h-[90vh]', // No exceder el 90% de la pantalla
+          className
+        )}>
           {/* Header */}
           {(title || showCloseButton) && (
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-gray-100 dark:border-gray-700/50 flex-shrink-0">
               {title && (
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-xl font-black text-gray-900 dark:text-gray-100 tracking-tight">
                   {title}
                 </h3>
               )}
@@ -94,8 +93,8 @@ const Modal: React.FC<ModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="text-gray-400 hover:text-gray-600"
-                  icon={<X className="h-4 w-4" />}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  icon={<X className="h-5 w-5" />}
                   aria-label="Close modal"
                 />
               )}
@@ -103,13 +102,13 @@ const Modal: React.FC<ModalProps> = ({
           )}
 
           {/* Content */}
-          <div className="p-6">
+          <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
             {children}
           </div>
 
           {/* Footer */}
           {footer && (
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+            <div className="flex justify-end gap-3 p-6 border-t border-gray-100 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-900/10 rounded-b-2xl flex-shrink-0">
               {footer}
             </div>
           )}

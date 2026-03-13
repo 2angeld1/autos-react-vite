@@ -1,5 +1,8 @@
-import React from 'react';
-import { Loader2, Plus, Search, Edit2, Trash2, Filter, DollarSign, Compass, Layers, Ruler, FileText, CheckCircle2 } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { 
+  Loader2, Plus, Edit2, Trash2, Compass, Layers, Ruler, FileText,
+  Home, Building2, Factory, Landmark, LayoutGrid
+} from 'lucide-react';
 import { motion } from 'framer-motion';
 import Button from '@/components/common/Button';
 import Modal from '@/components/common/Modal';
@@ -7,12 +10,29 @@ import ArchitectureForm from '@/components/architecture/ArchitectureForm';
 import { useArchitecture } from '@/hooks/pages/useArchitecture';
 import { fadeIn, slideUp, staggerContainer, scaleIn } from '@/animations/variants';
 
+// CategoryIcon removed as it's not used anymore in the main grid or filters
+
+
 const Architecture: React.FC = () => {
     const { state, actions } = useArchitecture();
     const {
-        loading, searchTerm, selectedCategory, isModalOpen, editingProduct,
-        isSubmitting, filteredProducts, stats, categoryOptions, categories
+        loading, isModalOpen, editingProduct,
+        isSubmitting, filteredProducts, categories, selectedGroup
     } = state;
+
+    const groupCategoriesOptions = useMemo(() => {
+        const filtered = categories.filter(cat => {
+            const val = cat.value.toLowerCase();
+            if (selectedGroup === 'houses') return val.includes('casa') || val.includes('mansion');
+            if (selectedGroup === 'buildings') return val.includes('edificio') || val.includes('conjunto');
+            if (selectedGroup === 'commercial') return val.includes('comercial');
+            if (selectedGroup === 'urbanism') return val.includes('urbanismo');
+            if (selectedGroup === 'industrial') return val.includes('industrial');
+            if (selectedGroup === 'institutional') return val.includes('institucional') || val.includes('salud');
+            return false;
+        });
+        return [{ value: 'all', label: 'Todos', icon: 'LayoutGrid' }, ...filtered];
+    }, [selectedGroup, categories]);
 
     if (loading && filteredProducts.length === 0) {
         return (
@@ -25,118 +45,52 @@ const Architecture: React.FC = () => {
     return (
         <motion.div initial="hidden" animate="visible" variants={fadeIn} className="min-h-screen bg-gray-50 p-6">
             {/* Header */}
-            <motion.div variants={slideUp} className="mb-8">
-                <div className="flex items-center justify-between">
+            <motion.div variants={slideUp} className="mb-10 bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl shadow-indigo-500/5 border border-indigo-50 dark:border-indigo-900/20 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative z-10">
                     <div>
-                        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 flex items-center gap-3">
+                        <div className="flex items-center gap-3 mb-2">
+                           <span className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 text-[10px] font-black uppercase tracking-[0.2em] rounded-full">
+                               Nexus Architect Hub
+                           </span>
+                        </div>
+                        <h1 className="text-4xl font-black text-gray-900 dark:text-gray-100 flex items-center gap-4 tracking-tighter">
                             <motion.div
                                 variants={scaleIn}
-                                className="p-2 bg-gradient-to-br from-primary-700 to-indigo-800 rounded-xl text-white shadow-lg shadow-primary-700/20"
+                                className="p-3 bg-gradient-to-tr from-sky-600 to-indigo-700 rounded-2xl text-white shadow-2xl shadow-indigo-500/40"
                             >
-                                <Compass className="h-7 w-7" />
+                                {selectedGroup === 'houses' ? <Home className="h-8 w-8" /> : 
+                                 selectedGroup === 'buildings' ? <Building2 className="h-8 w-8" /> :
+                                 selectedGroup === 'industrial' ? <Factory className="h-8 w-8" /> :
+                                 selectedGroup === 'institutional' ? <Landmark className="h-8 w-8" /> :
+                                 <LayoutGrid className="h-8 w-8" />}
                             </motion.div>
-                            Estudio de Arquitectura
+                            {selectedGroup ? <span>Hub de <span className="text-sky-600 capitalize">{selectedGroup.replace('houses', 'Casas').replace('buildings', 'Edificios').replace('commercial', 'Comercial').replace('urbanism', 'Urbanismo').replace('industrial', 'Industrial').replace('institutional', 'Hospitalario')}</span></span> : 'Architecture Hub'}
                         </h1>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Administra tus diseños, planos y renders de alta gama</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-3 text-lg font-medium max-w-2xl">
+                            {selectedGroup 
+                                ? `Selecciona una especialidad dentro de ${selectedGroup} para ver tus proyectos y diseños.`
+                                : 'Gestiona tu ecosistema de diseño: desde asesorías iniciales y venta de planos hasta grandes desarrollos urbanísticos y corporativos.'}
+                        </p>
                     </div>
-                    <Button
-                        variant="primary"
-                        icon={<Plus className="h-5 w-5" />}
-                        onClick={actions.handleAddProduct}
-                        className="!bg-primary-700 hover:!bg-primary-800 shadow-md shadow-primary-700/20"
-                    >
-                        Nuevo Proyecto
-                    </Button>
-                </div>
-            </motion.div>
-
-            {/* Stats Cards */}
-            <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Total Diseños</p>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalProjects}</p>
-                        </div>
-                        <div className="p-3 bg-primary-50 dark:bg-primary-900/20 rounded-lg">
-                            <Compass className="h-6 w-6 text-primary-700 dark:text-primary-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Proyectos Activos</p>
-                            <p className="text-2xl font-bold text-green-600 dark:text-green-400">{stats.activeProjects}</p>
-                        </div>
-                        <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                            <CheckCircle2 className="h-6 w-6 text-green-600 dark:text-green-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Valor Catálogo</p>
-                            <p className="text-2xl font-bold text-gray-900 dark:text-white">
-                                ${stats.totalValue.toLocaleString(undefined, { minimumFractionDigits: 2 })}
-                            </p>
-                        </div>
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-                            <DollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-5 shadow-sm border border-gray-100 dark:border-gray-700">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400">Promedio / Proyecto</p>
-                            <p className="text-2xl font-bold text-indigo-700 dark:text-indigo-400">${Math.round(stats.priceAvg).toLocaleString()}</p>
-                        </div>
-                        <div className="p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
-                            <Layers className="h-6 w-6 text-indigo-700 dark:text-indigo-400" />
-                        </div>
+                    <div className="flex gap-3">
+                        <Button
+                            variant="primary"
+                            icon={<Plus className="h-5 w-5" />}
+                            onClick={actions.handleAddProduct}
+                            className="!bg-indigo-600 hover:!bg-indigo-700 !rounded-2xl !py-4 !px-8 shadow-xl shadow-indigo-600/20 transform transition-transform border-none text-base font-bold"
+                        >
+                            Nuevo Proyecto o Servicio
+                        </Button>
                     </div>
                 </div>
             </motion.div>
 
-            {/* Filters */}
-            <motion.div variants={slideUp} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-4 mb-6">
-                <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-                    <div className="flex-1 relative w-full">
-                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                        <input
-                            type="text"
-                            placeholder="Buscar proyectos..."
-                            value={searchTerm}
-                            onChange={(e) => actions.setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-700 focus:border-transparent text-gray-900 dark:text-white"
-                        />
-                    </div>
-                    <div className="flex gap-2 items-center flex-wrap w-full md:w-auto">
-                        <Filter className="h-5 w-5 text-gray-400 hidden md:block" />
-                        {categoryOptions.map(cat => (
-                            <button
-                                key={cat.value}
-                                onClick={() => actions.setSelectedCategory(cat.value)}
-                                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${selectedCategory === cat.value
-                                        ? 'bg-primary-700 text-white shadow-md'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200'
-                                    }`}
-                            >
-                                {cat.icon} {cat.label}
-                            </button>
-                        ))}
-                    </div>
-                </div>
-            </motion.div>
-
-            {/* Projects Grid */}
-            <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProducts.map(project => (
+            {/* Projects Grid Container */}
+            {selectedGroup && (
+                <div className="pt-4">
+                    <motion.div variants={staggerContainer} className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredProducts.map(project => (
                     <motion.div
                         key={project._id}
                         variants={slideUp}
@@ -180,7 +134,9 @@ const Architecture: React.FC = () => {
                         </div>
                     </motion.div>
                 ))}
-            </motion.div>
+                </motion.div>
+                </div>
+            )}
 
             {filteredProducts.length === 0 && !loading && (
                 <div className="text-center py-20">
@@ -193,12 +149,12 @@ const Architecture: React.FC = () => {
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => actions.setIsModalOpen(false)}
-                size="md"
+                size="xl"
                 title={editingProduct ? 'Editar Proyecto Arquitectónico' : 'Nuevo Proyecto para Architect'}
             >
                 <ArchitectureForm
                     product={editingProduct}
-                    categories={categories}
+                    categories={groupCategoriesOptions.filter(c => c.value !== 'all')}
                     onSubmit={actions.handleSubmit}
                     onClose={() => actions.setIsModalOpen(false)}
                     loading={isSubmitting}
