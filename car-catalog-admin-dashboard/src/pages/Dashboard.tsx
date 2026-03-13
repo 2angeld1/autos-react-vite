@@ -1,6 +1,7 @@
 import React from 'react';
-import { Car, Users, Image as ImageIcon, TrendingUp, FileText, DollarSign } from 'lucide-react';
+import { Car, Users, Image as ImageIcon, TrendingUp, FileText, DollarSign, Compass } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuthStore } from '@/store/authSlice';
 import { useGet } from '@/hooks/useApi';
 // import { DashboardStats } from '@/services'; 
 import StatsCard from '@/components/dashboard/StatsCard';
@@ -12,6 +13,8 @@ import { fadeIn, slideUp, staggerContainer } from '@/animations/variants';
 
 const Dashboard: React.FC = () => {
   const { t } = useTranslation();
+  const { user: currentUser } = useAuthStore();
+  const isArchitect = currentUser?.role === 'architect';
 
   const { 
     data: statsResponse, 
@@ -91,50 +94,97 @@ const Dashboard: React.FC = () => {
           {/* KPI Cards */}
           <motion.div
             variants={staggerContainer}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" // Gap reducido
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
           >
-            <StatsCard
-              title="Total Ventas"
-              value={stats?.totalSales ? formatCurrency(stats.totalSales) : '$0'}
-              icon={TrendingUp}
-              color="green"
-              loading={statsLoading}
-              change={{ value: stats?.salesCount || 0, type: 'increase', period: 'Autos vendidos' } as any}
-            />
-            <StatsCard
-              title="Monto Pendiente"
-              value={stats?.pendingAmount ? formatCurrency(stats.pendingAmount) : '$0'}
-              icon={DollarSign}
-              color="orange"
-              loading={statsLoading}
-              change={{ value: stats?.pendingCount || 0, type: 'increase', period: 'En negociación', noSymbol: true } as any}
-            />
-            <StatsCard
-              title="Valor Inventario"
-              value={stats?.inventoryValue ? formatCurrency(stats.inventoryValue) : '$0'}
-              icon={Car}
-              color="blue"
-              loading={statsLoading}
-              change={{ value: stats?.activeCars || 0, type: 'increase', period: 'Disponibles', noSymbol: true } as any}
-            />
-            <StatsCard
-              title={t('dashboard.totalUsers')}
-              value={stats?.totalUsers || 0}
-              icon={Users}
-              color="purple"
-              loading={statsLoading}
-              change={{ value: stats?.activeUsers || 0, type: 'increase', period: 'Activos', noSymbol: true } as any}
-            />
+            {isArchitect ? (
+              <>
+                <StatsCard
+                  title="Proyectos Totales"
+                  value={stats?.architectStats?.totalProjects || 0}
+                  icon={Compass}
+                  color="blue"
+                  loading={statsLoading}
+                  change={{ value: stats?.architectStats?.activeProjects || 0, type: 'increase', period: 'Publicados', noSymbol: true } as any}
+                />
+                <StatsCard
+                  title="Valor Catálogo"
+                  value={stats?.architectStats?.inventoryValue ? formatCurrency(stats.architectStats.inventoryValue) : '$0'}
+                  icon={DollarSign}
+                  color="green"
+                  loading={statsLoading}
+                  change={{ value: 0, type: 'increase', period: 'Estimado' } as any}
+                />
+                <StatsCard
+                  title="Consultas"
+                  value={stats?.pendingCount || 0}
+                  icon={FileText}
+                  color="orange"
+                  loading={statsLoading}
+                  change={{ value: 0, type: 'increase', period: 'Pendientes', noSymbol: true } as any}
+                />
+                <StatsCard
+                  title="Estado Perfil"
+                  value="Activo"
+                  icon={Users}
+                  color="purple"
+                  loading={statsLoading}
+                  change={{ value: 100, type: 'increase', period: 'Completado', noSymbol: true } as any}
+                />
+              </>
+            ) : (
+              <>
+                <StatsCard
+                  title="Total Ventas"
+                  value={stats?.totalSales ? formatCurrency(stats.totalSales) : '$0'}
+                  icon={TrendingUp}
+                  color="green"
+                  loading={statsLoading}
+                  change={{ value: stats?.salesCount || 0, type: 'increase', period: 'Autos vendidos' } as any}
+                />
+                <StatsCard
+                  title="Monto Pendiente"
+                  value={stats?.pendingAmount ? formatCurrency(stats.pendingAmount) : '$0'}
+                  icon={DollarSign}
+                  color="orange"
+                  loading={statsLoading}
+                  change={{ value: stats?.pendingCount || 0, type: 'increase', period: 'En negociación', noSymbol: true } as any}
+                />
+                <StatsCard
+                  title="Valor Inventario"
+                  value={stats?.inventoryValue ? formatCurrency(stats.inventoryValue) : '$0'}
+                  icon={Car}
+                  color="blue"
+                  loading={statsLoading}
+                  change={{ value: stats?.activeCars || 0, type: 'increase', period: 'Disponibles', noSymbol: true } as any}
+                />
+                <StatsCard
+                  title={t('dashboard.totalUsers')}
+                  value={stats?.totalUsers || 0}
+                  icon={Users}
+                  color="purple"
+                  loading={statsLoading}
+                  change={{ value: stats?.activeUsers || 0, type: 'increase', period: 'Activos', noSymbol: true } as any}
+                />
+              </>
+            )}
           </motion.div>
 
           {/* Charts Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <motion.div variants={slideUp}>
-              <LeadsChart data={stats?.charts?.quotesByMonth || []} loading={statsLoading} />
+              <LeadsChart 
+                title={isArchitect ? "Consultas por Mes" : t('analytics.quotesByMonth')}
+                data={stats?.charts?.quotesByMonth || []} 
+                loading={statsLoading} 
+              />
             </motion.div>
 
             <motion.div variants={slideUp}>
-              <InventoryChart data={stats?.charts?.carsByMake || []} loading={statsLoading} />
+              <InventoryChart 
+                title={isArchitect ? "Distribución por Categoría" : "Autos por Marca"}
+                data={isArchitect ? (stats?.charts?.projectsByCategory || []) : (stats?.charts?.carsByMake || [])} 
+                loading={statsLoading} 
+              />
             </motion.div>
           </div>
 
@@ -145,11 +195,21 @@ const Dashboard: React.FC = () => {
           >
             <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">{t('dashboard.quickActions')}</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {/* Botones simplificados para que quepan mejor */}
-              <QuickActionButton icon={Car} label={t('cars.addCar')} />
-              <QuickActionButton icon={FieTextButtonIcon} label="Ver Cotizaciones" />
-              <QuickActionButton icon={ImageIcon} label={t('images.upload')} />
-              <QuickActionButton icon={TrendingUp} label={t('nav.analytics')} />
+              {isArchitect ? (
+                <>
+                  <QuickActionButton icon={Compass} label="Nuevo Proyecto" />
+                  <QuickActionButton icon={FieTextButtonIcon} label="Mis Planos" />
+                  <QuickActionButton icon={ImageIcon} label="Subir Renders" />
+                  <QuickActionButton icon={Users} label="Clientes" />
+                </>
+              ) : (
+                <>
+                  <QuickActionButton icon={Car} label={t('cars.addCar')} />
+                  <QuickActionButton icon={FieTextButtonIcon} label="Ver Cotizaciones" />
+                  <QuickActionButton icon={ImageIcon} label={t('images.upload')} />
+                  <QuickActionButton icon={TrendingUp} label={t('nav.analytics')} />
+                </>
+              )}
             </div>
           </motion.div>
 

@@ -13,7 +13,7 @@ export interface AuthUser {
   id: string;
   name: string;
   email: string;
-  role: 'user' | 'admin';
+  role: 'user' | 'admin' | 'architect';
   avatar?: string;
   isActive: boolean;
   lastLogin?: Date;

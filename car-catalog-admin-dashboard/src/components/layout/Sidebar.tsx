@@ -17,11 +17,13 @@ import {
   Mountain,
   MessageSquare,
   Gem,
-  Sofa
+  Sofa,
+  Compass
 } from 'lucide-react';
 import { clsx } from '@/utils/clsx';
 import Button from '@/components/common/Button';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '@/store/authSlice';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -33,6 +35,7 @@ export interface NavItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
   badge?: string;
+  allowedRoles?: string[];
 }
 
 interface NavSection {
@@ -42,6 +45,8 @@ interface NavSection {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const userRole = user?.role || 'user';
 
   const navigationSections: NavSection[] = [
     {
@@ -60,35 +65,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           name: t('nav.cars'),
           href: '/cars',
           icon: Car,
+          allowedRoles: ['admin'],
         },
         {
           name: t('nav.accessories'),
           href: '/accessories',
           icon: Wrench,
           badge: 'New',
+          allowedRoles: ['admin'],
         },
         {
           name: 'IronTrail',
           href: '/irontrail',
           icon: Mountain,
           badge: '4x4',
+          allowedRoles: ['admin'],
         },
         {
           name: 'LuxJewel',
           href: '/jewelry',
           icon: Gem,
           badge: '💎',
+          allowedRoles: ['admin'],
         },
         {
           name: 'DecoHaus',
           href: '/furniture',
           icon: Sofa,
           badge: '🛋️',
+          allowedRoles: ['admin'],
+        },
+        {
+          name: t('nav.architecture'),
+          href: '/architecture',
+          icon: Compass,
+          badge: '📐',
         },
         {
           name: t('nav.brands'),
           href: '/brands',
           icon: Building2,
+          allowedRoles: ['admin'],
         },
       ],
     },
@@ -104,6 +121,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           name: t('nav.promotions'),
           href: '/promotions',
           icon: Percent,
+          allowedRoles: ['admin'],
         },
       ],
     },
@@ -119,11 +137,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           name: t('nav.categories'),
           href: '/categories',
           icon: Tag,
+          allowedRoles: ['admin'],
         },
         {
           name: t('nav.reviews'),
           href: '/reviews',
           icon: MessageSquare,
+          allowedRoles: ['admin'],
         },
       ],
     },
@@ -134,11 +154,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           name: t('nav.users'),
           href: '/users',
           icon: Users,
+          allowedRoles: ['admin'],
         },
         {
           name: t('nav.analytics'),
           href: '/analytics',
           icon: BarChart3,
+          allowedRoles: ['admin'],
         },
         {
           name: t('nav.settings'),
@@ -211,20 +233,30 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
 
         {/* Navigation */}
         <nav className="flex-1 py-4 overflow-y-auto">
-          {navigationSections.map((section, index) => (
-            <div key={index} className="mb-4">
-              {section.titleKey && (
-                <h3 className="px-6 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
-                  {t(section.titleKey)}
-                </h3>
-              )}
-              <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <NavItemComponent key={item.name} item={item} />
-                ))}
+          {navigationSections.map((section, index) => {
+            // Filtrar items de la sección según el rol
+            const filteredItems = section.items.filter(item => 
+              !item.allowedRoles || item.allowedRoles.includes(userRole)
+            );
+
+            // Si no hay ítems permitidos en esta sección, no la mostramos
+            if (filteredItems.length === 0) return null;
+
+            return (
+              <div key={index} className="mb-4">
+                {section.titleKey && (
+                  <h3 className="px-6 mb-2 text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider">
+                    {t(section.titleKey)}
+                  </h3>
+                )}
+                <div className="space-y-0.5">
+                  {filteredItems.map((item) => (
+                    <NavItemComponent key={item.name} item={item} />
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </nav>
 
         {/* Footer */}

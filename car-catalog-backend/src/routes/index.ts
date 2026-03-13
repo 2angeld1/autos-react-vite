@@ -14,6 +14,7 @@ import irontrailRoutes from './irontrail';
 import jewelryRoutes from './jewelry';
 import furnitureRoutes from './furniture';
 import reviewRoutes from './reviews';
+import architectureRoutes from './architecture';
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.use('/irontrail', irontrailRoutes);
 router.use('/jewelry', jewelryRoutes);
 router.use('/furniture', furnitureRoutes);
 router.use('/reviews', reviewRoutes);
+router.use('/architecture', architectureRoutes);
 
 // Health check
 router.get('/health', (req: Request, res: Response) => {

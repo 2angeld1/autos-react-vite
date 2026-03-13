@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateToken, requireAdmin, AuthRequest } from '@/middleware/auth';
+import { authenticateToken, requireAdmin, requireRole, AuthRequest } from '@/middleware/auth';
 import { errorHandler } from '@/middleware/errorHandler';
 import { UserController } from '@/controllers/userController';
 import { body } from 'express-validator';
@@ -11,20 +11,22 @@ import Category from '@/models/Category';
 import Accessory from '@/models/Accessory';
 import Promotion from '@/models/Promotion';
 import Quote from '@/models/Quote';
+import Product from '@/models/Product';
 import { logger } from '@/utils/logger';
 
 const router = Router();
 
 // Apply middleware to all admin routes
 router.use(authenticateToken);
-router.use(requireAdmin);
+// Algunas rutas pueden requerir solo architect, otras admin. 
+// requireAdmin se mantiene para rutas críticas como gestión de usuarios.
 
 /**
  * @route   GET /api/admin/stats
  * @desc    Get dashboard statistics
- * @access  Private (Admin only)
+ * @access  Private (Admin or Architect)
  */
-router.get('/stats', async (req: AuthRequest, res) => {
+router.get('/stats', requireRole(['admin', 'architect']), async (req: AuthRequest, res) => {
   try {
     logger.info('Getting admin dashboard stats...');
 
@@ -133,6 +135,34 @@ router.get('/stats', async (req: AuthRequest, res) => {
         .lean()
     ]);
 
+    // Get stats for Architecture if role is architect or admin
+    let architectStats = {};
+    if (req.user && (req.user.role === 'admin' || req.user.role === 'architect')) {
+      const [totalProjects, activeProjects] = await Promise.all([
+        Product.countDocuments({ type: 'architecture' }),
+        Product.countDocuments({ type: 'architecture', isAvailable: true })
+      ]);
+      
+      const inventoryValueAggregate = await Product.aggregate([
+        { $match: { type: 'architecture', isAvailable: true } },
+        { $group: { _id: null, totalValue: { $sum: "$price" } } }
+      ]);
+      
+      // Gráfica de Arquitectura: Proyectos por Categoría
+      const projectsByCategory = await Product.aggregate([
+        { $match: { type: 'architecture' } },
+        { $group: { _id: "$specs.projectCategory", count: { $sum: 1 } } },
+        { $sort: { count: -1 } }
+      ]).then(res => res.map(item => ({ _id: item._id || 'General', count: item.count })));
+
+      architectStats = {
+        totalProjects,
+        activeProjects,
+        inventoryValue: inventoryValueAggregate[0]?.totalValue || 0,
+        projectsByCategory
+      };
+    }
+
     const stats = {
       totalCars,
       totalUsers,
@@ -147,9 +177,11 @@ router.get('/stats', async (req: AuthRequest, res) => {
       pendingCount,
       recentCars,
       recentUsers,
+      architectStats, // New specific stats
       charts: {
         carsByMake,
-        quotesByMonth
+        quotesByMonth,
+        projectsByCategory: (architectStats as any).projectsByCategory || []
       }
     };
 
@@ -173,7 +205,7 @@ router.get('/stats', async (req: AuthRequest, res) => {
  * @desc    Get comprehensive analytics data
  * @access  Private (Admin only)
  */
-router.get('/analytics', async (req: AuthRequest, res) => {
+router.get('/analytics', requireAdmin, async (req: AuthRequest, res) => {
   try {
     logger.info('Getting analytics data...');
 
@@ -331,7 +363,7 @@ router.get('/analytics', async (req: AuthRequest, res) => {
  * @desc    Get all cars for admin (with pagination and filters)
  * @access  Private (Admin only)
  */
-router.get('/cars', async (req: AuthRequest, res) => {
+router.get('/cars', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { 
       page = 1, 
@@ -423,7 +455,7 @@ router.get('/cars', async (req: AuthRequest, res) => {
  * @desc    Get all users for admin (with pagination and filters)
  * @access  Private (Admin only)
  */
-router.get('/users', async (req: AuthRequest, res) => {
+router.get('/users', requireAdmin, async (req: AuthRequest, res) => {
   try {
     const { 
       page = 1, 
@@ -498,7 +530,7 @@ router.post('/users', [
   body('name').notEmpty().withMessage('Name is required').trim().isLength({ min: 2, max: 50 }),
   body('email').notEmpty().withMessage('Email is required').isEmail().withMessage('Invalid email').normalizeEmail(),
   body('password').optional().isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').optional().isIn(['user', 'admin']),
+  body('role').optional().isIn(['user', 'admin', 'architect']),
   handleValidationErrors
 ], UserController.createUser);
 
@@ -512,7 +544,7 @@ router.put('/users/:id', [
   body('name').optional().trim().isLength({ min: 2, max: 50 }),
   body('email').optional().isEmail().normalizeEmail(),
   body('password').optional().isLength({ min: 6 }),
-  body('role').optional().isIn(['user', 'admin']),
+  body('role').optional().isIn(['user', 'admin', 'architect']),
   handleValidationErrors
 ], UserController.updateUser);
 

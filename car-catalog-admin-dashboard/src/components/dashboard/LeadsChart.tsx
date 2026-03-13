@@ -18,9 +18,10 @@ interface DataPoint {
 interface LeadsChartProps {
   data: DataPoint[];
   loading?: boolean;
+  title?: string;
 }
 
-const LeadsChart: React.FC<LeadsChartProps> = ({ data, loading }) => {
+const LeadsChart: React.FC<LeadsChartProps> = ({ data, loading, title }) => {
   // Transform data for chart if necessary
   const chartData = data.map(item => ({
     name: format(new Date(item._id), 'MMM yyyy'),
@@ -47,7 +48,7 @@ const LeadsChart: React.FC<LeadsChartProps> = ({ data, loading }) => {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase italic tracking-tight">Evolución de Leads</h3>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase italic tracking-tight">{title || 'Evolución de Leads'}</h3>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Actividad comercial mensual</p>
           </div>
           <div className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">

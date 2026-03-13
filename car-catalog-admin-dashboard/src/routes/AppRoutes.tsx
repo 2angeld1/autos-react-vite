@@ -25,6 +25,7 @@ const Categories = React.lazy(() => import('@/pages/Categories'));
 const IronTrail = React.lazy(() => import('@/pages/IronTrail'));
 const Jewelry = React.lazy(() => import('@/pages/Jewelry'));
 const Furniture = React.lazy(() => import('@/pages/Furniture'));
+const Architecture = React.lazy(() => import('@/pages/Architecture'));
 const Reviews = React.lazy(() => import('@/pages/Reviews'));
 
 // Loading component
@@ -128,6 +129,11 @@ const AppRoutes: React.FC = () => {
           {/* DecoHaus Routes */}
           <Route path="furniture" element={
             <ProtectedRoute requiredRole="admin"><Furniture /></ProtectedRoute>
+          } />
+
+          {/* Architecture Routes */}
+          <Route path="architecture" element={
+            <ProtectedRoute requiredRole="architect"><Architecture /></ProtectedRoute>
           } />
         </Route>
 

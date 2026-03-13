@@ -10,11 +10,12 @@ interface DataPoint {
 interface InventoryChartProps {
   data: DataPoint[];
   loading?: boolean;
+  title?: string;
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
-const InventoryChart: React.FC<InventoryChartProps> = ({ data, loading }) => {
+const InventoryChart: React.FC<InventoryChartProps> = ({ data, loading, title }) => {
   if (loading) {
     return <div className="h-80 bg-gray-50 dark:bg-gray-800 animate-pulse rounded-2xl" />;
   }
@@ -35,7 +36,7 @@ const InventoryChart: React.FC<InventoryChartProps> = ({ data, loading }) => {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase italic tracking-tight">Top por Marca</h3>
+            <h3 className="text-lg font-black text-gray-900 dark:text-white uppercase italic tracking-tight">{title || 'Top por Marca'}</h3>
             <p className="text-xs text-gray-400 font-bold uppercase tracking-widest">Distribución de inventario</p>
           </div>
           <div className="bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 text-[10px] font-black px-2 py-1 rounded uppercase tracking-tighter">

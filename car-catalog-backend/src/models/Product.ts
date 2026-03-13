@@ -36,6 +36,7 @@ export interface IProduct extends Document {
   // --- MEDIA ---
   thumbnail: string;      // Imagen principal
   images: string[];       // Galería completa
+  files?: string[];       // Archivos adjuntos (PDFs, Planos, etc.)
   videoUrl?: string;      // URL de video (YouTube/Vimeo)
   model3dUrl?: string;    // URL del modelo GLB/GLTF (Tu "Exodia")
 
@@ -43,6 +44,7 @@ export interface IProduct extends Document {
   // Aquí guardamos la data que cambia según el negocio.
   // Autos: { year: 2024, km: 5000, fuel: "gas" }
   // Joyas: { material: "gold", carat: 18 }
+  // Arquitectura: { metraje: 250, niveles: 2, estilo: "Minimalista" }
   specs: Record<string, any>; 
 
   // --- VARIANTES (Opcional) ---
@@ -51,6 +53,7 @@ export interface IProduct extends Document {
   variants?: IProductVariant[];
 
   // --- SEO & METADATA ---
+  // ... (sigue igual)
   seoTitle?: string;
   seoDescription?: string;
   
@@ -76,6 +79,7 @@ const ProductSchema = new Schema<IProduct>({
 
   thumbnail: { type: String, required: true },
   images: [String],
+  files: { type: [String], default: [] },
   videoUrl: String,
   model3dUrl: String,
 

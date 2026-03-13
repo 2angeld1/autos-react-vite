@@ -58,6 +58,7 @@
     "inventory": "Inventory",
     "sales": "Sales",
     "content": "Content",
+    "architecture": "Architecture",
     "system": "System"
   },
   "header": {

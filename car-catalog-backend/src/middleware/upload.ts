@@ -18,8 +18,10 @@ const storage = multer.diskStorage({
     // Create subdirectories based on file type
     if (file.fieldname === 'avatar') {
       uploadPath = path.join(uploadDir, 'avatars');
-    } else if (file.fieldname === 'carImage') {
-      uploadPath = path.join(uploadDir, 'cars');
+    } else if (file.fieldname === 'carImage' || file.fieldname === 'productImage') {
+      uploadPath = path.join(uploadDir, 'products');
+    } else if (file.fieldname === 'planFile' || file.mimetype === 'application/pdf') {
+      uploadPath = path.join(uploadDir, 'plans');
     }
     
     // Ensure directory exists
@@ -43,10 +45,10 @@ const storage = multer.diskStorage({
 // File filter function
 const fileFilter = (req: Request, file: Express.Multer.File, cb: multer.FileFilterCallback) => {
   // Check file type
-  if (file.mimetype.startsWith('image/')) {
+  if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
-    cb(new Error('Only image files are allowed'));
+    cb(new Error('Only image and PDF files are allowed'));
   }
 };
 
@@ -55,7 +57,7 @@ const upload = multer({
   storage: storage,
   fileFilter: fileFilter,
   limits: {
-    fileSize: parseInt(process.env.MAX_FILE_SIZE || '5000000'), // 5MB default
+    fileSize: parseInt(process.env.MAX_FILE_SIZE || '15000000'), // 15MB (Planes/PDFs)
     files: 5 // Maximum 5 files
   }
 });
@@ -98,10 +100,10 @@ export const handleUploadError = (
     }
   }
   
-  if (error.message === 'Only image files are allowed') {
+  if (error.message === 'Only image and PDF files are allowed') {
     return res.status(400).json({
       success: false,
-      message: 'Only image files are allowed'
+      message: 'Only image and PDF files are allowed'
     });
   }
   
